@@ -215,10 +215,10 @@ static int mdss_mdp_cmd_tearcheck_cfg(struct mdss_mdp_mixer *mixer,
 	if (pinfo->mipi.hw_vsync_mode)
 		cfg |= BIT(20);
 
-	if (te->refx100) {
+	if (te->refx100)
 		vclks_line = vclks_line * pinfo->mipi.frame_rate *
 			100 / te->refx100;
-	} else {
+	else {
 		pr_warn("refx100 cannot be zero! Use 6000 as default\n");
 		vclks_line = vclks_line * pinfo->mipi.frame_rate *
 			100 / 6000;
@@ -227,18 +227,18 @@ static int mdss_mdp_cmd_tearcheck_cfg(struct mdss_mdp_mixer *mixer,
 	cfg |= vclks_line;
 
 #ifdef CONFIG_FB_MSM_MDSS_SPECIFIC_PANEL
-		vporch = pinfo->lcdc.v_back_porch +
-			 pinfo->lcdc.v_front_porch +
-			 pinfo->lcdc.v_pulse_width;
+	vporch = pinfo->lcdc.v_back_porch +
+		 pinfo->lcdc.v_front_porch +
+		 pinfo->lcdc.v_pulse_width;
 
-		height = (pinfo->yres + vporch) * 2;
+	height = (pinfo->yres + vporch) * 2;
 #endif
-		pr_debug("%s: yres=%d vclks=%x height=%d init=%d rd=%d start=%d\n",
-			__func__, pinfo->yres, vclks_line, te->sync_cfg_height,
-			 te->vsync_init_val, te->rd_ptr_irq, te->start_pos);
-		pr_debug("thrd_start =%d thrd_cont=%d\n",
-			te->sync_threshold_start, te->sync_threshold_continue);
-	}
+	pr_debug("%s: yres=%d vclks=%x height=%d init=%d rd=%d start=%d\n",
+		__func__, pinfo->yres, vclks_line, te->sync_cfg_height,
+		 te->vsync_init_val, te->rd_ptr_irq, te->start_pos);
+	pr_debug("thrd_start =%d thrd_cont=%d\n",
+		te->sync_threshold_start, te->sync_threshold_continue);
+
 
 	pingpong_base = mixer->pingpong_base;
 
@@ -1299,10 +1299,7 @@ int mdss_mdp_cmd_ctx_stop(struct mdss_mdp_ctl *ctl,
 
 	mdss_mdp_cmd_clk_off(ctx);
 	flush_work(&ctx->pp_done_work);
-
-	if (mdss_panel_is_power_off(panel_power_state) ||
-	    mdss_panel_is_power_on_ulp(panel_power_state))
-		mdss_mdp_tearcheck_enable(ctl, false);
+	mdss_mdp_tearcheck_enable(ctl, false);
 
 	if (mdss_panel_is_power_on(panel_power_state)) {
 		pr_debug("%s: intf stopped with panel on\n", __func__);
