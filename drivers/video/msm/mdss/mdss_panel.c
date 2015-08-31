@@ -601,10 +601,14 @@ void mdss_panel_info_from_timing(struct mdss_panel_timing *pt,
 	pinfo->lcdc.xres_pad = pt->border_left + pt->border_right;
 	pinfo->lcdc.yres_pad = pt->border_top + pt->border_bottom;
 
+	pinfo->lm_widths[0] = pt->lm_widths[0];
+	pinfo->lm_widths[1] = pt->lm_widths[1];
+
 	pinfo->mipi.frame_rate = pt->frame_rate;
 	pinfo->edp.frame_rate = pinfo->mipi.frame_rate;
 
 	pinfo->dsc = pt->dsc;
+	pinfo->dsc_enc_total = pt->dsc_enc_total;
 	pinfo->fbc = pt->fbc;
 	pinfo->compression_mode = pt->compression_mode;
 
