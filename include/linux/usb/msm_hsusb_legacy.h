@@ -414,9 +414,6 @@ static inline int get_pm_runtime_counter(struct device *dev)
 {
 	return atomic_read(&dev->power.usage_count);
 }
-/* !CONFIG_PM */
-static inline int get_pm_runtime_counter(struct device *dev)
-{ return -EOPNOTSUPP; }
 #endif
 
 #endif
