@@ -1074,5 +1074,6 @@ config TOUCHSCREEN_IT7260_I2C
 	  module will be called it7258_ts_i2c.
 
 source "drivers/input/touchscreen/cyttsp4/Kconfig"
+source "drivers/input/touchscreen/cyttsp5/Kconfig"
 
 endif
