@@ -143,6 +143,11 @@ extern u8 print_limit_option;
 				pr_info(msg, ##args);	\
 		} \
 	} while (0)
+#define SPS_DEBUGFS(msg, args...) do {					\
+		char buf[MAX_MSG_LEN];		\
+		snprintf(buf, MAX_MSG_LEN, msg"\n", ##args);	\
+		sps_debugfs_record(buf);	\
+	} while (0)
 #define SPS_ERR(dev, msg, args...) do {					\
 		if (logging_option != 1) {	\
 			if (unlikely(print_limit_option > 2))	\
