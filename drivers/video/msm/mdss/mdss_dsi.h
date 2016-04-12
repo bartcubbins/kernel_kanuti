@@ -325,12 +325,14 @@ struct dsi_panel_cmds {
 struct dsi_panel_timing {
 	struct mdss_panel_timing timing;
 	uint32_t phy_timing[12];
-	uint32_t phy_timing_8996[40];
 	/* DSI_CLKOUT_TIMING_CTRL */
 	char t_clk_post;
 	char t_clk_pre;
+#ifdef CONFIG_FB_MSM_MDSS_SPECIFIC_PANEL
+	struct dsi_panel_cmds einit_cmds;
+	struct dsi_panel_cmds init_cmds;
+#endif
 	struct dsi_panel_cmds on_cmds;
-	struct dsi_panel_cmds post_panel_on_cmds;
 	struct dsi_panel_cmds switch_cmds;
 };
 
@@ -549,7 +551,7 @@ void mdss_dsi_irq_handler_config(struct mdss_dsi_ctrl_pdata *ctrl_pdata);
 void mdss_dsi_set_tx_power_mode(int mode, struct mdss_panel_data *pdata);
 int mdss_dsi_clk_div_config(struct mdss_panel_info *panel_info,
 			    int frame_rate);
-int mdss_dsi_clk_refresh(struct mdss_panel_data *pdata, bool update_phy);
+int mdss_dsi_clk_refresh(struct mdss_panel_data *pdata);
 int mdss_dsi_link_clk_init(struct platform_device *pdev,
 		      struct mdss_dsi_ctrl_pdata *ctrl_pdata);
 void mdss_dsi_link_clk_deinit(struct device *dev,
