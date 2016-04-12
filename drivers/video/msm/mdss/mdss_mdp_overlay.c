@@ -5142,6 +5142,7 @@ static int mdss_mdp_update_panel_info(struct msm_fb_data_type *mfd,
 		mdss_mdp_ctl_reconfig(ctl, pdata);
 
 		sctl = mdss_mdp_get_split_ctl(ctl);
+
 		if (sctl) {
 			if (mfd->split_mode == MDP_DUAL_LM_DUAL_DISPLAY) {
 				mdss_mdp_ctl_reconfig(sctl, pdata->next);
