@@ -354,29 +354,7 @@ enum dynamic_switch_modes {
 	SWITCH_TO_VIDEO_MODE,
 	SWITCH_RESOLUTION,
 };
-
-/**
- * struct mdss_panel_timing - structure for panel timing information
- * @list: List head ptr to track within panel data timings list
- * @name: A unique name of this timing that can be used to identify it
- * @xres: Panel width
- * @yres: Panel height
- * @h_back_porch: Horizontal back porch
- * @h_front_porch: Horizontal front porch
- * @h_pulse_width: Horizontal pulse width
- * @hsync_skew: Horizontal sync skew
- * @v_back_porch: Vertical back porch
- * @v_front_porch: Vertical front porch
- * @v_pulse_width: Vertical pulse width
- * @border_top: Border color on top
- * @border_bottom: Border color on bottom
- * @border_left: Border color on left
- * @border_right: Border color on right
- * @clk_rate: Pixel clock rate of this panel timing
- * @frame_rate: Display refresh rate
- * @fbc: Framebuffer compression parameters for this display timing
- * @te: Tearcheck parameters for this display timing
- **/
+ 
 struct mipi_panel_info {
 	char boot_mode;	/* identify if mode switched from starting mode */
 	char mode;		/* video/cmd */
@@ -688,6 +666,28 @@ struct mdss_panel_info {
 #endif
 };
 
+/**
+ * struct mdss_panel_timing - structure for panel timing information
+ * @list: List head ptr to track within panel data timings list
+ * @name: A unique name of this timing that can be used to identify it
+ * @xres: Panel width
+ * @yres: Panel height
+ * @h_back_porch: Horizontal back porch
+ * @h_front_porch: Horizontal front porch
+ * @h_pulse_width: Horizontal pulse width
+ * @hsync_skew: Horizontal sync skew
+ * @v_back_porch: Vertical back porch
+ * @v_front_porch: Vertical front porch
+ * @v_pulse_width: Vertical pulse width
+ * @border_top: Border color on top
+ * @border_bottom: Border color on bottom
+ * @border_left: Border color on left
+ * @border_right: Border color on right
+ * @clk_rate: Pixel clock rate of this panel timing
+ * @frame_rate: Display refresh rate
+ * @fbc: Framebuffer compression parameters for this display timing
+ * @te: Tearcheck parameters for this display timing
+ **/
 struct mdss_panel_timing {
 	struct list_head list;
 	const char *name;

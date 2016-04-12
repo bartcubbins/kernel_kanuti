@@ -954,10 +954,7 @@ static int mdss_fb_init_panel_modes(struct msm_fb_data_type *mfd,
 	int i = 0;
 
 	/* check if multiple modes are supported */
-	if (!pdata->timings_list.prev || !pdata->timings_list.next)
-		INIT_LIST_HEAD(&pdata->timings_list);
-
-	if (!fbi || !pdata->current_timing || list_empty(&pdata->timings_list))
+	if (!fbi || !pdata->current_timing)
 		return 0;
 
 	list_for_each(pos, &pdata->timings_list)
@@ -4270,7 +4267,7 @@ static int __ioctl_wait_idle(struct msm_fb_data_type *mfd, u32 cmd)
 	return ret;
 }
 
-int __ioctl_transition_dyn_mode_state(struct msm_fb_data_type *mfd,
+static int __ioctl_transition_dyn_mode_state(struct msm_fb_data_type *mfd,
 		unsigned int cmd)
 {
 
