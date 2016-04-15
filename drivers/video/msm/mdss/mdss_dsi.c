@@ -2128,11 +2128,26 @@ int mdss_dsi_register_recovery_handler(struct mdss_dsi_ctrl_pdata *ctrl,
 
 int mdss_dsi_clk_refresh(struct mdss_panel_data *pdata)
 {
-	mutex_lock(&ctrl->mutex);
-	ctrl->mdp_callback = mdp_callback;
-	mutex_unlock(&ctrl->mutex);
-	return 0;
+	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
+	int rc = 0;
+
+	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
+							panel_data);
+	rc = mdss_dsi_clk_div_config(&pdata->panel_info,
+			pdata->panel_info.mipi.frame_rate);
+	if (rc) {
+		pr_err("%s: unable to initialize the clk dividers\n",
+								__func__);
+		return rc;
+	}
+	ctrl_pdata->refresh_clk_rate = false;
+	ctrl_pdata->pclk_rate = pdata->panel_info.mipi.dsi_pclk_rate;
+	ctrl_pdata->byte_clk_rate = pdata->panel_info.clk_rate / 8;
+	pr_debug("%s ctrl_pdata->byte_clk_rate=%d ctrl_pdata->pclk_rate=%d\n",
+		__func__, ctrl_pdata->byte_clk_rate, ctrl_pdata->pclk_rate);
+	return rc;
 }
+
 
 static void mdss_dsi_dba_work(struct work_struct *work)
 {
@@ -2175,7 +2190,7 @@ static void mdss_dsi_dba_work(struct work_struct *work)
 
 static int mdss_dsi_check_params(struct mdss_dsi_ctrl_pdata *ctrl, void *arg)
 {
-	struct mdss_panel_info *var_pinfo, *pinfo;
+	struct mdss_panel_info *reconf_pinfo, *pinfo;
 	int rc = 0;
 
 	if (!ctrl || !arg)
@@ -2185,20 +2200,13 @@ static int mdss_dsi_check_params(struct mdss_dsi_ctrl_pdata *ctrl, void *arg)
 	if (!pinfo->is_pluggable)
 		return 0;
 
-	var_pinfo = (struct mdss_panel_info *)arg;
+	reconf_pinfo = (struct mdss_panel_info *)arg;
 
 	pr_debug("%s: reconfig xres: %d yres: %d, current xres: %d yres: %d\n",
-			__func__, var_pinfo->xres, var_pinfo->yres,
+			__func__, reconf_pinfo->xres, reconf_pinfo->yres,
 					pinfo->xres, pinfo->yres);
-	if ((var_pinfo->xres != pinfo->xres) ||
-		(var_pinfo->yres != pinfo->yres) ||
-		(var_pinfo->lcdc.h_back_porch != pinfo->lcdc.h_back_porch) ||
-		(var_pinfo->lcdc.h_front_porch != pinfo->lcdc.h_front_porch) ||
-		(var_pinfo->lcdc.h_pulse_width != pinfo->lcdc.h_pulse_width) ||
-		(var_pinfo->lcdc.v_back_porch != pinfo->lcdc.v_back_porch) ||
-		(var_pinfo->lcdc.v_front_porch != pinfo->lcdc.v_front_porch) ||
-		(var_pinfo->lcdc.v_pulse_width != pinfo->lcdc.v_pulse_width)
-		)
+	if ((reconf_pinfo->xres != pinfo->xres) ||
+			(reconf_pinfo->yres != pinfo->yres))
 		rc = 1;
 
 	return rc;
@@ -2226,15 +2234,8 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 	switch (event) {
 	case MDSS_EVENT_CHECK_PARAMS:
 		pr_debug("%s:Entered Case MDSS_EVENT_CHECK_PARAMS\n", __func__);
-		if (mdss_dsi_check_params(ctrl_pdata, arg)) {
-			ctrl_pdata->update_phy_timing = true;
-			/*
-			 * Call to MDSS_EVENT_CHECK_PARAMS expects
-			 * the return value of 1, if there is a change
-			 * in panel timing parameters.
-			 */
+		if (mdss_dsi_check_params(ctrl_pdata, arg))
 			rc = 1;
-		}
 		ctrl_pdata->refresh_clk_rate = true;
 		break;
 	case MDSS_EVENT_LINK_READY:
@@ -2243,7 +2244,6 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 				ctrl_pdata->update_phy_timing);
 
 		mdss_dsi_get_hw_revision(ctrl_pdata);
-		mdss_dsi_get_phy_revision(ctrl_pdata);
 		rc = mdss_dsi_on(pdata);
 		mdss_dsi_op_mode_config(pdata->panel_info.mipi.mode,
 							pdata);
@@ -3686,7 +3686,6 @@ int dsi_panel_device_register(struct platform_device *ctrl_pdev,
 		mdss_dsi_clk_ctrl(ctrl_pdata, DSI_ALL_CLKS, 1);
 		ctrl_pdata->is_phyreg_enabled = 1;
 		mdss_dsi_get_hw_revision(ctrl_pdata);
-		mdss_dsi_get_phy_revision(ctrl_pdata);
 		if ((ctrl_pdata->shared_data->hw_rev >= MDSS_DSI_HW_REV_103)
 			&& (pinfo->type == MIPI_CMD_PANEL)) {
 			data = MIPI_INP(ctrl_pdata->ctrl_base + 0x1b8);
