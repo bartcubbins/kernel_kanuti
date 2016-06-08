@@ -234,7 +234,7 @@ static void msm_spm_config_slpreq(struct msm_spm_device *dev,
 }
 
 static int msm_spm_dev_set_low_power_mode(struct msm_spm_device *dev,
-		unsigned int mode, bool notify_rpm)
+		unsigned int mode, bool notify_rpm,bool set_spm_enable)
 {
 	uint32_t i;
 	int ret = -EINVAL;
@@ -537,7 +537,7 @@ EXPORT_SYMBOL(msm_spm_avs_clear_irq);
 int msm_spm_set_low_power_mode(unsigned int mode, bool notify_rpm)
 {
 	struct msm_spm_device *dev = this_cpu_ptr(&msm_cpu_spm_device);
-	return msm_spm_dev_set_low_power_mode(dev, mode, notify_rpm);
+	return msm_spm_dev_set_low_power_mode(dev, mode, notify_rpm, true);
 }
 EXPORT_SYMBOL(msm_spm_set_low_power_mode);
 
@@ -596,7 +596,7 @@ struct msm_spm_device *msm_spm_get_device_by_name(const char *name)
 int msm_spm_config_low_power_mode(struct msm_spm_device *dev,
 		unsigned int mode, bool notify_rpm)
 {
-	return msm_spm_dev_set_low_power_mode(dev, mode, notify_rpm);
+	return msm_spm_dev_set_low_power_mode(dev, mode, notify_rpm, true);
 }
 #ifdef CONFIG_MSM_L2_SPM
 
