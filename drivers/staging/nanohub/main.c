@@ -12,6 +12,8 @@
  *
  */
 
+//#define DEBUG
+
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -516,6 +518,158 @@ static ssize_t nanohub_app_info(struct device *dev,
 	return len;
 }
 
+
+
+// Helper logging macros for FingerSense
+#define _fs_log(type, dev, fmt, ...) dev_##type((dev), "%s: [fingersense] " fmt, __func__, ##__VA_ARGS__)
+#define fs_err(dev, fmt, ...) _fs_log(err, dev, fmt, ##__VA_ARGS__)
+#define fs_info(dev, fmt, ...) _fs_log(info, dev, fmt, ##__VA_ARGS__)
+#define fs_dbg(dev, fmt, ...) _fs_log(dbg, dev, fmt, ##__VA_ARGS__)
+
+#define NANOHUB_PACKET_PAYLOAD_MAX 255
+
+static ssize_t nanohub_fs_enabled_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	struct nanohub_data *data = dev_get_nanohub_data(dev);
+
+	if (request_wakeup(data)) {
+		return -ERESTARTSYS;
+	}
+
+	release_wakeup(data);
+	return snprintf(buf, PAGE_SIZE, "TODO\n");
+}
+
+static struct task_struct *do_not_sleep_thread;
+
+static int nanohub_do_not_sleep_kthread(void *arg)
+{
+    struct nanohub_data *data = (struct nanohub_data *) arg;
+    struct device *dev = data->io[ID_NANOHUB_SENSOR].dev;
+
+    while (!kthread_should_stop()) {
+        if (request_wakeup(data)) {
+            continue;
+        }
+
+        release_wakeup(data);
+
+        msleep(1000);
+        fs_dbg(dev, "Wake up nanohub!\n");
+    }
+
+    return 0;
+}
+
+static ssize_t nanohub_fs_enabled_store(struct device *dev,
+                    struct device_attribute *attr,
+                    const char *buf, size_t count)
+{
+	int ret;
+    uint8_t fs_switch = 0;
+    uint8_t success = 0;
+	struct nanohub_data *data = dev_get_nanohub_data(dev);
+
+    if (sscanf(buf, "%hhu", &fs_switch) != 1) {
+        fs_err(dev, "Invalid fs_enabled value, expected 0 or 1");
+        return -EINVAL;
+    }
+
+    fs_switch = !!fs_switch;
+    fs_info(dev, "Setting FingerSense switch to '%u'\n", fs_switch);
+
+	if (request_wakeup(data)) {
+		return -ERESTARTSYS;
+	}
+
+    ret = nanohub_comms_tx_rx_retrans
+            (data, CMD_COMMS_FS_ENABLE_SWITCH, (uint8_t *) &fs_switch, sizeof(fs_switch),
+             (uint8_t *) &success, sizeof(success), false, 20, 1);
+    if (ret != sizeof(success) || !success) {
+        fs_err(dev, "Couldn't set FingerSense switch to '%u'. ret: %d\n", fs_switch, ret);
+		goto io_error;
+    }
+
+	release_wakeup(data);
+
+	if (fs_switch) {
+	    if (IS_ERR_OR_NULL(do_not_sleep_thread)) {
+            do_not_sleep_thread = kthread_run(nanohub_do_not_sleep_kthread, data, "do-not-sleep-nanohub");
+            if (IS_ERR(do_not_sleep_thread)) {
+                fs_err(dev, "Could not create 'do not sleep' thread: %ld\n", PTR_ERR(do_not_sleep_thread));
+            }
+	    }
+	} else {
+	    if(!IS_ERR_OR_NULL(do_not_sleep_thread)) {
+	        kthread_stop(do_not_sleep_thread);
+	        do_not_sleep_thread = NULL;
+	    }
+	}
+
+    fs_info(dev, "FingerSense switch set to '%u'\n", fs_switch);
+	return count;
+
+io_error:
+    release_wakeup(data);
+	return -EIO;
+}
+
+static ssize_t nanohub_vib_data(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	int ret;
+	struct nanohub_data *data = dev_get_nanohub_data(dev);
+
+	struct {
+		uint16_t vib_data_len;
+		int8_t vib_data[NANOHUB_PACKET_PAYLOAD_MAX - 2];
+	} __packed first_chunk;
+
+	uint16_t vib_data_len = 0;
+	uint16_t offset = 0;
+
+	fs_dbg(dev, "Requesting vibration data\n");
+	if (request_wakeup(data)) {
+		return -ERESTARTSYS;
+	}
+
+	// First chunk
+	ret = nanohub_comms_tx_rx_retrans
+		    (data, CMD_COMMS_GET_VIBRATION_DATA, (uint8_t *) &offset, sizeof(offset), (uint8_t *) &first_chunk,
+		     sizeof(first_chunk), false, 20, 1);
+	if (ret < 2) {
+		fs_err(dev, "Couldn't read vibration data length. ret: %d\n", ret);
+		goto io_error;
+	}
+
+	vib_data_len = first_chunk.vib_data_len;
+	fs_dbg(dev, "Vibration data length: %u\n", vib_data_len);
+	offset += ret;
+	memcpy(buf, first_chunk.vib_data, ret - 2);
+
+	while (offset < vib_data_len + 2) {
+		fs_dbg(dev, "Requesting vibration data chunk (offset: %u)\n", offset);
+
+		ret = nanohub_comms_tx_rx_retrans
+				(data, CMD_COMMS_GET_VIBRATION_DATA, (uint8_t *) &offset, sizeof(offset),
+				(uint8_t *) buf + offset - 2, PAGE_SIZE - offset + 2, false, 20, 1);
+		if (ret <= 0) {
+			fs_err(dev, "Couldn't read vibration data chunk (offset: %d). ret: %d\n", offset, ret);
+			goto io_error;
+		}
+
+		offset += ret;
+	}
+
+	release_wakeup(data);
+	return vib_data_len;
+
+io_error:
+	release_wakeup(data);
+	return -EIO;
+}
+
 static ssize_t nanohub_firmware_query(struct device *dev,
 				      struct device_attribute *attr, char *buf)
 {
@@ -799,6 +953,8 @@ static ssize_t nanohub_download_app(struct device *dev,
 static struct device_attribute attributes[] = {
 	__ATTR(wakeup, 0440, nanohub_wakeup_query, NULL),
 	__ATTR(app_info, 0440, nanohub_app_info, NULL),
+	__ATTR(vib_data, 0440, nanohub_vib_data, NULL),
+	__ATTR(fs_enabled, 0660, nanohub_fs_enabled_show, nanohub_fs_enabled_store),
 	__ATTR(firmware_version, 0440, nanohub_firmware_query, NULL),
 	__ATTR(download_bl, 0220, NULL, nanohub_download_bl),
 	__ATTR(download_kernel, 0220, NULL, nanohub_download_kernel),
@@ -1037,6 +1193,9 @@ static void nanohub_process_buffer(struct nanohub_data *data,
 	(*buf)->length = ret;
 
 	event_id = le32_to_cpu((((uint32_t *)(*buf)->buffer)[0]) & 0x7FFFFFFF);
+
+//	fs_dbg(data->io[ID_NANOHUB_SENSOR].dev, "event_id: %u\n", event_id);
+
 	if (ret >= sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint32_t) &&
 	    event_id > FIRST_SENSOR_EVENTID &&
 	    event_id <= LAST_SENSOR_EVENTID) {
@@ -1103,6 +1262,7 @@ static int nanohub_kthread(void *arg)
 				continue;
 			}
 
+			// Sends the read events command to the nanohub
 			ret = nanohub_comms_rx_retrans_boottime(
 			    data, CMD_COMMS_READ, buf->buffer,
 			    sizeof(buf->buffer), 10, 0);

@@ -30,6 +30,7 @@
 
 struct nanohub_buf {
 	struct list_head list;
+	// 255 maximum payload
 	uint8_t buffer[255];
 	uint8_t length;
 };

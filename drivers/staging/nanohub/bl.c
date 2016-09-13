@@ -12,6 +12,8 @@
  *
  */
 
+//#define DEBUG
+
 #include <linux/platform_data/nanohub.h>
 #include <linux/vmalloc.h>
 

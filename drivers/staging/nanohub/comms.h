@@ -95,6 +95,9 @@ int nanohub_comms_tx_rx_retrans(struct nanohub_data *, uint32_t,
 #define CMD_COMMS_READ			0x00001090
 #define CMD_COMMS_WRITE			0x00001091
 
+#define CMD_COMMS_GET_VIBRATION_DATA	0x000010a0
+#define CMD_COMMS_FS_ENABLE_SWITCH	0x000010a1
+
 #define CHUNK_REPLY_ACCEPTED		0
 #define CHUNK_REPLY_WAIT                1
 #define CHUNK_REPLY_RESEND              2

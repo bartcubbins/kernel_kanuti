@@ -43,6 +43,19 @@
 #define TYPE_B_PROTOCOL
 #endif
 
+#define ROI
+
+#ifdef ROI
+#define ROI_DATA_ADDRESS 0x0400
+#define ROI_CTRL_ADDRESS 0x0405
+#define ROI_HEADER_SIZE 4
+#define ROI_DATA_READ_LENGTH (7 * 7 * 2)
+static bool f51found;
+static bool roi_switch;
+static unsigned short prev_fstatus;
+static unsigned char roi_data[ROI_DATA_READ_LENGTH] = {0};
+#endif
+
 #define NO_0D_WHILE_2D
 #define REPORT_2D_Z
 #define REPORT_2D_W
@@ -97,6 +110,14 @@ static int synaptics_rmi4_f12_set_enables(struct synaptics_rmi4_data *rmi4_data,
 static int synaptics_rmi4_free_fingers(struct synaptics_rmi4_data *rmi4_data);
 static int synaptics_rmi4_reinit_device(struct synaptics_rmi4_data *rmi4_data);
 static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data);
+
+#ifdef ROI
+static ssize_t synaptics_rmi4_fs_enabled_show(struct device *dev,
+		struct device_attribute *attr, char *buf);
+
+static ssize_t synaptics_rmi4_fs_enabled_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count);
+#endif
 
 static ssize_t synaptics_rmi4_full_pm_cycle_show(struct device *dev,
 		struct device_attribute *attr, char *buf);
@@ -393,7 +414,27 @@ static struct device_attribute attrs[] = {
 			synaptics_secure_touch_show,
 			NULL),
 #endif
+#ifdef ROI
+	__ATTR(fs_enabled, (S_IRUGO | S_IWUSR | S_IWGRP),
+			synaptics_rmi4_fs_enabled_show,
+			synaptics_rmi4_fs_enabled_store),
+#endif
 };
+
+#ifdef ROI
+static ssize_t synaptics_rmi4_cap_data_show(struct file *data_file,
+		struct kobject *kobj, struct bin_attribute *attributes,
+		char *buf, loff_t pos, size_t count);
+
+static struct bin_attribute cap_data_attr = {
+	.attr = {
+		.name = "cap_data",
+		.mode = S_IRUGO,
+	},
+	.size = ROI_DATA_READ_LENGTH,
+	.read = synaptics_rmi4_cap_data_show,
+};
+#endif
 
 #define MAX_BUF_SIZE	256
 #define VKEY_VER_CODE	"0x01"
@@ -839,6 +880,117 @@ static ssize_t synaptics_rmi4_0dbutton_store(struct device *dev,
 	return count;
 }
 
+#ifdef ROI
+static int synaptics_rmi4_get_roi_switch(struct synaptics_rmi4_data *rmi4_data)
+{
+	int retval;
+	unsigned char setting;
+
+	if (!f51found)
+		return -ENODEV;
+
+	retval = synaptics_rmi4_reg_read(rmi4_data,
+			ROI_CTRL_ADDRESS,
+			&setting,
+			1);
+	if (retval < 0) {
+		dev_err(rmi4_data->pdev->dev.parent,
+				"%s: Failed to read ROI control setting\n",
+				__func__);
+		return retval;
+	}
+
+	setting &= 0x01;
+
+	roi_switch = setting > 0 ? true : false;
+
+	return 0;
+}
+
+static ssize_t synaptics_rmi4_fs_enabled_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int retval;
+	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
+
+	if (!f51found)
+		return -ENODEV;
+
+	retval = synaptics_rmi4_get_roi_switch(rmi4_data);
+	if (retval < 0)
+		return retval;
+
+	if (roi_switch)
+		return snprintf(buf, PAGE_SIZE, "1\n");
+	else
+		return snprintf(buf, PAGE_SIZE, "0\n");
+}
+
+static ssize_t synaptics_rmi4_fs_enabled_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	int retval;
+	unsigned char setting;
+	unsigned int input;
+	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
+
+	if (!f51found)
+		return -ENODEV;
+
+	if (sscanf(buf, "%u", &input) != 1)
+		return -EINVAL;
+
+	input = input > 0 ? 1 : 0;
+
+	retval = synaptics_rmi4_reg_read(rmi4_data,
+			ROI_CTRL_ADDRESS,
+			&setting,
+			1);
+	if (retval < 0) {
+		dev_err(rmi4_data->pdev->dev.parent,
+				"%s: Failed to read ROI control setting\n",
+				__func__);
+		return retval;
+	}
+
+	if (input)
+		setting |= 0x01;
+	else
+		setting &= 0xfe;
+
+	retval = synaptics_rmi4_reg_write(rmi4_data,
+			ROI_CTRL_ADDRESS,
+			&setting,
+			1);
+	if (retval < 0) {
+		dev_err(rmi4_data->pdev->dev.parent,
+				"%s: Failed to write ROI control setting\n",
+				__func__);
+		return retval;
+	}
+
+	roi_switch = input > 0 ? true : false;
+
+	if (!roi_switch)
+		memset(roi_data, 0x00, ROI_DATA_READ_LENGTH);
+
+	return count;
+}
+
+static ssize_t synaptics_rmi4_cap_data_show(struct file *data_file,
+		struct kobject *kobj, struct bin_attribute *attributes,
+		char *buf, loff_t pos, size_t count)
+{
+
+    if (count != ROI_DATA_READ_LENGTH)
+        return 0;
+
+	memcpy(buf, roi_data, ROI_DATA_READ_LENGTH);
+
+	return ROI_DATA_READ_LENGTH;
+}
+#endif
+
  /**
  * synaptics_rmi4_f11_abs_report()
  *
@@ -1008,6 +1160,10 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 	unsigned char finger_status;
 	unsigned char size_of_2d_data;
 	unsigned short data_addr;
+#ifdef ROI
+	unsigned short new_fstatus = 0;
+	unsigned char roi_data_header[ROI_HEADER_SIZE] = { 0 };
+#endif
 	int x;
 	int y;
 	int wx;
@@ -1125,6 +1281,9 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 			input_report_abs(rmi4_data->input_dev,
 					ABS_MT_TOUCH_MINOR, min(wx, wy));
 #endif
+#ifdef ROI
+			new_fstatus |= (1 << finger);
+#endif
 #ifndef TYPE_B_PROTOCOL
 			input_mt_sync(rmi4_data->input_dev);
 #endif
@@ -1159,6 +1318,37 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 		input_mt_sync(rmi4_data->input_dev);
 #endif
 	}
+
+#ifdef ROI
+	if (!roi_switch)
+		goto no_roi;
+
+	if (prev_fstatus != new_fstatus &&
+			(prev_fstatus & new_fstatus) != new_fstatus) {
+		retval = synaptics_rmi4_reg_read(rmi4_data,
+				ROI_DATA_ADDRESS,
+				roi_data_header,
+				sizeof(roi_data_header));
+		if (retval >= 0) {
+			retval = synaptics_rmi4_reg_read(rmi4_data,
+					ROI_DATA_ADDRESS,
+					roi_data,
+					sizeof(roi_data));
+			if (retval < 0) {
+				dev_err(rmi4_data->pdev->dev.parent,
+						"%s: Failed to read ROI data\n",
+						__func__);
+			}
+		} else {
+			dev_err(rmi4_data->pdev->dev.parent,
+					"%s: Failed to read ROI data header\n",
+					__func__);
+		}
+	}
+
+no_roi:
+	prev_fstatus = new_fstatus;
+#endif
 
 	input_sync(rmi4_data->input_dev);
 
@@ -1781,10 +1971,10 @@ static int synaptics_rmi4_f12_init(struct synaptics_rmi4_data *rmi4_data,
 	struct synaptics_rmi4_f12_ctrl_23 ctrl_23;
 
 	fhandler->fn_number = fd->fn_number;
-	fhandler->num_of_data_sources = fd->intr_src_count;
+	fhandler->num_of_data_sources = fd->intr_src_couWnt;
 	size_of_2d_data = sizeof(struct synaptics_rmi4_f12_finger_data);
 
-	fhandler->extra = kmalloc(sizeof(*extra_data), GFP_KERNEL);
+	fhandler->extra = kzalloc(sizeof(*extra_data), GFP_KERNEL);
 	if (!fhandler->extra) {
 		dev_err(rmi4_data->pdev->dev.parent,
 			"%s: Failed to alloc mem for function handler\n",
@@ -2265,6 +2455,9 @@ static int synaptics_rmi4_query_device(struct synaptics_rmi4_data *rmi4_data)
 
 rescan_pdt:
 	f01found = false;
+#ifdef ROI
+	f51found = false;
+#endif
 	was_in_bl_mode = false;
 	intr_count = 0;
 	INIT_LIST_HEAD(&rmi->support_fn_list);
@@ -2339,6 +2532,11 @@ rescan_pdt:
 					goto flash_prog_mode;
 
 				break;
+#ifdef ROI
+			case SYNAPTICS_RMI4_F51:
+				f51found = true;
+				break;
+#endif
 			case SYNAPTICS_RMI4_F11:
 				if (rmi_fd.intr_src_count == 0)
 					break;
@@ -3646,6 +3844,19 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 	synaptics_secure_touch_init(rmi4_data);
 	synaptics_secure_touch_stop(rmi4_data, 1);
 
+#ifdef ROI
+	retval = sysfs_create_bin_file(&rmi4_data->input_dev->dev.kobj,
+			&cap_data_attr);
+	if (retval < 0) {
+		dev_err(rmi4_data->pdev->dev.parent,
+				"%s: Failed to create sysfs bin file\n",
+				__func__);
+		goto err_sysfs;
+	}
+
+	synaptics_rmi4_get_roi_switch(rmi4_data);
+#endif
+
 	return retval;
 
 err_sysfs:
@@ -3659,6 +3870,10 @@ err_create_debugfs_dir:
 	cancel_delayed_work_sync(&exp_data.work);
 	flush_workqueue(exp_data.workqueue);
 	destroy_workqueue(exp_data.workqueue);
+
+#ifdef ROI
+	sysfs_remove_bin_file(&rmi4_data->input_dev->dev.kobj, &cap_data_attr);
+#endif
 
 	synaptics_rmi4_irq_enable(rmi4_data, false);
 	free_irq(rmi4_data->irq, rmi4_data);
