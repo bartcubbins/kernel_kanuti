@@ -37,9 +37,15 @@
 #define	WCD9XXX_CLSH_STATE_LO (0x01 << 3)
 #define NUM_CLSH_STATES (0x01 << 4)
 
+#define WCD9XXX_CLSAB_EVENT_PRE_DAC 0x01
+#define WCD9XXX_CLSAB_EVENT_POST_PA 0x02
+
 #define	WCD9XXX_CLSAB_STATE_IDLE  0x00
+#define	WCD9XXX_CLSAB_STATE_EAR (0x01 << 0)
 #define WCD9XXX_CLSAB_STATE_HPHL (0x01 << 1)
 #define WCD9XXX_CLSAB_STATE_HPHR (0x01 << 2)
+#define	WCD9XXX_CLSAB_STATE_LO (0x01 << 3)
+#define NUM_CLSAB_STATES (0x01 << 4)
 
 #define WCD9XXX_CLSAB_REQ_ENABLE  true
 #define WCD9XXX_CLSAB_REQ_DISABLE false
@@ -93,6 +99,39 @@
 #define WCD9XXX_CLSH_STATE_HPH_ST_EAR_LO (WCD9XXX_CLSH_STATE_HPH_ST | \
 						WCD9XXX_CLSH_STATE_EAR | \
 						WCD9XXX_CLSH_STATE_LO)
+
+/* Welcome Yuno */
+#define WCD9XXX_CLSAB_STATE_HPH_ST (WCD9XXX_CLSAB_STATE_HPHL | \
+						WCD9XXX_CLSAB_STATE_HPHR)
+
+#define WCD9XXX_CLSAB_STATE_HPHL_EAR (WCD9XXX_CLSAB_STATE_HPHL | \
+						WCD9XXX_CLSAB_STATE_EAR)
+#define WCD9XXX_CLSAB_STATE_HPHR_EAR (WCD9XXX_CLSAB_STATE_HPHR | \
+						WCD9XXX_CLSAB_STATE_EAR)
+
+#define WCD9XXX_CLSAB_STATE_HPH_ST_EAR (WCD9XXX_CLSAB_STATE_HPH_ST | \
+						WCD9XXX_CLSAB_STATE_EAR)
+
+#define WCD9XXX_CLSAB_STATE_HPHL_LO (WCD9XXX_CLSAB_STATE_HPHL | \
+						WCD9XXX_CLSAB_STATE_LO)
+#define WCD9XXX_CLSAB_STATE_HPHR_LO (WCD9XXX_CLSAB_STATE_HPHR | \
+						WCD9XXX_CLSAB_STATE_LO)
+
+#define WCD9XXX_CLSAB_STATE_HPH_ST_LO (WCD9XXX_CLSAB_STATE_HPH_ST | \
+						WCD9XXX_CLSAB_STATE_LO)
+
+#define WCD9XXX_CLSAB_STATE_EAR_LO (WCD9XXX_CLSAB_STATE_EAR | \
+						WCD9XXX_CLSAB_STATE_LO)
+
+#define WCD9XXX_CLSAB_STATE_HPHL_EAR_LO (WCD9XXX_CLSAB_STATE_HPHL | \
+						WCD9XXX_CLSAB_STATE_EAR | \
+						WCD9XXX_CLSAB_STATE_LO)
+#define WCD9XXX_CLSAB_STATE_HPHR_EAR_LO (WCD9XXX_CLSAB_STATE_HPHR | \
+						WCD9XXX_CLSAB_STATE_EAR | \
+						WCD9XXX_CLSAB_STATE_LO)
+#define WCD9XXX_CLSAB_STATE_HPH_ST_EAR_LO (WCD9XXX_CLSAB_STATE_HPH_ST | \
+						WCD9XXX_CLSAB_STATE_EAR | \
+						WCD9XXX_CLSAB_STATE_LO)
 
 struct wcd9xxx_reg_mask_val {
 	u16	reg;
@@ -183,9 +222,9 @@ extern void wcd9xxx_clsh_fsm(struct snd_soc_codec *codec,
 		struct wcd9xxx_clsh_cdc_data *cdc_clsh_d,
 		u8 req_state, bool req_type, u8 clsh_event);
 
-extern void wcd9xxx_enable_high_perf_mode(struct snd_soc_codec *codec,
+extern void gasaiq_control(struct snd_soc_codec *codec,
 				struct wcd9xxx_clsh_cdc_data *clsh_d,
-				u8 uhqa_mode, u8 req_state, bool req_type);
+				u8 uhqa_level, u8 req_state, bool req_type);
 
 extern void wcd9xxx_clsh_init(struct wcd9xxx_clsh_cdc_data *clsh,
 			      struct wcd9xxx_resmgr *resmgr);

@@ -1,4 +1,7 @@
-/* Copyright (c) 2012-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2017, Tristan Marsell <tristan.marsell@t-online.de>. All rights reserved.
+ *
+ * Yuno GasaIQ Audio Driver for WCD9330
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -105,10 +108,21 @@ MODULE_PARM_DESC(cpe_debug_mode, "boot cpe in debug mode");
 
 static atomic_t kp_tomtom_priv;
 
-static int high_perf_mode;
-module_param(high_perf_mode, int,
+static int GasaIQ_Audio = 1;
+module_param(GasaIQ_Audio, int,
 			S_IRUGO | S_IWUSR | S_IWGRP);
-MODULE_PARM_DESC(high_perf_mode, "enable/disable class AB config for hph");
+MODULE_PARM_DESC(GasaIQ_Audio, "enable/disable GasaIQ_Audio");
+
+static int allowBiQuads = 1;
+module_param(allowBiQuads, int,
+			S_IRUGO | S_IWUSR | S_IWGRP);
+MODULE_PARM_DESC(allowBiQuads, "enable/disable BiQuads");
+static int allowCompander;
+module_param(allowCompander, int,
+			S_IRUGO | S_IWUSR | S_IWGRP);
+MODULE_PARM_DESC(allowCompander, "enable/disable Compander");
+
+void gasaiq_uhqa_handler(struct snd_soc_codec *codec, bool status);
 
 static struct afe_param_slimbus_slave_port_cfg tomtom_slimbus_slave_port_cfg = {
 	.minor_version = 1,
@@ -357,6 +371,15 @@ static struct afe_param_id_clip_bank_sel clip_bank_sel = {
 			SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_48000 |\
 			SNDRV_PCM_RATE_96000 | SNDRV_PCM_RATE_192000)
 
+#define SHINKA_YUNO_RATES (SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000 |\
+			SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_44100 |\
+			SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_96000 |\
+			SNDRV_PCM_RATE_192000)
+
+#define SHINKA_YUNO_LOW_RATES (SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000 |\
+			SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_44100 |\
+			SNDRV_PCM_RATE_48000)
+
 #define NUM_DECIMATORS 10
 #define NUM_INTERPOLATORS 8
 #define BITS_PER_REG 8
@@ -375,6 +398,12 @@ static struct afe_param_id_clip_bank_sel clip_bank_sel = {
 #define TOMTOM_FORMATS_S16_S24_LE (SNDRV_PCM_FMTBIT_S16_LE | \
 			SNDRV_PCM_FMTBIT_S24_LE)
 
+#define SHINKA_YUNO_FORMATS (SNDRV_PCM_FMTBIT_S16_LE | \
+			SNDRV_PCM_FMTBIT_S24_LE | \
+			SNDRV_PCM_FMTBIT_S24_3LE)
+
+#define SHINKA_YUNO_16_FORMATS (SNDRV_PCM_FMTBIT_S16_LE)
+
 #define TOMTOM_FORMATS (SNDRV_PCM_FMTBIT_S16_LE)
 
 #define TOMTOM_SLIM_PGD_PORT_INT_TX_EN0 (TOMTOM_SLIM_PGD_PORT_INT_EN0 + 2)
@@ -385,6 +414,9 @@ static struct afe_param_id_clip_bank_sel clip_bank_sel = {
 #define TOMTOM_ZDET_ERROR_APPROX_MUL_FACTOR 655
 #define TOMTOM_ZDET_ERROR_APPROX_SHIFT 16
 #define TOMTOM_ZDET_ZONE_3_DEFAULT_VAL 1000000
+
+#define GASAIQ_UHQA_ENABLE true
+#define GASAIQ_UHQA_DISABLE false
 
 enum {
 	AIF1_PB = 0,
@@ -596,14 +628,19 @@ struct tomtom_priv {
 	/* handle to cpe core */
 	struct wcd_cpe_core *cpe_core;
 
-	/* UHQA (class AB) mode */
-	u8 uhqa_mode;
+	/* GasaIQ UHQA Level */
+	u8 uhqa_level;
 
 	/* Multiplication factor used for impedance detection */
 	int zdet_gain_mul_fact;
 
 	/* to track the status */
 	unsigned long status_mask;
+
+	/* Locks volume change */
+	bool uhqa_lock;
+	unsigned int uhqa_stock_volume_hphl;
+	unsigned int uhqa_stock_volume_hphr;
 };
 
 static const u32 comp_shift[] = {
@@ -702,15 +739,6 @@ int tomtom_enable_qfuse_sensing(struct snd_soc_codec *codec)
 }
 EXPORT_SYMBOL(tomtom_enable_qfuse_sensing);
 
-static int tomtom_get_sample_rate(struct snd_soc_codec *codec, int path)
-{
-	if (path == RX8_PATH)
-		return snd_soc_read(codec, TOMTOM_A_CDC_RX8_B5_CTL);
-	else
-		return snd_soc_read(codec,
-			(TOMTOM_A_CDC_RX1_B5_CTL + 8 * (path - 1)));
-}
-
 static int tomtom_compare_bit_format(struct snd_soc_codec *codec,
 				int bit_format)
 {
@@ -727,19 +755,23 @@ static int tomtom_compare_bit_format(struct snd_soc_codec *codec,
 	return ret;
 }
 
-static int tomtom_update_uhqa_mode(struct snd_soc_codec *codec, int path)
+#define SHINKA_GASAIQ_LEVEL_MAX 2
+#define SHINKA_GASAIQ_LEVEL_MID 1
+#define SHINKA_GASAIQ_LEVEL_LOW 0
+
+static int gasaiq_update_uhqa_level(struct snd_soc_codec *codec, int path)
 {
 	int ret = 0;
 	struct tomtom_priv *tomtom_p = snd_soc_codec_get_drvdata(codec);
 
-	/* UHQA path has fs=192KHz & bit=24 bit */
-	if (((tomtom_get_sample_rate(codec, path) & 0xE0) == 0xA0) &&
-		(tomtom_compare_bit_format(codec, 24))) {
-		tomtom_p->uhqa_mode = 1;
+	if ((tomtom_compare_bit_format(codec, 24))) {
+		tomtom_p->uhqa_level = SHINKA_GASAIQ_LEVEL_MAX;
+	} else if ((tomtom_compare_bit_format(codec, 16))) {
+		tomtom_p->uhqa_level = SHINKA_GASAIQ_LEVEL_MID;
 	} else {
-		tomtom_p->uhqa_mode = 0;
+		tomtom_p->uhqa_level = SHINKA_GASAIQ_LEVEL_LOW;
 	}
-	dev_dbg(codec->dev, "%s: uhqa_mode=%d", __func__, tomtom_p->uhqa_mode);
+	dev_dbg(codec->dev, "%s: uhqa_level=%d", __func__, tomtom_p->uhqa_level);
 	return ret;
 }
 
@@ -821,6 +853,9 @@ static int tomtom_get_iir_enable_audio_mixer(
 	int band_idx = ((struct soc_multi_mixer_control *)
 					kcontrol->private_value)->shift;
 
+	if (!allowBiQuads)
+		return 0;
+
 	ucontrol->value.integer.value[0] =
 		(snd_soc_read(codec, (TOMTOM_A_CDC_IIR1_CTL + 16 * iir_idx)) &
 		(1 << band_idx)) != 0;
@@ -842,6 +877,9 @@ static int tomtom_put_iir_enable_audio_mixer(
 					kcontrol->private_value)->shift;
 	int value = ucontrol->value.integer.value[0];
 
+	if (!allowBiQuads)
+		return 0;
+
 	/* Mask first 5 bits, 6-8 are reserved */
 	snd_soc_update_bits(codec, (TOMTOM_A_CDC_IIR1_CTL + 16 * iir_idx),
 		(1 << band_idx), (value << band_idx));
@@ -857,6 +895,9 @@ static uint32_t get_iir_band_coeff(struct snd_soc_codec *codec,
 				int coeff_idx)
 {
 	uint32_t value = 0;
+
+        if (!allowBiQuads)
+                return 0;
 
 	/* Address does not automatically update if reading */
 	snd_soc_write(codec,
@@ -905,6 +946,9 @@ static int tomtom_get_iir_band_audio_mixer(
 	int band_idx = ((struct soc_multi_mixer_control *)
 					kcontrol->private_value)->shift;
 
+	if (!allowBiQuads)
+		return 0;
+
 	ucontrol->value.integer.value[0] =
 		get_iir_band_coeff(codec, iir_idx, band_idx, 0);
 	ucontrol->value.integer.value[1] =
@@ -938,22 +982,24 @@ static void set_iir_band_coeff(struct snd_soc_codec *codec,
 				int iir_idx, int band_idx,
 				uint32_t value)
 {
-	snd_soc_write(codec,
-		(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
-		(value & 0xFF));
+	if (allowBiQuads) {
+		snd_soc_write(codec,
+			(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
+			(value & 0xFF));
 
-	snd_soc_write(codec,
-		(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
-		(value >> 8) & 0xFF);
+		snd_soc_write(codec,
+			(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
+			(value >> 8) & 0xFF);
 
-	snd_soc_write(codec,
-		(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
-		(value >> 16) & 0xFF);
+		snd_soc_write(codec,
+			(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
+			(value >> 16) & 0xFF);
 
-	/* Mask top 2 bits, 7-8 are reserved */
-	snd_soc_write(codec,
+		/* Mask top 2 bits, 7-8 are reserved */
+		snd_soc_write(codec,
 		(TOMTOM_A_CDC_IIR1_COEF_B2_CTL + 16 * iir_idx),
 		(value >> 24) & 0x3F);
+	}
 }
 
 static int tomtom_put_iir_band_audio_mixer(
@@ -965,6 +1011,9 @@ static int tomtom_put_iir_band_audio_mixer(
 					kcontrol->private_value)->reg;
 	int band_idx = ((struct soc_multi_mixer_control *)
 					kcontrol->private_value)->shift;
+
+	if (!allowBiQuads)
+		return 0;
 
 	/* Mask top bit it is reserved */
 	/* Updates addr automatically for each B2 write */
@@ -1010,6 +1059,9 @@ static int tomtom_get_compander(struct snd_kcontrol *kcontrol,
 		    kcontrol->private_value)->shift;
 	struct tomtom_priv *tomtom = snd_soc_codec_get_drvdata(codec);
 
+	if (!allowCompander)
+		return 0;
+
 	ucontrol->value.integer.value[0] = tomtom->comp_enabled[comp];
 	return 0;
 }
@@ -1023,12 +1075,13 @@ static int tomtom_set_compander(struct snd_kcontrol *kcontrol,
 		    kcontrol->private_value)->shift;
 	int value = ucontrol->value.integer.value[0];
 
+
 	pr_debug("%s: Compander %d enable current %d, new %d\n",
 		 __func__, comp, tomtom->comp_enabled[comp], value);
 	tomtom->comp_enabled[comp] = value;
 
 	if (comp == COMPANDER_1 &&
-			tomtom->comp_enabled[comp] == 1) {
+			tomtom->comp_enabled[comp] == 1 && allowCompander == 1) {
 		/* Wavegen to 5 msec */
 		snd_soc_write(codec, TOMTOM_A_RX_HPH_CNP_WG_CTL, 0xDB);
 		snd_soc_write(codec, TOMTOM_A_RX_HPH_CNP_WG_TIME, 0x2A);
@@ -1042,7 +1095,7 @@ static int tomtom_set_compander(struct snd_kcontrol *kcontrol,
 		pr_debug("%s: Enabled Chopper and set wavegen to 5 msec\n",
 				__func__);
 	} else if (comp == COMPANDER_1 &&
-			tomtom->comp_enabled[comp] == 0) {
+			tomtom->comp_enabled[comp] == 0  && allowCompander == 0) {
 		/* Wavegen to 20 msec */
 		snd_soc_write(codec, TOMTOM_A_RX_HPH_CNP_WG_CTL, 0xDB);
 		snd_soc_write(codec, TOMTOM_A_RX_HPH_CNP_WG_TIME, 0x58);
@@ -1063,6 +1116,9 @@ static int tomtom_config_gain_compander(struct snd_soc_codec *codec,
 				       int comp, bool enable)
 {
 	int ret = 0;
+
+	if (!allowCompander)
+		return 0;
 
 	switch (comp) {
 	case COMPANDER_0:
@@ -1097,14 +1153,16 @@ static int tomtom_config_gain_compander(struct snd_soc_codec *codec,
 
 static void tomtom_discharge_comp(struct snd_soc_codec *codec, int comp)
 {
-	/* Level meter DIV Factor to 5*/
-	snd_soc_update_bits(codec, TOMTOM_A_CDC_COMP0_B2_CTL + (comp * 8), 0xF0,
-			    0x05 << 4);
-	/* RMS meter Sampling to 0x01 */
-	snd_soc_write(codec, TOMTOM_A_CDC_COMP0_B3_CTL + (comp * 8), 0x01);
+	if (allowCompander) {
+		/* Level meter DIV Factor to 5*/
+		snd_soc_update_bits(codec, TOMTOM_A_CDC_COMP0_B2_CTL + (comp * 8), 0xF0,
+				    0x05 << 4);
+		/* RMS meter Sampling to 0x01 */
+		snd_soc_write(codec, TOMTOM_A_CDC_COMP0_B3_CTL + (comp * 8), 0x01);
 
-	/* Worst case timeout for compander CnP sleep timeout */
-	usleep_range(3000, 3100);
+		/* Worst case timeout for compander CnP sleep timeout */
+		usleep_range(3000, 3100);
+	}
 }
 
 static enum wcd9xxx_buck_volt tomtom_codec_get_buck_mv(
@@ -1152,6 +1210,9 @@ static int tomtom_config_compander(struct snd_soc_dapm_widget *w,
 	case SND_SOC_DAPM_PRE_PMU:
 		if (!tomtom->comp_enabled[comp])
 			break;
+
+		if (!allowCompander)
+			return 0;
 
 		/* If EAR PA is enabled then compander should not be enabled */
 		if ((snd_soc_read(codec, TOMTOM_A_RX_EAR_EN) & 0x10) != 0) {
@@ -3073,10 +3134,17 @@ static int tomtom_codec_enable_lineout(struct snd_soc_dapm_widget *w,
 		snd_soc_update_bits(codec, lineout_gain_reg, 0x40, 0x40);
 		break;
 	case SND_SOC_DAPM_POST_PMU:
-		wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
+		if (!GasaIQ_Audio) {
+			wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
 						 WCD9XXX_CLSH_STATE_LO,
 						 WCD9XXX_CLSH_REQ_ENABLE,
 						 WCD9XXX_CLSH_EVENT_POST_PA);
+		} else {
+			gasaiq_control(codec, &tomtom->clsh_d,
+						tomtom->uhqa_level,
+						WCD9XXX_CLSAB_REQ_ENABLE,
+						WCD9XXX_CLSAB_EVENT_POST_PA);
+		}
 		pr_debug("%s: sleeping 5 ms after %s PA turn on\n",
 				__func__, w->name);
 		/* Wait for CnP time after PA enable */
@@ -3923,6 +3991,8 @@ static int tomtom_codec_enable_vdd_spkr2(struct snd_soc_dapm_widget *w,
 	return ret;
 }
 
+
+
 static int tomtom_codec_enable_interpolator(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
@@ -3947,7 +4017,12 @@ static int tomtom_codec_enable_interpolator(struct snd_soc_dapm_widget *w,
 				  );
 		/* Check for Rx1 and Rx2 paths for uhqa mode update */
 		if (w->shift == 0 || w->shift == 1)
-			tomtom_update_uhqa_mode(codec, (1 << w->shift));
+			gasaiq_update_uhqa_level(codec, (1 << w->shift));
+
+		if (GasaIQ_Audio)
+			gasaiq_uhqa_handler(codec, GASAIQ_UHQA_ENABLE);
+		else
+			gasaiq_uhqa_handler(codec, GASAIQ_UHQA_DISABLE);
 
 		break;
 	}
@@ -4208,14 +4283,14 @@ static int tomtom_hphl_dac_event(struct snd_soc_dapm_widget *w,
 			msleep(50);
 		}
 
-		if (!high_perf_mode && !tomtom_p->uhqa_mode) {
+		if (!GasaIQ_Audio) {
 			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
 						 WCD9XXX_CLSH_STATE_HPHL,
 						 WCD9XXX_CLSH_REQ_ENABLE,
 						 WCD9XXX_CLSH_EVENT_PRE_DAC);
 		} else {
-			wcd9xxx_enable_high_perf_mode(codec, &tomtom_p->clsh_d,
-						tomtom_p->uhqa_mode,
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+						tomtom_p->uhqa_level,
 						WCD9XXX_CLSAB_STATE_HPHL,
 						WCD9XXX_CLSAB_REQ_ENABLE);
 		}
@@ -4236,14 +4311,14 @@ static int tomtom_hphl_dac_event(struct snd_soc_dapm_widget *w,
 		snd_soc_update_bits(codec, TOMTOM_A_CDC_RX1_B4_CTL, 0x30, 0x00);
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-		if (!high_perf_mode && !tomtom_p->uhqa_mode) {
+		if (!GasaIQ_Audio) {
 			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
 						 WCD9XXX_CLSH_STATE_HPHL,
 						 WCD9XXX_CLSH_REQ_DISABLE,
 						 WCD9XXX_CLSH_EVENT_POST_PA);
 		} else {
-			wcd9xxx_enable_high_perf_mode(codec, &tomtom_p->clsh_d,
-						tomtom_p->uhqa_mode,
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+						tomtom_p->uhqa_level,
 						WCD9XXX_CLSAB_STATE_HPHL,
 						WCD9XXX_CLSAB_REQ_DISABLE);
 		}
@@ -4268,14 +4343,14 @@ static int tomtom_hphr_dac_event(struct snd_soc_dapm_widget *w,
 		}
 
 		snd_soc_update_bits(codec, w->reg, 0x40, 0x40);
-		if (!high_perf_mode && !tomtom_p->uhqa_mode) {
+		if (!GasaIQ_Audio) {
 			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
 						 WCD9XXX_CLSH_STATE_HPHR,
 						 WCD9XXX_CLSH_REQ_ENABLE,
 						 WCD9XXX_CLSH_EVENT_PRE_DAC);
 		} else {
-			wcd9xxx_enable_high_perf_mode(codec, &tomtom_p->clsh_d,
-						tomtom_p->uhqa_mode,
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+						tomtom_p->uhqa_level,
 						WCD9XXX_CLSAB_STATE_HPHR,
 						WCD9XXX_CLSAB_REQ_ENABLE);
 		}
@@ -4290,14 +4365,14 @@ static int tomtom_hphr_dac_event(struct snd_soc_dapm_widget *w,
 		break;
 	case SND_SOC_DAPM_POST_PMD:
 		snd_soc_update_bits(codec, w->reg, 0x40, 0x00);
-		if (!high_perf_mode && !tomtom_p->uhqa_mode) {
+		if (!GasaIQ_Audio) {
 			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
 						 WCD9XXX_CLSH_STATE_HPHR,
 						 WCD9XXX_CLSH_REQ_DISABLE,
 						 WCD9XXX_CLSH_EVENT_POST_PA);
 		} else {
-			wcd9xxx_enable_high_perf_mode(codec, &tomtom_p->clsh_d,
-						tomtom_p->uhqa_mode,
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+						tomtom_p->uhqa_level,
 						WCD9XXX_CLSAB_STATE_HPHR,
 						WCD9XXX_CLSAB_REQ_DISABLE);
 		}
@@ -4350,11 +4425,16 @@ static int tomtom_hph_pa_event(struct snd_soc_dapm_widget *w,
 			pr_debug("%s: sleep %d us after %s PA enable\n",
 				__func__, pa_settle_time, w->name);
 		}
-		if (!high_perf_mode && !tomtom->uhqa_mode) {
+		if (!GasaIQ_Audio) {
 			wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
 						 req_clsh_state,
 						 WCD9XXX_CLSH_REQ_ENABLE,
 						 WCD9XXX_CLSH_EVENT_POST_PA);
+		} else {
+			gasaiq_control(codec, &tomtom->clsh_d,
+						tomtom->uhqa_level,
+						WCD9XXX_CLSAB_REQ_ENABLE,
+						WCD9XXX_CLSAB_EVENT_POST_PA);
 		}
 		break;
 
@@ -4435,19 +4515,34 @@ static int tomtom_lineout_dac_event(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_PRE_PMU:
-		wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
-						 WCD9XXX_CLSH_STATE_LO,
-						 WCD9XXX_CLSH_REQ_ENABLE,
-						 WCD9XXX_CLSH_EVENT_PRE_DAC);
+		if (!GasaIQ_Audio) {
+			wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
+						 	WCD9XXX_CLSH_STATE_LO,
+						 	WCD9XXX_CLSH_REQ_ENABLE,
+						 	WCD9XXX_CLSH_EVENT_PRE_DAC);
+		} else {
+			gasaiq_control(codec, &tomtom->clsh_d,
+							tomtom->uhqa_level,
+							WCD9XXX_CLSAB_REQ_ENABLE,
+							WCD9XXX_CLSAB_EVENT_PRE_DAC);
+		}
 		snd_soc_update_bits(codec, w->reg, 0x40, 0x40);
+
 		break;
 
 	case SND_SOC_DAPM_POST_PMD:
 		snd_soc_update_bits(codec, w->reg, 0x40, 0x00);
-		wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
-						 WCD9XXX_CLSH_STATE_LO,
-						 WCD9XXX_CLSH_REQ_DISABLE,
-						 WCD9XXX_CLSH_EVENT_POST_PA);
+		if (!GasaIQ_Audio) {
+			wcd9xxx_clsh_fsm(codec, &tomtom->clsh_d,
+						 	WCD9XXX_CLSH_STATE_LO,
+						 	WCD9XXX_CLSH_REQ_DISABLE,
+						 	WCD9XXX_CLSH_EVENT_POST_PA);
+		} else {
+			gasaiq_control(codec, &tomtom->clsh_d,
+							tomtom->uhqa_level,
+							WCD9XXX_CLSAB_REQ_DISABLE,
+							WCD9XXX_CLSAB_EVENT_POST_PA);
+		}
 		break;
 	}
 	return 0;
@@ -5345,7 +5440,7 @@ static int reg_access(unsigned int reg)
 	return ret;
 }
 
-static int tomtom_write(struct snd_soc_codec *codec, unsigned int reg,
+int tomtom_write(struct snd_soc_codec *codec, unsigned int reg,
 	unsigned int value)
 {
 	int val;
@@ -5378,7 +5473,7 @@ static int tomtom_write(struct snd_soc_codec *codec, unsigned int reg,
 	}
 }
 
-static unsigned int tomtom_read(struct snd_soc_codec *codec,
+unsigned int tomtom_read(struct snd_soc_codec *codec,
 				unsigned int reg)
 {
 	unsigned int val;
@@ -5425,6 +5520,53 @@ static void tomtom_shutdown(struct snd_pcm_substream *substream,
 {
 	pr_debug("%s(): substream = %s  stream = %d\n" , __func__,
 		 substream->name, substream->stream);
+}
+
+void gasaiq_enable_uhqa(struct snd_soc_codec *codec)
+{
+	struct tomtom_priv *tomtom_p = snd_soc_codec_get_drvdata(codec);
+	int value = 5;
+
+	tomtom_write(codec, TOMTOM_A_RX_HPH_R_GAIN, value);
+	tomtom_write(codec, TOMTOM_A_RX_HPH_L_GAIN, value);
+
+ 	tomtom_write(codec, TOMTOM_A_RX_HPH_R_STATUS,
+ 		tomtom_read(codec, TOMTOM_A_RX_HPH_R_STATUS) | (value << 4));
+ 	tomtom_write(codec, TOMTOM_A_RX_HPH_L_STATUS,
+ 		tomtom_read(codec, TOMTOM_A_RX_HPH_L_STATUS) | (value << 4));
+
+ 	tomtom_p->uhqa_lock = true;
+
+}
+
+void gasaiq_kill_uhqa(struct snd_soc_codec *codec)
+{
+	struct tomtom_priv *tomtom_p = snd_soc_codec_get_drvdata(codec);
+
+	tomtom_write(codec, TOMTOM_A_RX_HPH_R_GAIN, tomtom_p->uhqa_stock_volume_hphr);
+	tomtom_write(codec, TOMTOM_A_RX_HPH_L_GAIN, tomtom_p->uhqa_stock_volume_hphl);
+
+ 	tomtom_write(codec, TOMTOM_A_RX_HPH_R_STATUS,
+ 		tomtom_read(codec, TOMTOM_A_RX_HPH_R_STATUS) | (tomtom_p->uhqa_stock_volume_hphr << 4));
+ 	tomtom_write(codec, TOMTOM_A_RX_HPH_L_STATUS,
+ 		tomtom_read(codec, TOMTOM_A_RX_HPH_L_STATUS) | (tomtom_p->uhqa_stock_volume_hphl << 4));
+
+ 	tomtom_p->uhqa_lock = false;
+}
+
+void gasaiq_uhqa_handler(struct snd_soc_codec *codec, bool status)
+{
+	struct tomtom_priv *tomtom_p = snd_soc_codec_get_drvdata(codec);
+
+	if (!tomtom_p->uhqa_lock) {
+		tomtom_p->uhqa_stock_volume_hphl = tomtom_read(codec,TOMTOM_A_RX_HPH_L_STATUS);
+		tomtom_p->uhqa_stock_volume_hphr = tomtom_read(codec,TOMTOM_A_RX_HPH_R_STATUS);
+	}
+
+	if (status)
+		gasaiq_enable_uhqa(codec);
+	else
+		gasaiq_kill_uhqa(codec);
 }
 
 int tomtom_mclk_enable(struct snd_soc_codec *codec, int mclk_enable, bool dapm)
@@ -6123,8 +6265,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF1_CAP,
 		.capture = {
 			.stream_name = "AIF1 Capture",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_max = 192000,
 			.rate_min = 8000,
 			.channels_min = 1,
@@ -6137,8 +6279,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF2_PB,
 		.playback = {
 			.stream_name = "AIF2 Playback",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS_S16_S24_LE,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_min = 8000,
 			.rate_max = 192000,
 			.channels_min = 1,
@@ -6151,8 +6293,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF2_CAP,
 		.capture = {
 			.stream_name = "AIF2 Capture",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_max = 192000,
 			.rate_min = 8000,
 			.channels_min = 1,
@@ -6165,8 +6307,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF3_PB,
 		.playback = {
 			.stream_name = "AIF3 Playback",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS_S16_S24_LE,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_min = 8000,
 			.rate_max = 192000,
 			.channels_min = 1,
@@ -6179,8 +6321,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF3_CAP,
 		.capture = {
 			.stream_name = "AIF3 Capture",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_LOW_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_max = 48000,
 			.rate_min = 8000,
 			.channels_min = 1,
@@ -6193,8 +6335,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF4_VIFEED,
 		.capture = {
 			.stream_name = "VIfeed",
-			.rates = SNDRV_PCM_RATE_48000,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_LOW_RATES,
+			.formats = SHINKA_YUNO_16_FORMATS,
 			.rate_max = 48000,
 			.rate_min = 48000,
 			.channels_min = 2,
@@ -6207,8 +6349,8 @@ static struct snd_soc_dai_driver tomtom_dai[] = {
 		.id = AIF4_MAD_TX,
 		.capture = {
 			.stream_name = "AIF4 MAD TX",
-			.rates = SNDRV_PCM_RATE_16000,
-			.formats = TOMTOM_FORMATS_S16_S24_LE,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_16_FORMATS,
 			.rate_min = 16000,
 			.rate_max = 16000,
 			.channels_min = 1,
@@ -6224,8 +6366,8 @@ static struct snd_soc_dai_driver tomtom_i2s_dai[] = {
 		.id = AIF1_PB,
 		.playback = {
 			.stream_name = "AIF1 Playback",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_max = 192000,
 			.rate_min = 8000,
 			.channels_min = 1,
@@ -6238,8 +6380,8 @@ static struct snd_soc_dai_driver tomtom_i2s_dai[] = {
 		.id = AIF1_CAP,
 		.capture = {
 			.stream_name = "AIF1 Capture",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_max = 192000,
 			.rate_min = 8000,
 			.channels_min = 1,
@@ -6252,8 +6394,8 @@ static struct snd_soc_dai_driver tomtom_i2s_dai[] = {
 		.id = AIF1_PB,
 		.playback = {
 			.stream_name = "AIF2 Playback",
-			.rates = WCD9330_RATES,
-			.formats = TOMTOM_FORMATS,
+			.rates = SHINKA_YUNO_RATES,
+			.formats = SHINKA_YUNO_FORMATS,
 			.rate_max = 192000,
 			.rate_min = 8000,
 			.channels_min = 1,
@@ -6266,7 +6408,7 @@ static struct snd_soc_dai_driver tomtom_i2s_dai[] = {
 		.id = AIF1_CAP,
 		.capture = {
 			.stream_name = "AIF2 Capture",
-			.rates = WCD9330_RATES,
+			.rates = SHINKA_YUNO_RATES,
 			.formats = TOMTOM_FORMATS,
 			.rate_max = 192000,
 			.rate_min = 8000,
@@ -6609,10 +6751,17 @@ static int tomtom_codec_enable_ear_pa(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
-						 WCD9XXX_CLSH_STATE_EAR,
-						 WCD9XXX_CLSH_REQ_ENABLE,
-						 WCD9XXX_CLSH_EVENT_POST_PA);
+		if (!GasaIQ_Audio) {
+			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
+						 	WCD9XXX_CLSH_STATE_EAR,
+						 	WCD9XXX_CLSH_REQ_ENABLE,
+						 	WCD9XXX_CLSH_EVENT_POST_PA);
+		} else {
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+								tomtom_p->uhqa_level,
+								WCD9XXX_CLSAB_REQ_ENABLE,
+								WCD9XXX_CLSAB_EVENT_POST_PA);
+		}
 
 		usleep_range(5000, 5100);
 		break;
@@ -6645,16 +6794,30 @@ static int tomtom_codec_ear_dac_event(struct snd_soc_dapm_widget *w,
 						0x03, 0x00);
 		}
 
-		wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
-						 WCD9XXX_CLSH_STATE_EAR,
-						 WCD9XXX_CLSH_REQ_ENABLE,
-						 WCD9XXX_CLSH_EVENT_PRE_DAC);
+		if (!GasaIQ_Audio) {
+			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
+						 	WCD9XXX_CLSH_STATE_EAR,
+						 	WCD9XXX_CLSH_REQ_ENABLE,
+						 	WCD9XXX_CLSH_EVENT_PRE_DAC);
+		} else {
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+								tomtom_p->uhqa_level,
+								WCD9XXX_CLSAB_REQ_ENABLE,
+								WCD9XXX_CLSAB_EVENT_PRE_DAC);
+		}
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-		wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
-						 WCD9XXX_CLSH_STATE_EAR,
-						 WCD9XXX_CLSH_REQ_DISABLE,
-						 WCD9XXX_CLSH_EVENT_POST_PA);
+		if (!GasaIQ_Audio) {
+			wcd9xxx_clsh_fsm(codec, &tomtom_p->clsh_d,
+						 	WCD9XXX_CLSH_STATE_EAR,
+						 	WCD9XXX_CLSH_REQ_DISABLE,
+						 	WCD9XXX_CLSH_EVENT_POST_PA);
+		} else {
+			gasaiq_control(codec, &tomtom_p->clsh_d,
+								tomtom_p->uhqa_level,
+								WCD9XXX_CLSAB_REQ_DISABLE,
+								WCD9XXX_CLSAB_EVENT_POST_PA);
+		}
 		usleep_range(5000, 5100);
 		break;
 	default:
@@ -9221,5 +9384,5 @@ static void __exit tomtom_codec_exit(void)
 module_init(tomtom_codec_init);
 module_exit(tomtom_codec_exit);
 
-MODULE_DESCRIPTION("TomTom codec driver");
+MODULE_DESCRIPTION("Yuno-GasaIQ_Audio codec driver");
 MODULE_LICENSE("GPL v2");

@@ -629,6 +629,10 @@ config MSM_PERFORMANCE
 	  It ensures that no more than a user specified number of CPUs stay
 	  online at any given point in time.
 
+config STATE_NOTIFIER
+        bool "State Notifier"
+        default y
+
 config QCOM_NPA_DUMP
 	bool "Read NPA dump from the RPM memory"
 	depends on DEBUG_FS
