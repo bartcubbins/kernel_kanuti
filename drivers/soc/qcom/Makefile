@@ -3,6 +3,7 @@ KCOV_INSTRUMENT_scm.o := n
 
 obj-$(CONFIG_QCOM_CPUSS_DUMP) += cpuss_dump.o
 obj-$(CONFIG_CPU_V7) += idle-v7.o
+obj-$(CONFIG_MSM_CPU_ACC_CONTROLLER) += idle-v8.o cpu_ops.o
 obj-$(CONFIG_QCOM_GSBI)	+=	qcom_gsbi.o
 obj-$(CONFIG_QCOM_LLCC) += llcc-core.o llcc-slice.o
 obj-$(CONFIG_QCOM_SDM845_LLCC) += llcc-sdm845.o
