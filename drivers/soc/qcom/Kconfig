@@ -10,6 +10,13 @@ config QCOM_CPUSS_DUMP
 	  the entities if corruption is suspected.
 	  If unsure, say N
 
+config MSM_CPU_ACC_CONTROLLER
+	bool "CPU Operations and ACC Clock Controller"
+	help
+	  This driver enables the kernel to manage the L2 Cache
+	  Clock Controller and program the SCM to bring up/down
+	  the CPUs in the SoC.
+
 config QCOM_RUN_QUEUE_STATS
        bool "Enable collection and exporting of QTI Run Queue stats to userspace"
        help
