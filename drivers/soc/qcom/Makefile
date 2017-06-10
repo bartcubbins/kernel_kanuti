@@ -49,6 +49,7 @@ obj-$(CONFIG_TRACER_PKT) += tracer_pkt.o
 obj-$(CONFIG_QCOM_BUS_SCALING) += msm_bus/
 obj-$(CONFIG_QTI_RPMH_API) += rpmh.o
 obj-$(CONFIG_MSM_RPM_SMD)   +=  rpm-smd.o
+obj-$(CONFIG_MSM_CPU_PWR_CTL)	+=	cpu_pwr_ctl.o
 ifdef CONFIG_DEBUG_FS
 obj-$(CONFIG_MSM_RPM_SMD)   +=  rpm-smd-debug.o
 endif
