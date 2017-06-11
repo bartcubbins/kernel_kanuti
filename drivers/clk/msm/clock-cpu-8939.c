@@ -46,7 +46,7 @@ enum {
 	A53SS_MUX_NUM,
 };
 
-const char *mux_names[] = { "c1", "c0", "cci"};
+const char *mux_names[] = {"c0", "c1", "cci"};
 
 struct cpu_clk_8939 {
 	u32 cpu_reg_mask;
@@ -209,8 +209,8 @@ static struct cpu_clk_8939 cci_clk = {
 };
 
 static struct clk_lookup cpu_clocks_8939[] = {
-	CLK_LIST(a53ssmux_lc),
 	CLK_LIST(a53ssmux_bc),
+	CLK_LIST(a53ssmux_lc),
 	CLK_LIST(a53ssmux_cci),
 	CLK_LIST(a53_bc_clk),
 	CLK_LIST(a53_lc_clk),
@@ -658,14 +658,14 @@ static int clock_8939_pm_event(struct notifier_block *this,
 	switch (event) {
 	case PM_POST_HIBERNATION:
 	case PM_POST_SUSPEND:
-		clk_unprepare(&a53_lc_clk.c);
 		clk_unprepare(&a53_bc_clk.c);
+		clk_unprepare(&a53_lc_clk.c);
 		clk_unprepare(&cci_clk.c);
 		break;
 	case PM_HIBERNATION_PREPARE:
 	case PM_SUSPEND_PREPARE:
-		clk_prepare(&a53_lc_clk.c);
 		clk_prepare(&a53_bc_clk.c);
+		clk_prepare(&a53_lc_clk.c);
 		clk_prepare(&cci_clk.c);
 		break;
 	default:
@@ -700,6 +700,45 @@ static struct notifier_block clock_8939_pm_notifier_single_cluster = {
 	.notifier_call = clock_8939_pm_event_single_cluster,
 };
 
+/**
+ * clock_panic_callback() - panic notification callback function.
+ *		This function is invoked when a kernel panic occurs.
+ * @nfb:	Notifier block pointer
+ * @event:	Value passed unmodified to notifier function
+ * @data:	Pointer passed unmodified to notifier function
+ *
+ * Return: NOTIFY_OK
+ */
+static int clock_panic_callback(struct notifier_block *nfb,
+					unsigned long event, void *data)
+{
+	bool single_cluster = 0;
+	unsigned long rate;
+	struct device_node *ofnode = of_find_compatible_node(NULL, NULL,
+							"qcom,cpu-clock-8939");
+	if (!ofnode)
+		ofnode = of_find_compatible_node(NULL, NULL,
+						"qcom,cpu-clock-8917");
+	if (ofnode)
+		single_cluster = of_property_read_bool(ofnode,
+							"qcom,num-cluster");
+
+	rate  = (a53_bc_clk.c.count) ? a53_bc_clk.c.rate : 0;
+	pr_err("%s frequency: %10lu Hz\n", a53_bc_clk.c.dbg_name, rate);
+
+	if (!single_cluster) {
+		rate  = (a53_lc_clk.c.count) ? a53_lc_clk.c.rate : 0;
+		pr_err("%s frequency: %10lu Hz\n", a53_lc_clk.c.dbg_name, rate);
+	}
+
+	return NOTIFY_OK;
+}
+
+static struct notifier_block clock_panic_notifier = {
+	.notifier_call = clock_panic_callback,
+	.priority = 1,
+};
+
 static int clock_a53_probe(struct platform_device *pdev)
 {
 	int speed_bin, version, rc, cpu, mux_id, rate;
@@ -714,7 +753,11 @@ static int clock_a53_probe(struct platform_device *pdev)
 
 	mux_num = single_cluster ? A53SS_MUX_LC:A53SS_MUX_NUM;
 
+#ifdef CONFIG_MACH_SONY_TULIP
+	for (mux_id = 0; mux_id < A53SS_MUX_NUM; mux_id++) {
+#else
 	for (mux_id = 0; mux_id < mux_num; mux_id++) {
+#endif
 		rc = cpu_parse_devicetree(pdev, mux_id);
 		if (rc)
 			return rc;
@@ -760,7 +803,11 @@ static int clock_a53_probe(struct platform_device *pdev)
 		clk_set_rate(&cci_clk.c, rate);
 	}
 
+#ifdef CONFIG_MACH_SONY_TULIP
+	for (mux_id = 0; mux_id < A53SS_MUX_CCI; mux_id++) {
+#else
 	for (mux_id = 0; mux_id < mux_num; mux_id++) {
+#endif
 		/* Force a PLL reconfiguration */
 		config_pll(mux_id);
 	}
@@ -797,6 +844,9 @@ static int clock_a53_probe(struct platform_device *pdev)
 		register_pm_notifier(&clock_8939_pm_notifier);
 
 	populate_opp_table(pdev, single_cluster);
+
+	atomic_notifier_chain_register(&panic_notifier_list,
+						&clock_panic_notifier);
 
 	return 0;
 }
