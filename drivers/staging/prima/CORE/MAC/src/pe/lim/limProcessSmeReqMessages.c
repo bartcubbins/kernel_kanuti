@@ -76,6 +76,10 @@
 #include <limFT.h>
 #endif
 
+#ifdef WLAN_FEATURE_LFR_MBB
+#include "lim_mbb.h"
+#endif
+
 
 #define JOIN_FAILURE_TIMEOUT   1000   // in msecs
 /* This overhead is time for sending NOA start to host in case of GO/sending NULL data & receiving ACK 
@@ -243,7 +247,7 @@ __limIsSmeAssocCnfValid(tpSirSmeAssocCnf pAssocCnf)
  * @return    Total IE length
  */
 
-static tANI_U16
+tANI_U16
 __limGetSmeJoinReqSizeForAlloc(tANI_U8 *pBuf)
 {
     tANI_U16 len = 0;
@@ -4056,7 +4060,99 @@ end:
 
 } /*** end __limProcessSmeAssocCnfNew() ***/
 
+#ifdef SAP_AUTH_OFFLOAD
+/**
+ * __lim_process_sme_assoc_offload_cnf() station connection confirmation
+ *                          message from SME.
+ * @pMac: SirGlobal handler
+ * @msgType: message type
+ * @pMsgBuf: message body
+ *
+ * This function handles the station connect confirm of
+ * Software AP authentication offload feature
+ *
+ * Return: None
+ */
+    static void
+__lim_process_sme_assoc_offload_cnf(tpAniSirGlobal pmac,
+        tANI_U32 msg_type,
+        tANI_U32 *pmsg_buf)
+{
+    tSirSmeAssocCnf assoc_cnf;
+    tpDphHashNode sta_ds = NULL;
+    tpPESession psession_entry= NULL;
+    tANI_U8 session_id;
+    tANI_U16 aid=0;
 
+    if (pmsg_buf == NULL)
+    {
+        limLog(pmac, LOGE, FL("pmsg_buf is NULL "));
+        return;
+    }
+
+    if ((limAssocCnfSerDes(pmac, &assoc_cnf, (tANI_U8 *) pmsg_buf) ==
+                eSIR_FAILURE) || !__limIsSmeAssocCnfValid(&assoc_cnf))
+    {
+        limLog(pmac, LOGE, FL("Received invalid SME_RE(ASSOC)_CNF message "));
+        return;
+    }
+
+    if((psession_entry =
+               peFindSessionByBssid(pmac, assoc_cnf.bssId, &session_id))== NULL)
+    {
+        limLog(pmac, LOGE, FL("session does not exist for given bssId"));
+        goto end;
+    }
+
+    if ((!LIM_IS_AP_ROLE(psession_entry)) ||
+           ((psession_entry->limSmeState != eLIM_SME_NORMAL_STATE) &&
+           (psession_entry->limSmeState != eLIM_SME_NORMAL_CHANNEL_SCAN_STATE)))
+    {
+        limLog(pmac, LOGE,
+                FL("Received unexpected message %X in state %X, in role %X"),
+                msg_type, psession_entry->limSmeState,
+                GET_LIM_SYSTEM_ROLE(psession_entry));
+        goto end;
+    }
+    sta_ds = dphGetHashEntry(pmac,
+            assoc_cnf.aid,
+            &psession_entry->dph.dphHashTable);
+    if (sta_ds != NULL)
+    {
+        aid = sta_ds->assocId;
+        /* Deactivate/delete CNF_WAIT timer since ASSOC_CNF
+         * has been received */
+        limDeactivateAndChangePerStaIdTimer(pmac,
+                eLIM_CNF_WAIT_TIMER,
+                aid);
+    }
+    if (assoc_cnf.statusCode == eSIR_SME_SUCCESS)
+    {
+      sta_ds->mlmStaContext.mlmState = eLIM_MLM_LINK_ESTABLISHED_STATE;
+      limLog(pmac, LOG1, FL("Set mlmState to eLIM_MLM_LINK_ESTABLISHED_STATE"));
+    }
+
+end:
+    if((psession_entry != NULL) && (sta_ds != NULL))
+    {
+        if ( psession_entry->parsedAssocReq[aid] != NULL )
+        {
+            if ( ((tpSirAssocReq)
+                        (psession_entry->parsedAssocReq[aid]))->assocReqFrame)
+            {
+                vos_mem_free(((tpSirAssocReq)
+                         (psession_entry->parsedAssocReq[aid]))->assocReqFrame);
+                ((tpSirAssocReq)
+                 (psession_entry->parsedAssocReq[aid]))->assocReqFrame =
+                    NULL;
+            }
+            vos_mem_free(psession_entry->parsedAssocReq[aid]);
+            psession_entry->parsedAssocReq[aid] = NULL;
+        }
+    }
+
+} /*** end __lim_process_sme_assoc_offload_cnf() ***/
+#endif /* SAP_AUTH_OFFLOAD */
 
 
 static void
@@ -5706,7 +5802,14 @@ limProcessSmeReqMessages(tpAniSirGlobal pMac, tpSirMsgQ pMsg)
                 limLog(pMac, LOG1, FL("Received ASSOC_CNF message"));
             else
                 limLog(pMac, LOG1, FL("Received REASSOC_CNF message"));
+#ifdef SAP_AUTH_OFFLOAD
+            if (pMac->sap_auth_offload)
+                __lim_process_sme_assoc_offload_cnf(pMac, pMsg->type, pMsgBuf);
+            else
+                __limProcessSmeAssocCnfNew(pMac, pMsg->type, pMsgBuf);
+#else
             __limProcessSmeAssocCnfNew(pMac, pMsg->type, pMsgBuf);
+#endif /* SAP_AUTH_OFFLOAD */
             break;
 
         case eWNI_SME_ADDTS_REQ:
@@ -5806,6 +5909,13 @@ limProcessSmeReqMessages(tpAniSirGlobal pMac, tpSirMsgQ pMsg)
        case eWNI_SME_FT_AGGR_QOS_REQ:
             limProcessFTAggrQosReq(pMac, pMsgBuf);
             break;
+#endif
+
+#ifdef WLAN_FEATURE_LFR_MBB
+        case eWNI_SME_MBB_PRE_AUTH_REASSOC_REQ:
+             lim_process_pre_auth_reassoc_req(pMac, pMsg);
+             bufConsumed = FALSE;
+             break;
 #endif
 
 #if defined(FEATURE_WLAN_ESE) && !defined(FEATURE_WLAN_ESE_UPLOAD)

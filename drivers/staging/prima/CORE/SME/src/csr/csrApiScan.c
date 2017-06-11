@@ -125,6 +125,7 @@ tCsrIgnoreChannels countryIgnoreList[MAX_COUNTRY_IGNORE] = { };
 extern tSirRetStatus wlan_cfgGetStr(tpAniSirGlobal, tANI_U16, tANI_U8*, tANI_U32*);
 
 void csrScanGetResultTimerHandler(void *);
+void csr_handle_disable_scan(void *pv);
 static void csrPurgeScanResultByAge(void *pv);
 void csrScanIdleScanTimerHandler(void *);
 static void csrSetDefaultScanTiming( tpAniSirGlobal pMac, tSirScanType scanType, tCsrScanRequest *pScanRequest);
@@ -236,6 +237,15 @@ eHalStatus csrScanOpen( tpAniSirGlobal pMac )
             smsLog(pMac, LOGE, FL("cannot allocate memory for idleScan timer"));
             break;
         }
+        status = vos_timer_init(&pMac->scan.disable_scan_during_sco_timer,
+                                VOS_TIMER_TYPE_SW,
+                                csr_handle_disable_scan,
+                                pMac);
+        if (!HAL_STATUS_SUCCESS(status)) {
+            smsLog(pMac, LOGE,
+                   FL("cannot allocate memory for disable_scan_during_sco_timer"));
+            break;
+        }
     }while(0);
     
     return (status);
@@ -264,6 +274,7 @@ eHalStatus csrScanClose( tpAniSirGlobal pMac )
     vos_timer_destroy(&pMac->scan.hTimerStaApConcTimer);
 #endif
     vos_timer_destroy(&pMac->scan.hTimerIdleScan);
+    vos_timer_destroy(&pMac->scan.disable_scan_during_sco_timer);
     return eHAL_STATUS_SUCCESS;
 }
 
@@ -7056,6 +7067,21 @@ void csrScanGetResultTimerHandler(void *pv)
     vos_timer_start(&pMac->scan.hTimerGetResult, CSR_SCAN_GET_RESULT_INTERVAL/PAL_TIMER_TO_MS_UNIT);
 }
 
+
+void csr_handle_disable_scan(void *pv)
+{
+    tpAniSirGlobal mac = PMAC_STRUCT(pv);
+
+    if (mac->scan.disable_scan_during_sco_timer_info.callback)
+        mac->scan.disable_scan_during_sco_timer_info.callback(
+        mac,
+        mac->scan.disable_scan_during_sco_timer_info.dev,
+        mac->scan.disable_scan_during_sco_timer_info.scan_id,
+        eHAL_STATUS_SUCCESS);
+    else
+        smsLog(mac, LOGE, FL("Callback is NULL"));
+}
+
 #ifdef WLAN_AP_STA_CONCURRENCY
 static void csrStaApConcTimerHandler(void *pv)
 {
@@ -9147,6 +9173,25 @@ eHalStatus csrScanSavePreferredNetworkFound(tpAniSirGlobal pMac,
    pBssDescr->capabilityInfo = *((tANI_U16 *)&pParsedFrame->capabilityInfo);
    vos_mem_copy((tANI_U8 *) &pBssDescr->bssId, (tANI_U8 *) macHeader->bssId, sizeof(tSirMacAddr));
    pBssDescr->nReceivedTime = vos_timer_get_system_time();
+
+#ifdef WLAN_FEATURE_VOWIFI_11R
+    // MobilityDomain
+    pBssDescr->mdie[0] = 0;
+    pBssDescr->mdie[1] = 0;
+    pBssDescr->mdie[2] = 0;
+    pBssDescr->mdiePresent = FALSE;
+    // If mdie is present in the probe resp we fill it in the bss description
+    if(pParsedFrame->mdiePresent)
+    {
+        pBssDescr->mdiePresent = TRUE;
+        pBssDescr->mdie[0] = pParsedFrame->mdie[0];
+        pBssDescr->mdie[1] = pParsedFrame->mdie[1];
+        pBssDescr->mdie[2] = pParsedFrame->mdie[2];
+    }
+    smsLog(pMac, LOG1, FL("mdie=%02x%02x%02x"),
+           (unsigned int)pBssDescr->mdie[0], (unsigned int)pBssDescr->mdie[1],
+           (unsigned int)pBssDescr->mdie[2]);
+#endif
 
    smsLog( pMac, LOG1, FL("Bssid= "MAC_ADDRESS_STR
                        " chan= %d, rssi = %d "),

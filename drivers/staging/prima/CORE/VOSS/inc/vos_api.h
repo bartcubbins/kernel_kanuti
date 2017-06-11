@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2017 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -517,12 +517,16 @@ v_BOOL_t vos_isLoadUnloadInProgress(void);
 bool vos_get_rx_wow_dump(void);
 void vos_set_rx_wow_dump(bool value);
 
+void vos_set_hdd_bad_sta(uint8_t sta_id);
+void vos_reset_hdd_bad_sta(uint8_t sta_id);
+
 void vos_probe_threads(void);
 void vos_per_pkt_stats_to_user(void *perPktStat);
 void vos_updatePktStatsInfo(void * pktStat);
 bool vos_is_wlan_logging_enabled(void);
 
 v_BOOL_t vos_is_probe_rsp_offload_enabled(void);
+void vos_set_snoc_high_freq_voting(bool enable);
 void vos_smd_dump_stats(void);
 void vos_log_wdi_event(uint16 msg, vos_wdi_trace_event_type event);
 void vos_dump_wdi_events(void);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2017 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -454,6 +454,8 @@ VOS_STATUS vos_open( v_CONTEXT_t *pVosContext, void *devHandle )
    VOS_TRACE( VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_INFO_HIGH,
                "%s: VOSS successfully Opened", __func__);
 
+   gpVosContext->snoc_high_freq_voting = false;
+   spin_lock_init(&gpVosContext->freq_voting_lock);
    *pVosContext = gpVosContext;
 
    return VOS_STATUS_SUCCESS;
@@ -3285,6 +3287,59 @@ void vos_set_rx_wow_dump(bool value)
 }
 
 /**
+ * vos_set_hdd_bad_sta() - Set bad link peer sta id
+ * @sta_id: sta id of the bad peer
+ *
+ * Return none.
+ */
+void vos_set_hdd_bad_sta(uint8_t sta_id)
+{
+    hdd_context_t *pHddCtx = NULL;
+    v_CONTEXT_t pVosContext = vos_get_global_context(VOS_MODULE_ID_SYS, NULL);
+
+    if(!pVosContext)
+    {
+       hddLog(VOS_TRACE_LEVEL_FATAL,"%s: Global VOS context is Null", __func__);
+       return;
+    }
+
+    pHddCtx = (hdd_context_t *)vos_get_context(VOS_MODULE_ID_HDD, pVosContext );
+    if(!pHddCtx) {
+       VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_FATAL,
+                "%s: HDD context is Null", __func__);
+       return;
+    }
+
+    pHddCtx->bad_sta[sta_id] = 1;
+}
+
+/**
+ * vos_reset_hdd_bad_sta() - Reset the bad peer sta_id
+ * @sta_id: sta id of the peer
+ *
+ * Return none.
+ */
+void vos_reset_hdd_bad_sta(uint8_t sta_id)
+{
+    hdd_context_t *pHddCtx = NULL;
+    v_CONTEXT_t pVosContext = vos_get_global_context(VOS_MODULE_ID_SYS, NULL);
+
+    if(!pVosContext) {
+       hddLog(VOS_TRACE_LEVEL_FATAL,"%s: Global VOS context is Null", __func__);
+       return;
+    }
+
+    pHddCtx = (hdd_context_t *)vos_get_context(VOS_MODULE_ID_HDD, pVosContext );
+    if(!pHddCtx) {
+       VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_FATAL,
+                "%s: HDD context is Null", __func__);
+       return;
+    }
+
+    pHddCtx->bad_sta[sta_id] = 0;
+}
+
+/**
  * vos_probe_threads() - VOS API to post messages
  * to all the threads to detect if they are active or not
  *
@@ -3629,6 +3684,46 @@ v_BOOL_t vos_is_probe_rsp_offload_enabled(void)
 
 	return pHddCtx->cfg_ini->sap_probe_resp_offload;
 }
+
+
+/**
+ * vos_set_snoc_high_freq_voting() - enable/disable high freq voting
+ * @enable: true if need to be enabled
+ *
+ * enable/disable high freq voting
+ *
+ * Return: Void
+ */
+#ifdef HAVE_WCNSS_SNOC_HIGH_FREQ_VOTING
+void vos_set_snoc_high_freq_voting(bool enable)
+{
+   VosContextType *vos_ctx = NULL;
+
+   /* Get the Global VOSS Context */
+   vos_ctx = vos_get_global_context(VOS_MODULE_ID_SYS, NULL);
+
+   if (!vos_ctx) {
+      VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
+            "%s: vos context is NULL", __func__);
+      return;
+   }
+
+   spin_lock(&vos_ctx->freq_voting_lock);
+   if (vos_ctx->snoc_high_freq_voting != enable)
+   {
+      vos_ctx->snoc_high_freq_voting = enable;
+      spin_unlock(&vos_ctx->freq_voting_lock);
+      wcnss_snoc_vote(enable);
+      return;
+   }
+   spin_unlock(&vos_ctx->freq_voting_lock);
+}
+#else
+void vos_set_snoc_high_freq_voting(bool enable)
+{
+   return;
+}
+#endif
 
 void vos_smd_dump_stats(void)
 {
