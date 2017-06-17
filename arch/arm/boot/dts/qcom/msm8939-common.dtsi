@@ -619,12 +619,12 @@
 		compatible = "qcom,msm-thermal";
 		qcom,sensor-id = <5>;
 		qcom,poll-ms = <250>;
-		qcom,limit-temp = <60>;
+		qcom,limit-temp = <80>;
 		qcom,temp-hysteresis = <10>;
 		qcom,freq-step = <2>;
 		qcom,freq-control-list = <&CPU0 &CPU1 &CPU2 &CPU3
 					&CPU4 &CPU5 &CPU6 &CPU7>;
-		qcom,core-limit-temp = <80>;
+		qcom,core-limit-temp = <90>;
 		qcom,core-temp-hysteresis = <10>;
 		qcom,core-control-list = <&CPU0 &CPU1 &CPU2 &CPU3
 					&CPU4 &CPU5 &CPU6 &CPU7>;
