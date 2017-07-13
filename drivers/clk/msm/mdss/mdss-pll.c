@@ -156,6 +156,9 @@ static int mdss_pll_resource_parse(struct platform_device *pdev,
 	} else if (!strcmp(compatible_stream,
 				"qcom,mdss_hdmi_pll_8996_v3_1p8")) {
 		pll_res->pll_interface_type = MDSS_HDMI_PLL_8996_V3_1_8;
+	} else if (!strcmp(compatible_stream, "qcom,mdss_dsi_pll_8939")) {
+		pll_res->pll_interface_type = MDSS_DSI_PLL_LPM;
+		pll_res->target_id = MDSS_PLL_TARGET_8939;
 	} else {
 		goto err;
 	}
@@ -196,6 +199,9 @@ static int mdss_pll_clock_register(struct platform_device *pdev,
 		break;
 	case MDSS_HDMI_PLL_8996_V3_1_8:
 		rc = hdmi_8996_v3_1p8_pll_clock_register(pdev, pll_res);
+		break;
+	case MDSS_DSI_PLL_LPM:
+		rc = dsi_pll_clock_register_lpm(pdev, pll_res);
 		break;
 	case MDSS_UNKNOWN_PLL:
 	default:
