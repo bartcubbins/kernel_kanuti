@@ -162,6 +162,16 @@ config QPNP_REVID
 	  numbers in the kernel log along with the PMIC option status. The PMIC
 	  type is mapped to a QTI chip part number and logged as well.
 
+config QPNP_VIBRATOR
+	tristate "Vibrator support for QPNP PMIC"
+	depends on SPMI
+	help
+	  This option enables device driver support for the vibrator
+	  on the Qualcomm technologies Inc's QPNP PMICs. The vibrator
+	  is connected on the VIB_DRV_N line and can be controlled
+	  manually or by the DTEST lines.It uses the android timed-output
+	  framework.
+
 config GPIO_USB_DETECT
 	tristate "GPIO-based USB VBUS Detection"
 	depends on POWER_SUPPLY
