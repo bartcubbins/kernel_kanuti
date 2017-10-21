@@ -316,6 +316,7 @@ config ARCH_MMAP_RND_BITS_MAX
 #
 choice
 	prompt "ARM system type"
+        default ARCH_MSM
 	default ARCH_VERSATILE if !MMU
 	default ARCH_MULTIPLATFORM if MMU
 

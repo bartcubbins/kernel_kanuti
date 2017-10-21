@@ -1374,6 +1374,12 @@ static int wait_task_continued(struct wait_opts *wo, struct task_struct *p)
 static int wait_consider_task(struct wait_opts *wo, int ptrace,
 				struct task_struct *p)
 {
+	/*
+	 * We can race with wait_task_zombie() from another thread.
+	 * Ensure that EXIT_ZOMBIE -> EXIT_DEAD/EXIT_TRACE transition
+	 * can't confuse the checks below.
+	 */
+	int exit_state = ACCESS_ONCE(p->exit_state);
 	int ret = eligible_child(wo, p);
 	if (!ret)
 		return ret;
@@ -1393,7 +1399,7 @@ static int wait_consider_task(struct wait_opts *wo, int ptrace,
 	}
 
 	/* dead body doesn't have much to contribute */
-	if (unlikely(p->exit_state == EXIT_DEAD)) {
+	if (unlikely(exit_state == EXIT_DEAD)) {
 		/*
 		 * But do not ignore this task until the tracer does
 		 * wait_task_zombie()->do_notify_parent().
@@ -1404,7 +1410,7 @@ static int wait_consider_task(struct wait_opts *wo, int ptrace,
 	}
 
 	/* slay zombie? */
-	if (p->exit_state == EXIT_ZOMBIE) {
+	if (exit_state == EXIT_ZOMBIE) {
 		/*
 		 * A zombie ptracee is only visible to its ptracer.
 		 * Notification and reaping will be cascaded to the real

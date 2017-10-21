@@ -1566,6 +1566,11 @@ static int qseecom_unload_app(struct qseecom_dev_handle *data,
 		goto unload_exit;
 	}
 
+	if (!memcmp(data->client.app_name, "tzsuntory", strlen("tzsuntory"))) {
+		pr_warn("Do not unload tzsuntory app from tz\n");
+		return 0;
+	}
+
 	if (data->client.app_id > 0) {
 		spin_lock_irqsave(&qseecom.registered_app_list_lock, flags);
 		list_for_each_entry(ptr_app, &qseecom.registered_app_list_head,

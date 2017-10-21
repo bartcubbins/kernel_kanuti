@@ -1706,10 +1706,15 @@ static int _regmap_bus_read(void *context, unsigned int reg,
 	return ret;
 }
 
+//CORE-KC-FixDeviceCanNotPowerON-00 +[
+#define REG_NCP6335D_PROGVSEL0      0x11
+#define NCP6335D_ENABLE             BIT(7)
+//CORE-KC-FixDeviceCanNotPowerON-00 +]
 static int _regmap_read(struct regmap *map, unsigned int reg,
 			unsigned int *val)
 {
 	int ret;
+
 	void *context = _regmap_map_get_context(map);
 
 	WARN_ON(!map->reg_read);
@@ -1724,6 +1729,25 @@ static int _regmap_read(struct regmap *map, unsigned int reg,
 		return -EBUSY;
 
 	ret = map->reg_read(context, reg, val);
+//CORE-KC-FixDeviceCanNotPowerON-00 +[
+	if (reg == REG_NCP6335D_PROGVSEL0 && !(*val & NCP6335D_ENABLE)) {
+		int num = 0;
+		do {
+			if (!num)
+				pr_err("ncp6335d: BAD VALUE! reg=%x val=%x ret=%d\n",
+					reg, *val, ret);
+			ret = map->reg_read(context, reg, val);
+			pr_info("ncp6335d: RETRY[%d] reg_read reg=%x val=%x ret=%d\n",
+				num, reg, *val, ret);
+			msleep(10);
+			num++;
+		} while (!(*val & NCP6335D_ENABLE) && num < 500);
+                if (!(*val & NCP6335D_ENABLE)) {
+                        panic("NCP6335D_ENABLE is gone");
+                        return ret;
+                }
+	}
+//CORE-KC-FixDeviceCanNotPowerON-00 +]
 	if (ret == 0) {
 #ifdef LOG_DEVICE
 		if (map->dev && strcmp(dev_name(map->dev), LOG_DEVICE) == 0)

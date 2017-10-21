@@ -1,0 +1,11 @@
+config FIH_DUMP_WAKELOCK
+	bool "FIH DUMP WAKELOCK"
+	default y
+	help
+		Enable to dump wakelock if it active.
+
+config FIH_HR_MSLEEP
+	bool "High Resolution Sleep"
+	default y
+	help
+		Enable High Resolution Sleep
