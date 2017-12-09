@@ -3375,21 +3375,9 @@ static int msm_hs_probe(struct platform_device *pdev)
 	if (!msm_uport->tx.ipc_tx_ctxt)
 		dev_err(&pdev->dev, "%s: error creating tx logging context",
 								__func__);
-#endif
-	memset(name, 0, sizeof(name));
-	scnprintf(name, sizeof(name), "%s%s", dev_name(msm_uport->uport.dev),
-									"_rx");
-	msm_uport->rx.ipc_rx_ctxt = ipc_log_context_create(
-					IPC_MSM_HS_LOG_DATA_PAGES, name, 0);
-#ifdef CONFIG_IPC_LOGGING
 	if (!msm_uport->rx.ipc_rx_ctxt)
 		dev_err(&pdev->dev, "%s: error creating rx logging context",
 								__func__);
-#endif
-	memset(name, 0, sizeof(name));
-	scnprintf(name, sizeof(name), "%s%s", dev_name(msm_uport->uport.dev),
-									"_pwr");
-#ifdef CONFIG_IPC_LOGGING
 	msm_uport->ipc_msm_hs_pwr_ctxt = ipc_log_context_create(
 					IPC_MSM_HS_LOG_USER_PAGES, name, 0);
 	if (!msm_uport->ipc_msm_hs_pwr_ctxt)
