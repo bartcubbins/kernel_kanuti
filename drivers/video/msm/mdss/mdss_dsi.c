@@ -2250,8 +2250,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		break;
 	case MDSS_EVENT_LINK_READY:
 		if (ctrl_pdata->refresh_clk_rate)
-			rc = mdss_dsi_clk_refresh(pdata,
-				ctrl_pdata->update_phy_timing);
+			rc = mdss_dsi_clk_refresh(pdata);
 
 		mdss_dsi_get_hw_revision(ctrl_pdata);
 		rc = mdss_dsi_on(pdata);
@@ -2326,10 +2325,6 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		rc = mdss_dsi_register_recovery_handler(ctrl_pdata,
 			(struct mdss_intf_recovery *)arg);
 		break;
-	case MDSS_EVENT_REGISTER_MDP_CALLBACK:
-		rc = mdss_dsi_register_mdp_callback(ctrl_pdata,
-			(struct mdss_intf_recovery *)arg);
-		break;
 	case MDSS_EVENT_DSI_DYNAMIC_SWITCH:
 		mode = (u32)(unsigned long) arg;
 		mdss_dsi_switch_mode(pdata, mode);
@@ -2360,9 +2355,6 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 				queue_delayed_work(ctrl_pdata->workq,
 					&ctrl_pdata->dba_work, HZ);
 		}
-		break;
-	case MDSS_EVENT_PANEL_TIMING_SWITCH:
-		rc = mdss_dsi_panel_timing_switch(ctrl_pdata, arg);
 		break;
 #ifdef CONFIG_SOMC_PANEL_LEGACY
 	case MDSS_EVENT_DISP_ON:
