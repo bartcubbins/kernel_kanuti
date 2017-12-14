@@ -520,6 +520,62 @@ static inline void ufshcd_remove_non_printable(char *val)
 static void ufshcd_add_command_trace(struct ufs_hba *hba,
 		unsigned int tag, const char *str)
 {
+	__ufshcd_cmd_log(hba, str, cmd_type, tag, cmd_id, idn,
+			 0xff, (sector_t)-1, -1, -1);
+}
+
+static void ufshcd_dme_cmd_log(struct ufs_hba *hba, char *str, u8 cmd_id)
+{
+	ufshcd_cmd_log(hba, str, "dme", 0xff, cmd_id, 0xff);
+}
+
+static void ufshcd_print_cmd_log(struct ufs_hba *hba)
+{
+	int i;
+	int pos;
+	struct ufshcd_cmd_log_entry *p;
+
+	if (!hba->cmd_log.entries)
+		return;
+
+	pos = hba->cmd_log.pos;
+	for (i = 0; i < UFSHCD_MAX_CMD_LOGGING; i++) {
+		p = &hba->cmd_log.entries[pos];
+		pos = (pos + 1) % UFSHCD_MAX_CMD_LOGGING;
+
+		if (ktime_to_us(p->tstamp)) {
+			pr_err("%s: %s: seq_no=%u lun=0x%x cmd_id=0x%02x lba=0x%llx txfer_len=%d tag=%u, doorbell=0x%x outstanding=0x%x idn=%d time=%lld us\n",
+				p->cmd_type, p->str, p->seq_num,
+				p->lun, p->cmd_id, (unsigned long long)p->lba,
+				p->transfer_len, p->tag, p->doorbell,
+				p->outstanding_reqs, p->idn,
+				ktime_to_us(p->tstamp));
+				usleep_range(1000, 1100);
+		}
+	}
+}
+#else
+static void ufshcd_cmd_log_init(struct ufs_hba *hba)
+{
+}
+
+static void ufshcd_dme_cmd_log(struct ufs_hba *hba, char *str, u8 cmd_id)
+{
+}
+
+static void ufshcd_print_cmd_log(struct ufs_hba *hba)
+{
+}
+#endif
+
+#ifdef CONFIG_TRACEPOINTS
+static inline void ufshcd_cond_add_cmd_trace(struct ufs_hba *hba,
+					unsigned int tag, const char *str)
+{
+	struct ufshcd_lrb *lrbp;
+	char *cmd_type = NULL;
+	u8 opcode = 0;
+	u8 cmd_id = 0, idn = 0;
 	sector_t lba = -1;
 	u8 opcode = 0;
 	u32 intr, doorbell;
