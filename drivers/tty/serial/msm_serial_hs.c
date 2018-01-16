@@ -3280,6 +3280,7 @@ static int msm_hs_probe(struct platform_device *pdev)
 		iounmap(uport->membase);
 		return -ENOMEM;
 	}
+#ifdef CONFIG_IPC_LOGGING
 	msm_uport->ipc_msm_hs_log_ctxt =
 			ipc_log_context_create(IPC_MSM_HS_LOG_PAGES,
 					dev_name(msm_uport->uport.dev), 0);
@@ -3290,11 +3291,12 @@ static int msm_hs_probe(struct platform_device *pdev)
 								__func__);
 	} else {
 		msm_uport->ipc_debug_mask = INFO_LEV;
-		ret = sysfs_create_file(&pdev->dev.kobj,
-				&dev_attr_debug_mask.attr);
-		if (unlikely(ret))
-			MSM_HS_WARN("%s: Failed to create dev. attr", __func__);
 	}
+#endif
+
+	ret = sysfs_create_file(&pdev->dev.kobj, &dev_attr_debug_mask.attr);
+	if (unlikely(ret))
+		MSM_HS_WARN("%s: Failed to create dev. attr", __func__);
 
 	uport->irq = core_irqres;
 	msm_uport->bam_irq = bam_irqres;
