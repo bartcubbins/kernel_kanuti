@@ -14,6 +14,8 @@
 &soc {
 	qcom,msm-cam@1800000{
 		compatible = "qcom,msm-cam";
+		reg = <0x1b00000 0x10000>;
+		reg-names = "msm-cam";
 	};
 
 	qcom,csiphy@1b0ac00 {
