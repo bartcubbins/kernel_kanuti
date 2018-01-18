@@ -1701,6 +1701,13 @@
 								 "scm_core_clk_src";
 		qcom,scm_core_clk_src-freq = <80000000>;
 
+		qcom,msm-bus,name = "pil-venus";
+		qcom,msm-bus,num-cases = <2>;
+		qcom,msm-bus,name-paths = <1>;
+		qcom,msm-bus,vectors-kBps =
+				<63 512 0 0>,
+				<63 512 0 304000>;
+
 		qcom,pas-id = <9>;
 		qcom,proxy-timeout-ms = <100>;
 		qcom,firmware-name = "venus";
