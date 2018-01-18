@@ -197,7 +197,7 @@
 			"NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE";
 	};
 
-	vfe0: qcom,vfe@1b10000 {
+	vfe0: qcom,vfe0@1b10000 {
 		cell-index = <0>;
 		compatible = "qcom,vfe40";
 		#address-cells = <1>;
