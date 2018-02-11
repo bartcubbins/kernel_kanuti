@@ -112,7 +112,6 @@ int cyttsp4_init(struct cyttsp4_core_platform_data *pdata,
 	int rc = 0;
 
 	if (on) {
-
 		rc = gpio_request(rst_gpio, NULL);
 		if (rc < 0) {
 			gpio_free(rst_gpio);
@@ -227,7 +226,7 @@ int cyttsp4_detect(struct cyttsp4_core_platform_data *pdata,
 		if (!rc)
 			return 0;
 
-		dev_vdbg(dev, "%s: Read unsuccessful, try=%d\n",
+		dev_info(dev, "%s: Read unsuccessful, try=%d\n",
 			__func__, 3 - retry);
 	}
 

@@ -110,7 +110,7 @@ do { \
 } while (0)
 
 #define CY_CORE_BL_HOST_SYNC_BYTE                0xFF
-
+ 
 static const u8 security_key[] = {
 	0xA5, 0x01, 0x02, 0x03, 0xFF, 0xFE, 0xFD, 0x5A
 };
@@ -3770,6 +3770,20 @@ static ssize_t	cyttsp4_panel_id_show( struct device *dev, struct device_attribut
 	return 1;
 }
 
+/* Show Touch Module ID via sysfs */
+static ssize_t cyttsp4_tp_id_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct cyttsp4_core_data *cd = dev_get_drvdata(dev);
+	ssize_t ret;
+
+	dev_info(dev, "%s: GPIO%d = %d\n", __func__, cd->pdata->tp_id_gpio,
+			gpio_get_value(cd->pdata->tp_id_gpio));
+	ret = snprintf(buf, CY_MAX_PRBUF_SIZE, "0x%02X\n",
+			gpio_get_value(cd->pdata->tp_id_gpio));
+	return ret;
+}
+
 // Enable/disable glove mode
 static ssize_t cyttsp4_signal_disparity_show(struct device *dev,
                    struct device_attribute *attr, char *buf)
@@ -3935,6 +3949,7 @@ static struct device_attribute attributes[] = {
 	__ATTR( get_bootloader_state, S_IRUGO, cyttsp4_bootloader_mode_show, NULL ),
 	__ATTR( glove, S_IRUGO | S_IWUSR | S_IWGRP, cyttsp4_signal_disparity_show, cyttsp4_signal_disparity_store ),
 	__ATTR( panel_id, S_IRUGO, cyttsp4_panel_id_show, NULL ),
+	__ATTR( tp_id, S_IRUGO, cyttsp4_tp_id_show, NULL),
 };
 
 static int add_sysfs_interfaces(struct cyttsp4_core_data *cd,

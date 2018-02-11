@@ -22,7 +22,7 @@
  */
 
 #include <linux/module.h>
-#include <linux/cyttsp5_device_access-api.h>
+#include <linux/input/cypress-gen5/cyttsp5_device_access-api.h>
 #include <asm/unaligned.h>
 
 #define BUFFER_SIZE		256

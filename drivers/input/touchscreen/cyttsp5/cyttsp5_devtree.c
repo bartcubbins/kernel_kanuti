@@ -549,33 +549,8 @@ static struct cyttsp5_core_platform_data *create_and_get_core_pdata(
 		goto fail;
 	}
 
-	/* Required fields */
-#if 0
-	rc = of_property_read_u32(core_node, "cy,irq_gpio", &value);
-	if (rc)
-		goto fail_free;
-	pdata->irq_gpio = value;
-#else
 	pdata->irq_gpio	= of_get_named_gpio(core_node, "gpios", 1);
-#endif
-	rc = of_property_read_u32(core_node, "cy,hid_desc_register", &value);
-	if (rc)
-		goto fail_free;
-	pdata->hid_desc_register = value;
-
-	/* Optional fields */
-	/* rst_gpio is optional since a platform may use
-	 * power cycling instead of using the XRES pin
-	 */
-#if 0
-	rc = of_property_read_u32(core_node, "cy,rst_gpio", &value);
-	if (!rc)
-		pdata->rst_gpio = value;
-#else
 	pdata->rst_gpio	= of_get_named_gpio(core_node, "gpios", 0);
-#endif
-
-	pdata->tp_id_gpio = of_get_named_gpio(core_node, "gpios", 3);
 
 	rc = of_property_read_u32(core_node, "cy,level_irq_udelay", &value);
 	if (!rc)
@@ -630,7 +605,6 @@ static struct cyttsp5_core_platform_data *create_and_get_core_pdata(
 fail_free_sett:
 	for (i--; i >= 0; i--)
 		free_touch_setting(pdata->sett[i]);
-fail_free:
 	kfree(pdata);
 fail:
 	return ERR_PTR(rc);
@@ -646,35 +620,25 @@ static void free_core_pdata(void *pdata)
 	kfree(core_pdata);
 }
 
-static bool	pinctrl_init( struct device *dev )
+static bool pinctrl_init(struct device *dev)
 {
-	struct pinctrl		*ts_pinctrl;
-
-	struct pinctrl_state	*gpio_state_active /*, *gpio_state_suspend */;
-
-	int			ret;
+	struct pinctrl *ts_pinctrl;
+	struct pinctrl_state *gpio_state_active /*, *gpio_state_suspend */;
+	int ret;
 
 	/* Get pinctrl if target uses pinctrl */
-	ts_pinctrl	= devm_pinctrl_get( dev );
+	ts_pinctrl = devm_pinctrl_get( dev );
 
-	if( IS_ERR_OR_NULL( ts_pinctrl ) )
-	{
-
-		printk( "DTUCH : Target does not use pinctrl\n" );
-
-		return	false;
-
+	if (IS_ERR_OR_NULL(ts_pinctrl)) {
+		printk("%s: Target does not use pinctrl\n", __func__);
+		return false;
 	}
 
-	gpio_state_active	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_active" );
+	gpio_state_active = pinctrl_lookup_state(ts_pinctrl, "pmx_ts_active");
 
-	if( IS_ERR_OR_NULL( gpio_state_active ) )
-	{
-
-		printk( "DTUCH : Can not get ts default pinstate\n" );
-
-		return	false;
-
+	if (IS_ERR_OR_NULL(gpio_state_active)) {
+		printk("%s: Can not get ts default pinstate\n", __func__);
+		return false;
 	}
 
 //	gpio_state_suspend	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_suspend" );
@@ -688,18 +652,14 @@ static bool	pinctrl_init( struct device *dev )
 //
 //	}
 
-	ret	= pinctrl_select_state( ts_pinctrl, gpio_state_active );
+	ret = pinctrl_select_state( ts_pinctrl, gpio_state_active );
 
-	if( ret )
-	{
-
-		printk( "DTUCH : can not set pins\n" );
-
-		return	false;
-
+	if (ret) {
+		printk("%s: can not set pins\n", __func__);
+		return false;
 	}
 
-	return	true;
+	return true;
 
 }
 
@@ -714,11 +674,11 @@ int cyttsp5_devtree_create_and_get_pdata(struct device *adap_dev)
 	if (!adap_dev->of_node)
 		return 0;
 
-	if( pinctrl_init( adap_dev ) )
-		printk( "DTUCH : set Pin-Control done\n" );
+	if (pinctrl_init(adap_dev))
+		printk("%s: set Pin-Control done\n", __func__);
 	else
 	{
-		printk( "DTUCH : pinctrl_init() failed!!!\n" );
+		printk("%s: pinctrl_init() failed!!!\n", __func__);
 		return -EPERM;
 	}
 

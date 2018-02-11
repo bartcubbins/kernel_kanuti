@@ -121,6 +121,7 @@ typedef int (*cyttsp4_platform_read) (struct device *dev, u16 addr,
 struct cyttsp4_core_platform_data {
 	int irq_gpio;
 	int rst_gpio;
+	int tp_id_gpio;
 	int level_irq_udelay;
 	int max_xfer_len;
 	int (*xres)(struct cyttsp4_core_platform_data *pdata,

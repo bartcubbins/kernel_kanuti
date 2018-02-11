@@ -33,7 +33,6 @@
 
 #if IS_ENABLED(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP4)
 extern struct cyttsp4_loader_platform_data _cyttsp4_loader_platform_data;
-extern struct cyttsp4_loader_platform_data _cyttsp4_loader_platform_data_vy58;
 
 extern int cyttsp4_xres(struct cyttsp4_core_platform_data *pdata,
 		struct device *dev);

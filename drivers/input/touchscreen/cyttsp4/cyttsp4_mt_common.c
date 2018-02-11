@@ -58,7 +58,6 @@ static void cyttsp4_lift_all(struct cyttsp4_mt_data *md)
 static void cyttsp4_mt_process_touch(struct cyttsp4_mt_data *md,
 	struct cyttsp4_touch *touch)
 {
-	struct device *dev = &md->ttsp->dev;
 	int tmp;
 	bool flipped;
 
@@ -86,14 +85,9 @@ static void cyttsp4_mt_process_touch(struct cyttsp4_mt_data *md,
 			touch->abs[CY_TCH_Y] = md->si->si_ofs.max_y -
 				touch->abs[CY_TCH_Y];
 	}
-
-	dev_vdbg(dev, "%s: flip=%s inv-x=%s inv-y=%s x=%04X(%d) y=%04X(%d)\n",
-		__func__, flipped ? "true" : "false",
-		md->pdata->flags & CY_MT_FLAG_INV_X ? "true" : "false",
-		md->pdata->flags & CY_MT_FLAG_INV_Y ? "true" : "false",
-		touch->abs[CY_TCH_X], touch->abs[CY_TCH_X],
-		touch->abs[CY_TCH_Y], touch->abs[CY_TCH_Y]);
 }
+
+extern bool	glove_mode;
 
 static void cyttsp4_get_mt_touches(struct cyttsp4_mt_data *md, int num_cur_rec)
 {
@@ -101,7 +95,7 @@ static void cyttsp4_get_mt_touches(struct cyttsp4_mt_data *md, int num_cur_rec)
 	struct cyttsp4_sysinfo *si = md->si;
 	struct cyttsp4_touch tch;
 	int sig;
-	int i, j, t = 0;
+	int i, t = 0;
 	int mt_sync_count = 0;
 	DECLARE_BITMAP(ids, max(CY_TMA1036_MAX_TCH, CY_TMA4XX_MAX_TCH));
 
@@ -141,6 +135,8 @@ static void cyttsp4_get_mt_touches(struct cyttsp4_mt_data *md, int num_cur_rec)
 			t = tch.abs[CY_TCH_T] - md->pdata->frmwrk->abs
 				[(CY_ABS_ID_OST * CY_NUM_ABS_SET) + CY_MIN_OST];
 			if (tch.abs[CY_TCH_E] == CY_EV_LIFTOFF) {
+				// dev_dbg(dev, "%s: t=%d e=%d lift-off\n",
+				// 	__func__, t, tch.abs[CY_TCH_E]);
 				goto cyttsp4_get_mt_touches_pr_tch;
 			}
 			if (md->mt_function.input_report)
@@ -149,38 +145,34 @@ static void cyttsp4_get_mt_touches(struct cyttsp4_mt_data *md, int num_cur_rec)
 			__set_bit(t, ids);
 		}
 
-		for (j = 0; j <= CY_ABS_W_OST ; j++) {
-			sig = md->pdata->frmwrk->abs[((CY_ABS_X_OST + j) *
-				CY_NUM_ABS_SET) + 0];
-			if (sig != CY_IGNORE_VALUE)
-				input_report_abs(md->input, sig,
-					tch.abs[CY_TCH_X + j]);
-		}
-		if (IS_TTSP_VER_GE(si, 2, 3)) {
-			/*
-			 * TMA400 size and orientation fields:
-			 * if pressure is non-zero and major touch
-			 * signal is zero, then set major and minor touch
-			 * signals to minimum non-zero value
-			 */
-			if (tch.abs[CY_TCH_P] > 0 && tch.abs[CY_TCH_MAJ] == 0)
-				tch.abs[CY_TCH_MAJ] = tch.abs[CY_TCH_MIN] = 1;
-
-			/* Get the extended touch fields */
-			for (j = 0; j < CY_NUM_EXT_TCH_FIELDS; j++) {
-				sig = md->pdata->frmwrk->abs
-					[((CY_ABS_MAJ_OST + j) *
-					CY_NUM_ABS_SET) + 0];
-				if (sig != CY_IGNORE_VALUE)
-					input_report_abs(md->input, sig,
-						tch.abs[CY_TCH_MAJ + j]);
-			}
-		}
-		if (md->mt_function.input_sync)
-			md->mt_function.input_sync(md->input);
-		mt_sync_count++;
+		/* all devices: position and pressure fields */
+		input_report_abs( md->input, ABS_MT_POSITION_X, tch.abs[CY_TCH_X] );
+		input_report_abs( md->input, ABS_MT_POSITION_Y, tch.abs[CY_TCH_Y] ); 
+		input_report_abs( md->input, ABS_MT_TOUCH_MAJOR, tch.abs[CY_TCH_MAJ] );
+		input_report_abs( md->input, ABS_MT_TOUCH_MINOR, tch.abs[CY_TCH_MIN] );
+		input_report_abs( md->input, ABS_MT_PRESSURE, glove_mode && tch.abs[CY_TCH_P] <= 5 ? 255 + tch.abs[CY_TCH_P] + 1 : tch.abs[CY_TCH_P] );
 
 cyttsp4_get_mt_touches_pr_tch:
+		// if (IS_TTSP_VER_GE(si, 2, 3))
+		// 	dev_dbg(dev,
+		// 		"%s: t=%d x=%d y=%d z=%d M=%d m=%d o=%d e=%d\n",
+		// 		__func__, t,
+		// 		tch.abs[CY_TCH_X],
+		// 		tch.abs[CY_TCH_Y],
+		// 		tch.abs[CY_TCH_P],
+		// 		tch.abs[CY_TCH_MAJ],
+		// 		tch.abs[CY_TCH_MIN],
+		// 		tch.abs[CY_TCH_OR],
+		// 		tch.abs[CY_TCH_E]);
+		// else
+		// 	dev_dbg(dev,
+		// 		"%s: t=%d x=%d y=%d z=%d e=%d\n", __func__,
+		// 		t,
+		// 		tch.abs[CY_TCH_X],
+		// 		tch.abs[CY_TCH_Y],
+		// 		tch.abs[CY_TCH_P],
+		// 		tch.abs[CY_TCH_E]);
+
 		{
 			struct	pointer_information
 			{
@@ -207,7 +199,7 @@ cyttsp4_get_mt_touches_pr_tch:
 					finger_state->down_state	= false;
 
 				if( down != finger_state->down_state )
-					pr_debug("ETUCH : <%d>(%s)[%d:%d:%d]|[%d,%d]\n", finger, finger_state->down_state ? "down" : "up", tch.abs[CY_TCH_X], tch.abs[CY_TCH_Y], tch.abs[CY_TCH_P], tch.abs[CY_TCH_OR], finger_state->pointer_count );
+					pr_debug( "ETUCH : <%d>(%s)[%d:%d:%d]|[%d,%d]\n", finger, finger_state->down_state ? "down" : "up", tch.abs[CY_TCH_X], tch.abs[CY_TCH_Y], tch.abs[CY_TCH_P], tch.abs[CY_TCH_OR], finger_state->pointer_count );
 			}
 		}
 
@@ -443,6 +435,7 @@ static void cyttsp4_setup_early_suspend(struct cyttsp4_mt_data *md)
 }
 
 #elif CONFIG_FB
+void	RestoreGloveState( void );
 static int fb_notifier_callback(struct notifier_block *self,
 				unsigned long event, void *data)
 {
@@ -466,6 +459,7 @@ static int fb_notifier_callback(struct notifier_block *self,
 		{
 			cyttsp4_mt_resume(&(md->ttsp->dev));
 			pr_debug( "ETUCH : Resume\n" );
+			RestoreGloveState();
 		}
 		else if (*blank == FB_BLANK_POWERDOWN && md->is_suspended == false)	/* PERI-FG-TOUCH_SUSPEND-00* */
 		{
@@ -567,13 +561,6 @@ static int cyttsp4_mt_resume(struct device *dev)
 }
 #endif
 
-#if 0
-static const struct dev_pm_ops cyttsp4_mt_pm_ops = {
-	SET_SYSTEM_SLEEP_PM_OPS(cyttsp4_mt_suspend, cyttsp4_mt_resume)
-	SET_RUNTIME_PM_OPS(cyttsp4_mt_suspend, cyttsp4_mt_rt_resume, NULL)
-};
-#endif
-
 #if (!defined(CONFIG_FB) && !defined(CONFIG_HAS_EARLYSUSPEND))
 static const struct dev_pm_ops cyttsp4_mt_pm_ops = {
 	SET_SYSTEM_SLEEP_PM_OPS(cyttsp4_mt_suspend, cyttsp4_mt_resume)
@@ -595,12 +582,31 @@ static int cyttsp4_setup_input_device(struct cyttsp4_device *ttsp)
 	int rc;
 
 	dev_vdbg(dev, "%s: Initialize event signals\n", __func__);
-	__set_bit(EV_ABS, md->input->evbit);
-	__set_bit(EV_REL, md->input->evbit);
-	__set_bit(EV_KEY, md->input->evbit);
+
+	set_bit( EV_SYN, md->input->evbit );
+	set_bit( EV_KEY, md->input->evbit );
+	set_bit( EV_ABS, md->input->evbit );
+	set_bit( INPUT_PROP_NO_DUMMY_RELEASE, md->input->propbit);
+
 #ifdef INPUT_PROP_DIRECT
 	__set_bit(INPUT_PROP_DIRECT, md->input->propbit);
 #endif
+
+	input_set_abs_params( md->input, ABS_MT_POSITION_X, 0, 1080, 0, 0);
+	input_set_abs_params( md->input, ABS_MT_POSITION_Y, 0, 1920, 0, 0);
+	input_set_abs_params( md->input, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+	input_set_abs_params( md->input, ABS_MT_PRESSURE, 0, 255, 0, 0);
+
+	input_mt_init_slots( md->input, 10, 0 );
+
+	if( ( rc = input_register_device( md->input ) ) )
+	{
+		printk( "CTUCH : Failed to register input device\n" );
+		return	-1;
+	}
+
+if( 0 )
+{
 
 	/* If virtualkeys enabled, don't use all screen */
 	if (md->pdata->flags & CY_MT_FLAG_VKEYS) {
@@ -661,6 +667,9 @@ static int cyttsp4_setup_input_device(struct cyttsp4_device *ttsp)
 	else
 		md->input_device_registered = true;
 
+}
+
+	md->input_device_registered = true;
 
 	return rc;
 }
@@ -813,4 +822,3 @@ struct cyttsp4_driver cyttsp4_mt_driver = {
 		.pm = &cyttsp4_mt_pm_ops,
 	},
 };
-

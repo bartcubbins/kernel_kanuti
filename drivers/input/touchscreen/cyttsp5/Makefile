@@ -1,7 +1,3 @@
-#
-# Makefile for the touchscreen drivers.
-#
-
 obj-$(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5)	+= cyttsp5.o
 cyttsp5-y := cyttsp5_core.o cyttsp5_mt_common.o
 cyttsp5-$(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_MT_A) += cyttsp5_mta.o
@@ -49,4 +45,3 @@ CFLAGS_cyttsp5_debug.o += -DVERBOSE_DEBUG
 CFLAGS_cyttsp5_devtree.o += -DVERBOSE_DEBUG
 CFLAGS_cyttsp5_platform.o += -DVERBOSE_DEBUG
 endif
-

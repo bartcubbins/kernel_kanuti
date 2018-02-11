@@ -161,14 +161,6 @@ static void cyttsp5_mt_process_touch(struct cyttsp5_mt_data *md,
 		touch->abs[CY_TCH_OR] *= -1;
 	}
 
-	/* Convert MAJOR/MINOR from mm to resolution */
-#if 0
-	tmp = touch->abs[CY_TCH_MAJ] * 100 * si->sensing_conf_data.res_x;
-	touch->abs[CY_TCH_MAJ] = tmp / si->sensing_conf_data.len_x;
-	tmp = touch->abs[CY_TCH_MIN] * 100 * si->sensing_conf_data.res_x;
-	touch->abs[CY_TCH_MIN] = tmp / si->sensing_conf_data.len_x;
-#endif
-
 	dev_vdbg(dev, "%s: flip=%s inv-x=%s inv-y=%s x=%04X(%d) y=%04X(%d)\n",
 		__func__, flipped ? "true" : "false",
 		md->pdata->flags & CY_MT_FLAG_INV_X ? "true" : "false",
@@ -192,7 +184,7 @@ static void cyttsp5_get_mt_touches(struct cyttsp5_mt_data *md,
 	struct device *dev = md->dev;
 	struct cyttsp5_sysinfo *si = md->si;
 	int sig;
-	int i, j, t = 0;
+	int i, t = 0;
 	int max_tch = si->sensing_conf_data.max_tch;
 	DECLARE_BITMAP(ids, max_tch);
 	int mt_sync_count = 0;
@@ -260,27 +252,6 @@ static void cyttsp5_get_mt_touches(struct cyttsp5_mt_data *md,
 					tch->abs[CY_TCH_P]);
 			tch->abs[CY_TCH_P] = 0;
 		}
-
-		/* all devices: position and pressure fields */
-if( 0 )
-		for (j = 0; j <= CY_ABS_W_OST; j++) {
-			if (!si->tch_abs[j].report)
-				continue;
-			cyttsp5_report_event(md, CY_ABS_X_OST + j,
-					tch->abs[CY_TCH_X + j]);
-		}
-
-		/* Get the extended touch fields */
-if( 0 )
-		for (j = 0; j < CY_NUM_EXT_TCH_FIELDS; j++) {
-			if (!si->tch_abs[j].report)
-				continue;
-			cyttsp5_report_event(md, CY_ABS_MAJ_OST + j,
-					tch->abs[CY_TCH_MAJ + j]);
-		}
-		if (md->mt_function.input_sync)
-			md->mt_function.input_sync(md->input);
-		mt_sync_count++;
 
 cyttsp5_get_mt_touches_pr_tch:
 		dev_vdbg(dev,
@@ -533,16 +504,9 @@ static int cyttsp5_setup_input_device(struct device *dev)
 {
 	struct cyttsp5_core_data *cd = dev_get_drvdata(dev);
 	struct cyttsp5_mt_data *md = &cd->md;
-	int signal = CY_IGNORE_VALUE;
-	int max_x, max_y, max_p, min, max;
-	int max_x_tmp, max_y_tmp;
-	int i;
 	int rc;
 
 	dev_vdbg(dev, "%s: Initialize event signals\n", __func__);
-	//__set_bit(EV_ABS, md->input->evbit);
-	//__set_bit(EV_REL, md->input->evbit);
-	//__set_bit(EV_KEY, md->input->evbit);
 	set_bit( EV_SYN, md->input->evbit );
 	set_bit( EV_KEY, md->input->evbit );
 	set_bit( EV_ABS, md->input->evbit );
@@ -565,75 +529,10 @@ static int cyttsp5_setup_input_device(struct device *dev)
 	md->t_min = 0;
 	md->t_max = 15;
 
-	if( ( rc = input_register_device( md->input ) ) )
-	{
-		printk( "CTUCH : Failed to register input device\n" );
+	if ((rc = input_register_device(md->input))) {
+		pr_err("CTUCH : Failed to register input device\n");
 		return	-1;
 	}
-
-if( 0 )
-{
-
-	/* If virtualkeys enabled, don't use all screen */
-	if (md->pdata->flags & CY_MT_FLAG_VKEYS) {
-		max_x_tmp = md->pdata->vkeys_x;
-		max_y_tmp = md->pdata->vkeys_y;
-	} else {
-		max_x_tmp = md->si->sensing_conf_data.res_x;
-		max_y_tmp = md->si->sensing_conf_data.res_y;
-	}
-
-	/* get maximum values from the sysinfo data */
-	if (md->pdata->flags & CY_MT_FLAG_FLIP) {
-		max_x = max_y_tmp - 1;
-		max_y = max_x_tmp - 1;
-	} else {
-		max_x = max_x_tmp - 1;
-		max_y = max_y_tmp - 1;
-	}
-	max_p = md->si->sensing_conf_data.max_z;
-
-	/* set event signal capabilities */
-	for (i = 0; i < NUM_SIGNALS(md->pdata->frmwrk); i++) {
-		signal = MT_PARAM_SIGNAL(md, i);
-		if (signal != CY_IGNORE_VALUE) {
-			__set_bit(signal, md->input->absbit);
-
-			min = MT_PARAM_MIN(md, i);
-			max = MT_PARAM_MAX(md, i);
-			if (i == CY_ABS_ID_OST) {
-				/* shift track ids down to start at 0 */
-				max = max - min;
-				min = min - min;
-			} else if (i == CY_ABS_X_OST)
-				max = max_x;
-			else if (i == CY_ABS_Y_OST)
-				max = max_y;
-			else if (i == CY_ABS_P_OST)
-				max = max_p;
-
-			input_set_abs_params(md->input, signal, min, max,
-				MT_PARAM_FUZZ(md, i), MT_PARAM_FLAT(md, i));
-			dev_dbg(dev, "%s: register signal=%02X min=%d max=%d\n",
-				__func__, signal, min, max);
-		}
-	}
-
-	md->or_min = MT_PARAM_MIN(md, CY_ABS_OR_OST);
-	md->or_max = MT_PARAM_MAX(md, CY_ABS_OR_OST);
-
-	md->t_min = MT_PARAM_MIN(md, CY_ABS_ID_OST);
-	md->t_max = MT_PARAM_MAX(md, CY_ABS_ID_OST);
-
-	rc = md->mt_function.input_register_device(md->input,
-			md->si->tch_abs[CY_TCH_T].max);
-	if (rc < 0)
-		dev_err(dev, "%s: Error, failed register input device r=%d\n",
-			__func__, rc);
-	else
-		md->input_device_registered = true;
-
-}
 
 	md->input_device_registered = true;
 

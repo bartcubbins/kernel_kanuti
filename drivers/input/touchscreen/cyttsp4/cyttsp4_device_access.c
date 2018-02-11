@@ -851,7 +851,7 @@ static ssize_t cyttsp4_ic_grpdata_show(struct device *dev,
 
 	index += scnprintf(buf + index, CY_MAX_PRBUF_SIZE - index,
 			"(%zd bytes)\n", num_read);
-
+	
 cyttsp4_ic_grpdata_show_error:
 	mutex_unlock(&dad->sysfs_lock);
 	return index;
@@ -1643,7 +1643,7 @@ static ssize_t cyttsp4_get_panel_data_show(struct device *dev,
 		left_over_element = dad->heatmap.num_element - returned_element;
 		read_element_offset = returned_element;
 		data_idx = read_byte;
-	}
+	}	
 
 	dev_info(dev, "%s: left_over_element=%d, read_element_offset=%d,data_idx=%d\n", __func__, left_over_element, read_element_offset,data_idx);
 
@@ -1686,13 +1686,13 @@ static ssize_t cyttsp4_get_panel_data_show(struct device *dev,
 				& CY_CMD_RET_PANEL_ELMNT_SZ_MASK);
 
 		if(read_byte > 224)
-		{
+		{	
 			dev_info(dev, "%s, read_byte > 224\n", __func__);
 			read_byte1 = 224;
 			rc = cyttsp4_read(dad->ttsp, CY_MODE_CAT,
-				element_start_offset,
-				dad->ic_buf + data_idx,
-				read_byte1);
+					element_start_offset,
+					dad->ic_buf + data_idx,
+					read_byte1);
 			if (rc < 0) {
 				dev_err(dev, "%s: Error on read r=%d\n", __func__, rc);
 				goto cyttsp4_get_panel_data_show_err_release;
@@ -1707,9 +1707,9 @@ static ssize_t cyttsp4_get_panel_data_show(struct device *dev,
 		{
 			dev_info(dev, "%s, read_byte <= 224\n", __func__);
 			rc = cyttsp4_read(dad->ttsp, CY_MODE_CAT,
-				element_start_offset,
-				dad->ic_buf + data_idx,
-				read_byte);
+					element_start_offset,
+					dad->ic_buf + data_idx,
+					read_byte);
 			if (rc < 0) {
 				dev_err(dev, "%s: Error on read r=%d\n", __func__, rc);
 				goto cyttsp4_get_panel_data_show_err_release;
@@ -1718,7 +1718,7 @@ static ssize_t cyttsp4_get_panel_data_show(struct device *dev,
 			left_over_element -= returned_element;
 			read_element_offset += returned_element;
 			data_idx += read_byte;
-		}
+		}	
 
 		dev_info(dev, "%s left_over_element=%d, read_element_offset=%d,data_idx=%d\n", __func__, left_over_element, read_element_offset,data_idx);
 
@@ -2884,30 +2884,6 @@ static int cyttsp4_get_idac(struct device *dev, struct device_attribute *attr, c
 	       goto cyttsp4_get_panel_data_show_err_release;
 	}
 	print_idx += size;
-#if 0
-	//Button IDAC check:
-	rc = cyttsp4_ic_grpdata_store(dev, attr, buffer_size_btn, strlen(buffer_size_btn));
-	if (rc < 0) {
-		dev_err(dev, "%s: Error on cyttsp4_ic_grpdata_store, buffer_size_btn r=%d\n",
-				__func__, rc);
-		goto exit;
-	}
-
-	rc = cyttsp4_ic_grpdata_store(dev, NULL, grpdata_idac_btn, strlen(grpdata_idac_btn));
-	if (rc < 0) {
-		dev_err(dev, "%s: Error on cyttsp4_ic_grpdata_store, grpdata_idac_btn r=%d\n",
-				__func__, rc);
-		goto cyttsp4_get_panel_data_show_err_release;
-	}
-
-	size = cyttsp4_idac_print(dev, buf, print_idx, CY_BTN_SCAN);
-	if (size < 0) {
-		dev_err(dev, "%s: Error on cyttsp4_ic_grpdata_store r=%d\n",
-				__func__, rc);
-		goto cyttsp4_get_panel_data_show_err_release;
-	}
-	print_idx += size;
-#endif
 
 cyttsp4_get_panel_data_show_err_release:
 	/*back to operational*/

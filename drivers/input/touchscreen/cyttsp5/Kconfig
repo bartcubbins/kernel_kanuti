@@ -1,6 +1,3 @@
-#
-# Touchscreen driver configuration
-#
 config TOUCHSCREEN_CYPRESS_CYTTSP5
 	tristate "Cypress TrueTouch Gen5 Touchscreen Driver"
 	default n
@@ -235,4 +232,3 @@ config TOUCHSCREEN_CYPRESS_CYTTSP5_DEBUG_MDL
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called cyttsp5_debug.
-

@@ -52,17 +52,6 @@
 	(defined(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP4_PLATFORM_TTCONFIG_UPGRADE) \
 	|| defined(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP4_MANUAL_TTCONFIG_UPGRADE))
 
-/* PERI-FG-TOUCH_CHECK_TTCONFIG-00+[ */
-#define CYTTSP4_TTCONFIG_CHECK
-
-#ifdef CYTTSP4_TTCONFIG_CHECK
-#define SEAGULL_TTCONFIG_VERSION    0x1FFF
-#define TULIP_TTCONFIG_VERSION_1    0x0002
-#define TULIP_TTCONFIG_VERSION_2    0x07D0
-#define TULIP_TTCONFIG_VERSION_DP   0x2001	/* PERI-FG-TOUCH_CHECK_TTCONFIG-01+ */
-#endif
-/* PERI-FG-TOUCH_CHECK_TTCONFIG-00+] */
-
 /* Timeout values in ms. */
 #define CY_CMD_TIMEOUT					500
 #define CY_CMD_LDR_INIT_TIMEOUT				10000
@@ -170,19 +159,6 @@ static int cyttsp4_check_firmware_version(struct cyttsp4_device *ttsp,
 	u32 fw_ver_img;
 	u32 fw_revctrl_img_h;
 	u32 fw_revctrl_img_l;
-
-#ifdef CYTTSP4_TTCONFIG_CHECK
-	u32 ttconfig_ver_img;
-
-	ttconfig_ver_img = data->si->si_ptrs.cydata->cyito_verh << 8;
-	ttconfig_ver_img += data->si->si_ptrs.cydata->cyito_verl;
-
-	dev_info(dev, "%s: img ttconfig vers:0x%04X\n", __func__, ttconfig_ver_img);
-	if ((ttconfig_ver_img <= SEAGULL_TTCONFIG_VERSION) &&
-	    (ttconfig_ver_img != TULIP_TTCONFIG_VERSION_1) &&
-	    (ttconfig_ver_img != TULIP_TTCONFIG_VERSION_2))
-		return -EINVAL;
-#endif
 
 	fw_ver_img = data->si->si_ptrs.cydata->fw_ver_major << 8;
 	fw_ver_img += data->si->si_ptrs.cydata->fw_ver_minor;

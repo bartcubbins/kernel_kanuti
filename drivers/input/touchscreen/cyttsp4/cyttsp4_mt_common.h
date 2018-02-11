@@ -28,6 +28,8 @@
  */
 
 #include <linux/cyttsp4_bus.h>
+#include <linux/cyttsp4_core.h>
+#include <linux/cyttsp4_mt.h>
 
 #include <linux/delay.h>
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -45,9 +47,6 @@
 #include <linux/notifier.h>
 #include <linux/fb.h>
 
-
-#include <linux/cyttsp4_core.h>
-#include <linux/cyttsp4_mt.h>
 #include "cyttsp4_regs.h"
 
 struct cyttsp4_mt_data;
@@ -88,3 +87,4 @@ struct cyttsp4_mt_data {
 
 extern void cyttsp4_init_function_ptrs(struct cyttsp4_mt_data *md);
 extern struct cyttsp4_driver cyttsp4_mt_driver;
+

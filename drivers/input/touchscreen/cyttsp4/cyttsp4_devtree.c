@@ -585,8 +585,8 @@ static struct cyttsp4_core_platform_data *create_and_get_core_pdata(
 		goto fail;
 	}
 
-	pdata->irq_gpio = of_get_named_gpio(core_node, "gpios", 1);
-	pdata->rst_gpio = of_get_named_gpio(core_node, "gpios", 0);
+	pdata->irq_gpio	= of_get_named_gpio(core_node, "gpios", 1);
+	pdata->rst_gpio	= of_get_named_gpio(core_node, "gpios", 0);
 
 	rc = of_property_read_u32(core_node, "cy,level_irq_udelay", &value);
 	if (!rc)
@@ -638,6 +638,7 @@ static struct cyttsp4_core_platform_data *create_and_get_core_pdata(
 fail_free_sett:
 	for (i--; i >= 0; i--)
 		free_touch_setting(pdata->sett[i]);
+// fail_free:
 	kfree(pdata);
 fail:
 	return ERR_PTR(rc);
@@ -695,34 +696,47 @@ fail:
 	return rc;
 }
 
-static bool	pinctrl_init( struct device *dev )
+static bool pinctrl_init(struct device *dev)
 {
-	struct pinctrl		*ts_pinctrl;
-	struct pinctrl_state	*gpio_state_active /*, *gpio_state_suspend */;
-	int			ret;
+	struct pinctrl *ts_pinctrl;
+	struct pinctrl_state *gpio_state_active /*, *gpio_state_suspend */;
+	int ret;
 
 	/* Get pinctrl if target uses pinctrl */
-	ts_pinctrl	= devm_pinctrl_get( dev );
+	ts_pinctrl = devm_pinctrl_get(dev);
 
 	if (IS_ERR_OR_NULL(ts_pinctrl)) {
-		printk( "%s: Target does not use pinctrl\n",__func__ );
-		return	false;
+		printk("%s: Target does not use pinctrl\n", __func__);
+		return false;
 	}
 
-	gpio_state_active	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_active" );
+	gpio_state_active = pinctrl_lookup_state(ts_pinctrl, "pmx_ts_active");
 
-	if(IS_ERR_OR_NULL( gpio_state_active)) {
-		printk( "%s: Can not get ts default pinstate\n",__func__ );
-		return	false;
+	if (IS_ERR_OR_NULL(gpio_state_active)) {
+		printk("%s: Can not get ts default pinstate\n", __func__);
+		return false;
 	}
 
-	ret	= pinctrl_select_state( ts_pinctrl, gpio_state_active );
+//	gpio_state_suspend	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_suspend" );
+//
+//	if( IS_ERR_OR_NULL( gpio_state_suspend ) )
+//	{
+//
+//		printk( "DTUCH : Can not get ts sleep pinstate\n" );
+//
+//		return	false;
+//
+//	}
 
-	if (ret){
-		printk( "%s: can not set pins\n",__func__ );
-		return	false;
+	ret = pinctrl_select_state(ts_pinctrl, gpio_state_active);
+
+	if (ret) {
+		printk("%s: can not set pins\n", __func__);
+		return false;
 	}
-	return	true;
+
+	return true;
+
 }
 
 int cyttsp4_devtree_register_devices(struct device *adap_dev)
@@ -735,10 +749,10 @@ int cyttsp4_devtree_register_devices(struct device *adap_dev)
 	if (!adap_dev->of_node)
 		return 0;
 
-	if( !pinctrl_init( adap_dev ) )
-		printk( "%s: pinctrl_init() failed!!!\n",__func__ );
+	if (!pinctrl_init(adap_dev))
+		printk("%s: pinctrl_init() failed!!!\n", __func__);
 	else
-		printk( "%s: set Pin-Control done\n",__func__ );
+		printk("%s: set Pin-Control done\n", __func__);
 
 	rc = of_property_read_string(adap_dev->of_node, "cy,adapter_id",
 			&adap_id);
