@@ -29,6 +29,9 @@
 
 #define CY_I2C_DATA_SIZE  (2 * 256)
 
+/* cyttsp detection */
+extern bool cyttsp_i2c_driver;
+
 static int cyttsp5_i2c_read_default(struct device *dev, void *buf, int size)
 {
 	struct i2c_client *client = to_i2c_client(dev);
@@ -142,7 +145,11 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 #ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	const struct of_device_id *match;
 #endif
-	int rc;
+	int rc = 0;
+
+	/* cyttsp detection */
+	if (cyttsp_i2c_driver)
+		return rc;
 
 	dev_info(dev, "%s: Starting %s probe...\n", __func__, CYTTSP5_I2C_NAME);
 

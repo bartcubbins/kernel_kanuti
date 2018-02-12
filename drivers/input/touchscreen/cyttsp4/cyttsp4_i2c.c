@@ -49,6 +49,9 @@
 
 #define CY_I2C_DATA_SIZE  (3 * 256)
 
+/* cyttsp detection */
+extern bool cyttsp_i2c_driver;
+
 struct cyttsp4_i2c {
 	struct i2c_client *client;
 	u8 wr_buf[CY_I2C_DATA_SIZE];
@@ -265,6 +268,9 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	dev_info(dev, "%s: Successful probe %s\n", __func__, CYTTSP4_I2C_NAME);
 
 	printk( "ITUCH : I2C driver is ready\n" );
+
+	/* cyttsp detection */
+	cyttsp_i2c_driver = true;
 
 	return 0;
 
