@@ -56,8 +56,6 @@ struct cyttsp4_i2c {
 	struct mutex lock;
 };
 
-bool cyttsp4_flag = false;
-
 int cyttsp4_i2c_read_block_data(struct cyttsp4_i2c *ts_i2c, u16 addr,
 		int length, void *values, int max_xfer)
 {
@@ -235,6 +233,12 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	dev_dbg(dev, "%s: add adap='%s' (CYTTSP4_I2C_NAME=%s)\n", __func__,
 		ts_i2c->id, CYTTSP4_I2C_NAME);
 
+	rc = cyttsp4_ping_hw(ts_i2c);
+	if (rc) {
+		dev_err(dev, "%s: No HW detected\n", __func__);
+		goto add_adapter_err;
+	}
+
 	pm_runtime_enable(&client->dev);
 
 	match = of_match_device(of_match_ptr(cyttsp4_i2c_of_match), dev);
@@ -251,11 +255,6 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	}
 	ts_i2c->id = (adap_id) ? adap_id : CYTTSP4_I2C_NAME;
 
-	rc = cyttsp4_ping_hw(ts_i2c);
-	if (rc) {
-		dev_err(dev, "%s: No HW detected\n", __func__);
-		goto error_free_data;
-	}
 	rc = cyttsp4_add_adapter(ts_i2c->id, &ops, dev);
 	if (rc) {
 		dev_err(dev, "%s: Error on probe %s\n", __func__,
@@ -266,8 +265,6 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	dev_info(dev, "%s: Successful probe %s\n", __func__, CYTTSP4_I2C_NAME);
 
 	printk( "ITUCH : I2C driver is ready\n" );
-
-	cyttsp4_flag = true;
 
 	return 0;
 
@@ -315,12 +312,7 @@ static struct i2c_driver cyttsp4_i2c_driver = {
 
 static int __init cyttsp4_i2c_init(void)
 {
-	int rc = 0;
-
-	if (cyttsp4_flag)
-		return rc;
-
-	rc = i2c_add_driver(&cyttsp4_i2c_driver);
+	int rc = i2c_add_driver(&cyttsp4_i2c_driver);
 
 	pr_info("%s: Cypress TTSP I2C Touchscreen Driver (Built %s) rc=%d\n",
 		 __func__, CY_DRIVER_DATE, rc);

@@ -29,8 +29,6 @@
 
 #define CY_I2C_DATA_SIZE  (2 * 256)
 
-bool cyttsp5_flag = false;
-
 static int cyttsp5_i2c_read_default(struct device *dev, void *buf, int size)
 {
 	struct i2c_client *client = to_i2c_client(dev);
@@ -156,6 +154,11 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 		return -EIO;
 	}
 
+	rc = cyttsp5_ping_hw(dev);
+	if (rc) {
+		dev_err(dev, "%s: No HW detected\n", __func__);
+		return rc;
+	}
 
 #ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	match = of_match_device(of_match_ptr(cyttsp5_i2c_of_match), dev);
@@ -166,12 +169,6 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 	}
 #endif
 
-	rc = cyttsp5_ping_hw(dev);
-	if (rc) {
-		dev_err(dev, "%s: No HW detected\n", __func__);
-		return rc;
-	}
-
 	rc = cyttsp5_probe(&cyttsp5_i2c_bus_ops, &client->dev, client->irq,
 			  CY_I2C_DATA_SIZE);
 
@@ -179,8 +176,6 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 	if (rc && match)
 		cyttsp5_devtree_clean_pdata(dev);
 #endif
-
-	cyttsp5_flag = true;
 
 	return rc;
 }
@@ -229,12 +224,7 @@ module_i2c_driver(cyttsp5_i2c_driver);
 #else
 static int __init cyttsp5_i2c_init(void)
 {
-	int rc = 0;
-
-	if (cyttsp5_flag)
-		return rc;
-
-	rc = i2c_add_driver(&cyttsp5_i2c_driver);
+	int rc = i2c_add_driver(&cyttsp5_i2c_driver);
 
 	pr_info("%s: Cypress TTSP v5 I2C Driver (Built %s) rc=%d\n",
 		 __func__, CY_DRIVER_DATE, rc);
