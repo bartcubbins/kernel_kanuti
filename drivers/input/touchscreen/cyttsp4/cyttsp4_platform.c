@@ -31,8 +31,8 @@
 #include <linux/delay.h>
 
 /* cyttsp */
-#include <linux/cyttsp4_bus.h>
-#include <linux/cyttsp4_core.h>
+#include <linux/input/cyttsp4/cyttsp4_bus.h>
+#include <linux/input/cyttsp4/cyttsp4_core.h>
 
 #ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP4_PLATFORM_FW_UPGRADE
 #include "cyttsp4_img.h"

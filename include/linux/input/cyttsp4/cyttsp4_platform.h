@@ -29,7 +29,7 @@
 #ifndef _LINUX_CYTTSP4_PLATFORM_H
 #define _LINUX_CYTTSP4_PLATFORM_H
 
-#include <linux/cyttsp4_core.h>
+#include <linux/input/cyttsp4/cyttsp4_core.h>
 
 #if IS_ENABLED(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP4)
 extern struct cyttsp4_loader_platform_data _cyttsp4_loader_platform_data;

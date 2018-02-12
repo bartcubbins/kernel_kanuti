@@ -32,12 +32,12 @@
 #include <linux/slab.h>
 
 /* cyttsp */
-#include <linux/cyttsp4_bus.h>
-#include <linux/cyttsp4_core.h>
-#include <linux/cyttsp4_btn.h>
-#include <linux/cyttsp4_mt.h>
-#include <linux/cyttsp4_proximity.h>
-#include <linux/cyttsp4_platform.h>
+#include <linux/input/cyttsp4/cyttsp4_bus.h>
+#include <linux/input/cyttsp4/cyttsp4_core.h>
+#include <linux/input/cyttsp4/cyttsp4_btn.h>
+#include <linux/input/cyttsp4/cyttsp4_mt.h>
+#include <linux/input/cyttsp4/cyttsp4_proximity.h>
+#include <linux/input/cyttsp4/cyttsp4_platform.h>
 
 #include <linux/pinctrl/consumer.h>
 #include <linux/of_gpio.h>

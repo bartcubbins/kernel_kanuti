@@ -30,8 +30,8 @@
  *
  */
 
-#include <linux/cyttsp4_bus.h>
-#include <linux/cyttsp4_core.h>
+#include <linux/input/cyttsp4/cyttsp4_bus.h>
+#include <linux/input/cyttsp4/cyttsp4_core.h>
 
 #include <linux/delay.h>
 #include <linux/gpio.h>

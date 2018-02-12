@@ -30,7 +30,7 @@
  *
  */
 
-#include <linux/cyttsp4_bus.h>
+#include <linux/input/cyttsp4/cyttsp4_bus.h>
 
 #include <linux/device.h>
 #include <linux/kernel.h>

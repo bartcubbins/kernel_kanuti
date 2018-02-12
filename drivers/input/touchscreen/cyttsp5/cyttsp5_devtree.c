@@ -28,7 +28,7 @@
 
 /* cyttsp */
 #include "cyttsp5_regs.h"
-#include <linux/cyttsp5_platform.h>
+#include <linux/input/cyttsp5/cyttsp5_platform.h>
 #include <linux/of_gpio.h>
 
 #define ENABLE_VIRTUAL_KEYS

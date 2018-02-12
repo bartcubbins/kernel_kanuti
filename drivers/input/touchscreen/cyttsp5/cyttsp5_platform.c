@@ -22,7 +22,7 @@
  */
 
 #include "cyttsp5_regs.h"
-#include <linux/cyttsp5_platform.h>
+#include <linux/input/cyttsp5/cyttsp5_platform.h>
 
 #ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_PLATFORM_FW_UPGRADE
 /* FW for Panel ID = 0x00 */

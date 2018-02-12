@@ -54,7 +54,7 @@
 #include <linux/uaccess.h>
 #include <linux/workqueue.h>
 #include <linux/version.h>
-#include <linux/cyttsp5_core.h>
+#include <linux/input/cyttsp5/cyttsp5_core.h>
 
 #define CY_FW_FILE_PREFIX	"cyttsp5_fw"
 #define CY_FW_FILE_SUFFIX	".bin"

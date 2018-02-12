@@ -28,7 +28,7 @@
  */
 
 #include <linux/input.h>
-#include <linux/cyttsp4_core.h>
+#include <linux/input/cyttsp4/cyttsp4_core.h>
 
 #include "cyttsp4_mt_common.h"
 

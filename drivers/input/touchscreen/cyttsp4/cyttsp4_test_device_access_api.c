@@ -27,7 +27,7 @@
  */
 
 #include <linux/module.h>
-#include <linux/cyttsp4_device_access-api.h>
+#include <linux/input/cyttsp4/cyttsp4_device_access-api.h>
 
 #define CONFIG_VER_OFFSET	8
 #define CONFIG_VER_SIZE		2

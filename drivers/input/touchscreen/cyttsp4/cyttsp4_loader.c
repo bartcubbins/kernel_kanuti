@@ -35,8 +35,8 @@
 #include <linux/slab.h>
 #include <linux/firmware.h>
 #include <linux/version.h>
-#include <linux/cyttsp4_bus.h>
-#include <linux/cyttsp4_core.h>
+#include <linux/input/cyttsp4/cyttsp4_bus.h>
+#include <linux/input/cyttsp4/cyttsp4_core.h>
 #include "cyttsp4_regs.h"
 
 #define CYTTSP4_LOADER_NAME "cyttsp4_loader"
