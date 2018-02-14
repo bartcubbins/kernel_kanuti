@@ -133,7 +133,7 @@
 		qcom,csid-sd-index = <0>;
 		qcom,mount-angle = <90>;
 		qcom,actuator-src = <&actuator0>;
-		qcom,eeprom-src = <&eeprom0>;
+		//qcom,eeprom-src = <&eeprom0>;
 		qcom,led-flash-src = <&led_flash0>;
 		cam_vdig-supply = <&pm8916_s4>;
 		cam_vio-supply = <&pm8916_l6>;
@@ -145,20 +145,15 @@
 		qcom,cam-vreg-op-mode = <200000 0 80000 100000>;
 		pinctrl-names = "cam_default", "cam_suspend";
 		pinctrl-0 = <&cam_sensor_mclk0_default &cam_sensor_rear_default>;
-		pinctrl-1 = <&cam_sensor_mclk0_sleep &cam_sensor_rear_sleep &cam_sensor_rear_sleep_np>;
+		pinctrl-1 = <&cam_sensor_mclk0_sleep &cam_sensor_rear_sleep>;
 		gpios = <&msm_gpio 26 0>,
 			<&msm_gpio 36 0>,
 			<&msm_gpio 34 0>,
 			<&msm_gpio 33 0>,
 			<&msm_gpio 28 0>,
 			<&msm_gpio 121 0>,
-			<&pm8916_gpios 3 0>;
+			<&msm_gpio 111 0>;
 		qcom,gpio-reset = <1>;
-		qcom,gpio-vdig = <2>;
-		qcom,gpio-vio = <3>;
-		qcom,gpio-vana = <4>;
-		qcom,gpio-f-reset = <5>;
-		qcom,gpio-f-standby = <6>;
 		qcom,gpio-req-tbl-num = <0 1 2 3 4 5 6>;
 		qcom,gpio-req-tbl-flags = <1 0 0 0 0 0 0>;
 		qcom,gpio-req-tbl-label = "CAMIF_MCLK0",
