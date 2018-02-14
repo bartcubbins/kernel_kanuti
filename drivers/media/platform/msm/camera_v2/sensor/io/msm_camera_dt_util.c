@@ -1028,7 +1028,8 @@ int msm_camera_get_dt_vreg_data(struct device_node *of_node,
 	bool custom_vreg_name =  false;
 
 	count = of_property_count_strings(of_node, "qcom,cam-vreg-name");
-	CDBG("%s qcom,cam-vreg-name count %d\n", __func__, count);
+//	CDBG("%s qcom,cam-vreg-name count %d\n", __func__, count);
+	pr_info("%s qcom,cam-vreg-name count %d\n", __func__, count);
 
 	if (!count || (count == -EINVAL)) {
 		pr_err("%s:%d number of entries is 0 or not present in dts\n",
