@@ -47,7 +47,7 @@
 			"FLASH_EN";
 		qcom,cci-master = <0>;
 	};
-
+/*
 	eeprom0: qcom,eeprom@18 {
 		cell-index = <0>;
 		reg = <0x18>;
@@ -124,7 +124,7 @@
 		qcom,cam-power-seq-cfg-val = <1>;
 		qcom,cam-power-seq-delay = <5>;
 	};
-
+*/
 	qcom,camera@0 {
 		cell-index = <0>;
 		compatible = "qcom,camera";
