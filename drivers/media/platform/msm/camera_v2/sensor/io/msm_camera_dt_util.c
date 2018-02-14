@@ -1045,6 +1045,7 @@ int msm_camera_get_dt_vreg_data(struct device_node *of_node,
 	}
 	*cam_vreg = vreg;
 	*num_vreg = count;
+pr_info("%s: memory allocated. driver is happy", __func__);
 	for (i = 0; i < count; i++) {
 		rc = of_property_read_string_index(of_node,
 			"qcom,cam-vreg-name", i,
