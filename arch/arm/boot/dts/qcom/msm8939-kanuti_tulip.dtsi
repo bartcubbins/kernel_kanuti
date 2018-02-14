@@ -18,6 +18,7 @@
 
 &soc {
 	i2c@78b9000 { /* BLSP1 QUP5 */
+		qcom,clk-freq-out = <400000>;
 		tsc@24 {
 			compatible = "cy,cyttsp4_i2c_adapter";
 			reg = <0x24>;
