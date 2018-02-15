@@ -51,6 +51,11 @@
 
 #define CY_I2C_DATA_SIZE  (3 * 256)
 
+#ifdef CONFIG_MACH_SONY_TULIP
+/* cyttsp detection */
+extern bool cyttsp_i2c_driver;
+#endif
+
 struct cyttsp4_i2c {
 	struct i2c_client *client;
 	u8 wr_buf[CY_I2C_DATA_SIZE];
@@ -176,6 +181,25 @@ static struct of_device_id cyttsp4_i2c_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, cyttsp4_i2c_of_match);
 
+static int cyttsp4_ping_hw(struct cyttsp4_i2c *ts_i2c)
+{
+	int rc, retry = 3;
+	char buf;
+
+	mutex_lock(&ts_i2c->lock);
+	while (retry--) {
+		rc = cyttsp4_i2c_read_block_data(ts_i2c, 0x00, 1, &buf, 1);
+		if (rc)
+			printk("%s: Read unsuccessful, try=%d\n", __func__, 3 - retry);
+		else
+			break;
+		msleep(100);
+	}
+	mutex_unlock(&ts_i2c->lock);
+
+	return rc;
+}
+
 static int cyttsp4_i2c_probe(struct i2c_client *client,
 	const struct i2c_device_id *i2c_id)
 {
@@ -229,6 +253,12 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 
 	dev_dbg(dev, "%s: add adap='%s' (CYTTSP4_I2C_NAME=%s)\n", __func__,
 		ts_i2c->id, CYTTSP4_I2C_NAME);
+
+	rc = cyttsp4_ping_hw(ts_i2c);
+	if (rc) {
+		dev_err(dev, "%s: No HW detected\n", __func__);
+		goto add_adapter_err;
+	}
 
 	vdd = regulator_get(&client->dev, "vdd");
 	if (IS_ERR(vdd)) {
@@ -288,6 +318,11 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 
 	dev_info(dev, "%s: Successful probe %s\n", __func__, CYTTSP4_I2C_NAME);
 
+#ifdef CONFIG_MACH_SONY_TULIP
+	/* cyttsp detection */
+	cyttsp_i2c_driver = true;
+#endif
+
 	return 0;
 
 add_adapter_err:
@@ -331,24 +366,8 @@ static struct i2c_driver cyttsp4_i2c_driver = {
 	.id_table = cyttsp4_i2c_id,
 };
 
-static int __init cyttsp4_i2c_init(void)
-{
-	int rc = i2c_add_driver(&cyttsp4_i2c_driver);
+module_i2c_driver(cyttsp4_i2c_driver);
 
-	pr_info("%s: Cypress TTSP I2C Touchscreen Driver (Built %s) rc=%d\n",
-		 __func__, CY_DRIVER_DATE, rc);
-	return rc;
-}
-module_init(cyttsp4_i2c_init);
-
-static void __exit cyttsp4_i2c_exit(void)
-{
-	i2c_del_driver(&cyttsp4_i2c_driver);
-	pr_info("%s: module exit\n", __func__);
-}
-module_exit(cyttsp4_i2c_exit);
-
-MODULE_ALIAS(CYTTSP4_I2C_NAME);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Cypress TrueTouch(R) Standard Product (TTSP) I2C driver");
 MODULE_AUTHOR("Cypress");

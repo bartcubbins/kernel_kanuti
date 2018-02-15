@@ -29,6 +29,11 @@
 
 #define CY_I2C_DATA_SIZE  (2 * 256)
 
+#ifdef CONFIG_MACH_SONY_TULIP
+/* cyttsp detection */
+extern bool cyttsp_i2c_driver;
+#endif
+
 static int cyttsp5_i2c_read_default(struct device *dev, void *buf, int size)
 {
 	struct i2c_client *client = to_i2c_client(dev);
@@ -117,7 +122,6 @@ static struct of_device_id cyttsp5_i2c_of_match[] = {
 MODULE_DEVICE_TABLE(of, cyttsp5_i2c_of_match);
 #endif
 
-/* PERI-FG-TOUCH_CHECK_HW-00+[ */
 static int cyttsp5_ping_hw(struct device *dev)
 {
     int rc, retry = 3;
@@ -135,7 +139,6 @@ static int cyttsp5_ping_hw(struct device *dev)
 
     return rc;
 }
-/* PERI-FG-TOUCH_CHECK_HW-00+] */
 
 static int cyttsp5_i2c_probe(struct i2c_client *client,
 	const struct i2c_device_id *i2c_id)
@@ -144,105 +147,82 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 #ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	const struct of_device_id *match;
 #endif
+	struct regulator *vdd;
+	struct regulator *vcc;
+	struct regulator *vreg_l27;
 	int rc;
+	int retval;
+
+#ifdef CONFIG_MACH_SONY_TULIP
+	/* cyttsp detection */
+	if (cyttsp_i2c_driver) {
+		dev_err(dev, "%s: CYTTSP4 detected. Stop probing.\n", __func__);
+		return -ENODEV;
+	}
+#endif
 
 	dev_info(dev, "%s: Starting %s probe...\n", __func__, CYTTSP5_I2C_NAME);
 
 	dev_dbg(dev, "%s: debug on\n", __func__);
 	dev_vdbg(dev, "%s: verbose debug on\n", __func__);
 
-	{ // Enable power source
+	vdd = regulator_get(&client->dev, "vdd");
+	if (IS_ERR(vdd)) {
+		printk("%s: Failed to get vdd regulator\n", __func__);
+	} else {
+		retval = regulator_set_voltage(vdd, 2800000, 2850000);
+		if(retval) {
+			printk("%s: regulator_set_voltage vdd falied!\n", __func__);
+		} else {
+			retval = regulator_set_optimum_mode(vdd, 15000);
+			if (retval < 0) {
+				printk("%s: regulator_set_optimum_mode vdd falied!\n", __func__);
+			} else {
+				retval = regulator_enable(vdd);
+				if(retval)
+					printk("%s: regulator_enable vdd falied!\n", __func__);
+			}
+		}
+	}
 
-		struct	power_source_data
-		{
+	vcc = regulator_get(&client->dev, "vcc_i2c");
+	if (IS_ERR(vcc)) {
+		printk("%s: Failed to get vcc regulator\n", __func__);
+	} else {
+		retval = regulator_enable(vcc);
+		if(retval)
+		printk("%s: regulator_enable vcc falied!\n", __func__);
+	}
 
-			char	*name;
+	vreg_l27 = regulator_get(&client->dev, "vdd_l27");
+	if (IS_ERR(vreg_l27)) {
+		printk("%s: Failed to get vreg_l27 regulator\n", __func__);
+	} else {
+		retval = regulator_set_voltage(vreg_l27,  2050000, 2100000);
+		if(retval) {
+			printk("%s: regulator_set_voltage vreg_l27 falied!\n", __func__);
+		} else {
+			retval = regulator_set_optimum_mode(vreg_l27, 15000);
+			if (retval < 0) {
+				printk("%s: regulator_set_optimum_mode vreg_l27 falied!\n", __func__);
+			} else {
+				retval = regulator_enable(vreg_l27);
+				if(retval)
+					printk("%s: regulator_enable vreg_l27 falied!\n", __func__);
+			}
+		}
+	}
 
-			unsigned	min_voltage, max_voltage, load_current;
-
-		};
-
-		struct power_source_data	power_source_DEFAULT[] =
-		{
-
-			{ "vdda", 2700000, 3300000, 15000 },
-			{ "vddio_DEFAULT", 1800000, 1800000, 15000 }
-
-		};
-
-		struct regulator	*power;
-
-		struct power_source_data	*power_source;
-
-		unsigned	loop, power_source_count;
-
-		power_source = power_source_DEFAULT;
-		power_source_count = sizeof( power_source_DEFAULT ) / sizeof( *power_source_DEFAULT );
-		printk( "ITUCH : Load default power source\n" );
-
-		for( loop = 0 ; loop < power_source_count ; ++loop )
-		{ // enable loop
-
-			struct power_source_data	*source = power_source + loop;
-
-			power	= regulator_get( dev, source->name );
-
-			if( IS_ERR( power ) )
-			{ // Failed
-
-				printk( "PTUCH : Failed to get %s regulator\n", source->name );
-
-				return	-1;
-
-			} // Failed
-
-			if( regulator_count_voltages( power ) > 0 )
-			{ // Set voltage & current
-
-				if( regulator_set_voltage( power, source->min_voltage, source->max_voltage ) )
-				{ // Failed
-
-					printk( "PTUCH : reg set %s vtg failed\n", source->name );
-
-					return	-1;
-
-				} // Failed
-
-				if( regulator_set_optimum_mode( power, source->load_current ) < 0 )
-				{ // Failed
-
-					printk( "PTUCH : Regulator %s set_opt failed\n", source->name );
-
-					return	-1;
-
-				} // Failed
-
-			} // Set voltage & current
-
-			if( regulator_enable( power ) )
-			{ // Failed
-
-				printk( "PTUCH : Regulator %s enable failed\n", source->name );
-
-				return	-1;
-
-			} // Failed
-
-		} // enable loop
-
-	} // Enable power source
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		dev_err(dev, "I2C functionality not Supported\n");
 		return -EIO;
 	}
 
-    /* PERI-FG-TOUCH_CHECK_HW-00+[ */
     rc = cyttsp5_ping_hw(dev);
     if (rc) {
         dev_err(dev, "%s: No HW detected\n", __func__);
         return rc;
     }
-    /* PERI-FG-TOUCH_CHECK_HW-00+] */
 
 #ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	match = of_match_device(of_match_ptr(cyttsp5_i2c_of_match), dev);
@@ -303,25 +283,7 @@ static struct i2c_driver cyttsp5_i2c_driver = {
 	.id_table = cyttsp5_i2c_id,
 };
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0))
 module_i2c_driver(cyttsp5_i2c_driver);
-#else
-static int __init cyttsp5_i2c_init(void)
-{
-	int rc = i2c_add_driver(&cyttsp5_i2c_driver);
-
-	pr_info("%s: Cypress TTSP v5 I2C Driver (Built %s) rc=%d\n",
-		 __func__, CY_DRIVER_DATE, rc);
-	return rc;
-}
-module_init(cyttsp5_i2c_init);
-
-static void __exit cyttsp5_i2c_exit(void)
-{
-	i2c_del_driver(&cyttsp5_i2c_driver);
-}
-module_exit(cyttsp5_i2c_exit);
-#endif
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Cypress TrueTouch(R) Standard Product I2C driver");
