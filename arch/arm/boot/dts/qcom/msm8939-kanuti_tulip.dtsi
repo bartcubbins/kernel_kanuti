@@ -119,6 +119,7 @@
 
 				cy,irq_gpio = <13>;
 				cy,rst_gpio = <12>;
+
 				cy,hid_desc_register = <1>;
 				/* CY_CORE_FLAG_WAKE_ON_GESTURE | CY_CORE_FLAG_RESTORE_PARAMETERS */
 				cy,flags = <5>;
