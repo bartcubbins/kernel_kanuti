@@ -23,6 +23,7 @@
 #ifndef __ASM_ASSEMBLER_H
 #define __ASM_ASSEMBLER_H
 
+#include <asm/cpufeature.h>
 #include <asm/ptrace.h>
 #include <asm/thread_info.h>
 
@@ -264,5 +265,4 @@ lr	.req	x30		// link register
 	.endif
 	movk	\reg, :abs_g0_nc:\val
 	.endm
-
 #endif	/* __ASM_ASSEMBLER_H */
