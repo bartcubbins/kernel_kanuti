@@ -513,10 +513,13 @@
 		qcom,num-grp-pins = <4>;
 	};
 
+/* Verified. FIH. */
+#if 0
 	ext-cdc-tlmm-lines { /* Verify me. CAF or FIH? */
 		qcom,pins = <&gp 112>, <&gp 117>, <&gp 118>, <&gp 119>;
 		qcom,num-grp-pins = <4>;
 	};
+#endif
 
 	bma2x2_int_pin {
 		qcom,pins = <&gp 69>;
