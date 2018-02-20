@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2016, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -60,6 +60,10 @@ extern const u8 msm8x16_wcd_reg_readable[MSM8X16_WCD_CACHE_SIZE];
 extern const u8 msm8x16_wcd_reg_readonly[MSM8X16_WCD_CACHE_SIZE];
 extern const u8 msm8x16_wcd_reset_reg_defaults[MSM8X16_WCD_CACHE_SIZE];
 extern const u8 cajon_digital_reg[MSM8X16_WCD_CACHE_SIZE];
+
+#ifdef CONFIG_ARCH_SONY_KANUTI
+extern int vdd_spkr_gpio;
+#endif
 
 enum codec_versions {
 	TOMBAK_1_0,
