@@ -442,11 +442,6 @@
 	vddio-supply = <&pm8916_l16>;
 };
 
-&mdss_mdp {
-	somc,pwr-positive5-gpio = <&msm_gpio 114 0>;
-	somc,pwr-negative5-gpio = <&msm_gpio 17 0>;
-};
-
 &mdss_dsi0 {
 	/delete-property/ qcom,platform-enable-gpio;
 	vddio-supply = <&pm8916_l16>;
