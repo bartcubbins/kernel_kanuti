@@ -9,6 +9,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * NOTE: This file has been modified by Pavel Dubrova.
+ * Modifications are Copyright (c) 2018 Pavel Dubrova <pashadubrova@gmail.com>,
+ * and licensed under the license of the file.
+ *
  */
 
 #ifndef MDSS_DSI_H
@@ -503,6 +507,11 @@ struct mdss_dsi_ctrl_pdata {
 	struct workqueue_struct *workq;
 	struct delayed_work dba_work;
 	bool update_phy_timing; /* flag to recalculate PHY timings */
+
+#ifdef CONFIG_MACH_SONY_TULIP
+	int disp_positive_gpio;
+	int disp_negative_gpio;
+#endif
 };
 
 struct dsi_status_data {
