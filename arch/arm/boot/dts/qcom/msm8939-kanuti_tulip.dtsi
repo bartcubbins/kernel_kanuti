@@ -442,16 +442,18 @@
 	vddio-supply = <&pm8916_l16>;
 };
 
-&mdss_mdp {
-	somc,pwr-positive5-gpio = <&msm_gpio 114 0>;
-	somc,pwr-negative5-gpio = <&msm_gpio 17 0>;
-};
+//&mdss_mdp {
+//	somc,pwr-positive5-gpio = <&msm_gpio 114 0>;
+//	somc,pwr-negative5-gpio = <&msm_gpio 17 0>;
+//};
 
 &mdss_dsi0 {
 	/delete-property/ qcom,platform-enable-gpio;
 	vddio-supply = <&pm8916_l16>;
-
+qcom,platform-positive-gpio = <&msm_gpio 114 0>;
+qcom,platform-negative-gpio = <&msm_gpio 170>;
 	qcom,platform-regulator-settings = [04 09 03 00 20 00 01];
+qcom,regulator-ldo-mode;
 	qcom,dsi-pref-prim-pan = <&dsi_nt35521_720_vid_truly63>;
 	qcom,platform-te-gpio = <&msm_gpio 24 0>;
 	qcom,platform-bklight-en-gpio = <&msm_gpio 10 0>;

@@ -250,6 +250,24 @@ static int mdss_dsi_request_gpios(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 		}
 	}
 
+#ifdef CONFIG_MACH_SONY_TULIP
+	if (gpio_is_valid(ctrl_pdata->disp_positive_gpio)) {
+		rc = gpio_request(ctrl_pdata->lcd_mode_sel_gpio, "disp_positive");
+		if (rc) {
+			pr_err("request positive gpio failed, rc=%d\n", rc);
+			goto positive_gpio_err;
+		}
+	}
+
+	if (gpio_is_valid(ctrl_pdata->disp_negative_gpio)) {
+		rc = gpio_request(ctrl_pdata->lcd_mode_sel_gpio, "disp_negative");
+		if (rc) {
+			pr_err("request negative gpio failed, rc=%d\n", rc);
+			goto negative_gpio_err;
+		}
+	}
+#endif
+
 	return rc;
 
 lcd_mode_sel_gpio_err:
@@ -260,6 +278,12 @@ bklt_en_gpio_err:
 rst_gpio_err:
 	if (gpio_is_valid(ctrl_pdata->disp_en_gpio))
 		gpio_free(ctrl_pdata->disp_en_gpio);
+#ifdef CONFIG_MACH_SONY_TULIP
+positive_gpio_err:
+	gpio_free(ctrl_pdata->disp_positive_gpio);
+negative_gpio_err:
+	gpio_free(ctrl_pdata->disp_negative_gpio);
+#endif
 disp_en_gpio_err:
 	return rc;
 }

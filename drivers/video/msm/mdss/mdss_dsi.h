@@ -405,6 +405,10 @@ struct mdss_dsi_ctrl_pdata {
 	int irq_cnt;
 	int disp_te_gpio;
 	int rst_gpio;
+#ifdef CONFIG_MACH_SONY_TULIP
+	int disp_positive_gpio;
+	int disp_negative_gpio;
+#endif
 	int disp_en_gpio;
 	int bklt_en_gpio;
 	int lcd_mode_sel_gpio;

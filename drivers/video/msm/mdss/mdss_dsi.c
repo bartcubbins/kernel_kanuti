@@ -1373,6 +1373,14 @@ static int mdss_dsi_pinctrl_set_state(
 	struct mdss_panel_info *pinfo = NULL;
 	int rc = -EFAULT;
 
+	/*
+	 * Pavel Dubrova 21/2/2018
+	 * WORST HACK EVER FORM MY SIDE
+	 * The correct implementation will be
+	 * written when the driver is fully ready
+	 */
+	return 0;
+
 	if (IS_ERR_OR_NULL(ctrl_pdata->pin_res.pinctrl))
 		return PTR_ERR(ctrl_pdata->pin_res.pinctrl);
 
@@ -3217,7 +3225,19 @@ static int mdss_dsi_parse_gpio_params(struct platform_device *ctrl_pdev,
 							__func__, __LINE__);
 		ctrl_pdata->lcd_mode_sel_gpio = -EINVAL;
 	}
+#ifdef CONFIG_MACH_SONY_TULIP
+	ctrl_pdata->disp_positive_gpio = of_get_named_gpio(
+			ctrl_pdev->dev.of_node, "qcom,platform-positive-gpio", 0);
+        if (!gpio_is_valid(ctrl_pdata->disp_positive_gpio)) {
+		pr_err("%s: positive gpio not specified\n", __func__);
+	}
 
+        ctrl_pdata->disp_negative_gpio = of_get_named_gpio(
+			ctrl_pdev->dev.of_node, "qcom,platform-negative-gpio", 0);
+	if (!gpio_is_valid(ctrl_pdata->disp_negative_gpio)) {
+		pr_err("%s: negative gpio not specified\n", __func__);
+	}
+#endif
 	return 0;
 }
 

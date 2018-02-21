@@ -324,11 +324,11 @@
 	pinctrl-names = "mdss_default", "mdss_sleep";
 	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
 	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
-	qcom,dsi-pref-prim-pan = <&dsi_jdi_1080_vid>;
+//	qcom,dsi-pref-prim-pan = <&dsi_jdi_1080_vid>;
 
-	qcom,platform-enable-gpio = <&msm_gpio 97 0>;
-	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
-	qcom,platform-bklight-en-gpio = <&msm_gpio 98 0>;
+//	qcom,platform-enable-gpio = <&msm_gpio 97 0>;
+//	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
+//	qcom,platform-bklight-en-gpio = <&msm_gpio 98 0>;
 };
 
 &pm8916_mpps {
