@@ -11,9 +11,11 @@ obj-$(CONFIG_MSM_CLK_CONTROLLER_V2)	+= msm-clock-controller.o
 
 obj-$(CONFIG_DEBUG_FS)		+= clock-debug.o
 
+ifneq ($(CONFIG_ARCH_SONY_KANUTI), y)
 # MSM8916
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-rpm-8916.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-gcc-8916.o
+endif
 obj-$(CONFIG_ARCH_MSM8909)	+= clock-rpm-8909.o
 obj-$(CONFIG_ARCH_MSM8909)	+= clock-gcc-8909.o
 obj-$(CONFIG_ARCH_MDMFERRUM)	+= clock-rpm-8909.o
@@ -38,7 +40,9 @@ obj-$(CONFIG_ARCH_MSM8916)	+= clock-gcc-8936.o
 obj-$(CONFIG_ARCH_MSM8610)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MSM8226)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MDM9630)	+= clock-a7.o
+ifneq ($(CONFIG_ARCH_SONY_KANUTI), y)
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-a7.o
+endif
 obj-$(CONFIG_ARCH_MSMZIRC)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-cpu-8939.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-cpu-8936.o
