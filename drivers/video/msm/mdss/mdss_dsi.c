@@ -275,6 +275,15 @@ static int mdss_dsi_panel_power_off(struct mdss_panel_data *pdata)
 		goto end;
 	}
 
+#ifdef CONFIG_MACH_SONY_TULIP
+	/*
+	 * It's required the first pinctrl setup not to be done.
+	 * LK have initial gpio when boot to kernel don't request gpio.
+	 * Set disp_on_in_boot to flase to resume normal mdss pinctrl operation.
+	 */
+	disp_on_in_boot = false;
+#endif
+
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
@@ -1379,12 +1388,12 @@ static int mdss_dsi_pinctrl_set_state(
 
 #ifdef CONFIG_MACH_SONY_TULIP
 	/*
-	 * Pavel Dubrova 21/2/2018
-	 * WORST HACK EVER FORM MY SIDE
-	 * The correct implementation will be
-	 * written when the driver is fully ready
+	 * It's required the first pinctrl setup not to be done.
+	 * LK have initial gpio when boot to kernel don't request gpio.
+	 * Set disp_on_in_boot to flase to resume normal mdss pinctrl operation.
 	 */
-	return 0;
+	if (disp_on_in_boot)
+		return 0;
 #endif
 
 	if (IS_ERR_OR_NULL(ctrl_pdata->pin_res.pinctrl))

@@ -511,6 +511,7 @@ struct mdss_dsi_ctrl_pdata {
 #ifdef CONFIG_MACH_SONY_TULIP
 	int disp_positive_gpio;
 	int disp_negative_gpio;
+	bool disp_on_in_boot;
 #endif
 };
 

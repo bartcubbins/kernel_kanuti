@@ -2451,6 +2451,15 @@ int mdss_dsi_panel_init(struct device_node *node,
 		return rc;
 	}
 
+#ifdef CONFIG_MACH_SONY_TULIP
+	/*
+	 * It's required the first pinctrl setup not to be done.
+	 * LK have initial gpio when boot to kernel don't request gpio.
+	 * Set disp_on_in_boot to flase to resume normal mdss pinctrl operation.
+	 */
+	disp_on_in_boot = true;
+#endif
+	
 	mdss_dsi_set_prim_panel(ctrl_pdata);
 	pinfo->dynamic_switch_pending = false;
 	pinfo->is_lpm_mode = false;
