@@ -520,13 +520,6 @@ static int32_t msm_led_get_dt_data(struct device_node *of_node,
 				goto ERROR4;
 			}
 
-			rc = msm_camera_get_dt_gpio_set_tbl(of_node, gconf,
-				gpio_array, gpio_array_size);
-			if (rc < 0) {
-				pr_err("%s failed %d\n", __func__, __LINE__);
-				goto ERROR5;
-			}
-
 			rc = msm_camera_init_gpio_pin_tbl(of_node, gconf,
 				gpio_array, gpio_array_size);
 			if (rc < 0) {
@@ -613,8 +606,6 @@ ERROR8:
 		kfree(fctrl->flashdata->power_info.gpio_conf->gpio_num_info);
 ERROR6:
 		kfree(gconf->cam_gpio_set_tbl);
-ERROR5:
-		kfree(gconf->cam_gpio_req_tbl);
 ERROR4:
 		kfree(gconf);
 ERROR1:
