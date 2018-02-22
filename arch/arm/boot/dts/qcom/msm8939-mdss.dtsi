@@ -268,4 +268,4 @@
 	};
 };
 
-#include "msm8939-mdss-panels.dtsi"
+/*#include "msm8939-mdss-panels.dtsi"*/
