@@ -16,6 +16,29 @@
  * VERSION = "1.0"
  *---------------------------------------------------------------------------*/
 &mdss_mdp {
+	dsi_panel_pwr_supply: dsi_panel_pwr_supply {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "vdd";
+			qcom,supply-min-voltage = <2850000>;
+			qcom,supply-max-voltage = <2850000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+		};
+	};
+
 	/* Tulip Panel */
 	dsi_nt35521_720_vid_truly63: qcom,mdss_dsi_nt35521_720p_video_truly63 {
 		compatible = "qcom,mdss-dsi-panel-truly";
