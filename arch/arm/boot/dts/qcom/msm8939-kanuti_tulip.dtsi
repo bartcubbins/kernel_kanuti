@@ -414,7 +414,7 @@
 };
 
 &mdss_dsi0 {
-	qcom,dsi-pref-prim-pan = <&dsi_nt35521_720_vid_truly63>;
+	qcom,dsi-pref-prim-pan = <&dsi_nt35521_720_vid>;
 	qcom,platform-bklight-en-gpio = <&msm_gpio 10 0>;
 };
 
