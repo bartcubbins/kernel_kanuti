@@ -448,11 +448,6 @@
 
 /* Pinctrl */
 &tlmm_pinmux {
-	tlmm_gpio_key {
-		qcom,pins = <&gp 108>, <&gp 109>, <&gp 51>, <&gp 11>;
-		qcom,num-grp-pins = <4>;
-	};
-
 	bma2x2_int_pin {
 		qcom,pins = <&gp 69>;
 		qcom,pin-func = <0>;
