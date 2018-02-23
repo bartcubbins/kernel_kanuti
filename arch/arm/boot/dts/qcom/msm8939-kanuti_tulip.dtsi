@@ -12,7 +12,8 @@
 
 / {
         aliases {
-                /delete-property/ spi0;
+			/delete-property/ spi0;
+			/delete-property/ spi5;
         };
 };
 
@@ -359,9 +360,10 @@
 };
 
 &spi_0 {
-	/delete-property/ pinctrl-names;
-	/delete-property/ pinctrl-0;
-	/delete-property/ pinctrl-1;
+	status = "disabled";
+};
+
+&spi_5 {
 	status = "disabled";
 };
 
@@ -446,11 +448,6 @@
 
 /* Pinctrl */
 &tlmm_pinmux {
-	/delete-node/ spi0_active;
-	/delete-node/ spi0_suspend;
-	/delete-node/ spi0_cs0_active;
-	/delete-node/ spi0_cs0_suspend;
-
 	tlmm_gpio_key {
 		qcom,pins = <&gp 108>, <&gp 109>, <&gp 51>, <&gp 11>;
 		qcom,num-grp-pins = <4>;
