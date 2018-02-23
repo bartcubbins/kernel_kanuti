@@ -18,7 +18,6 @@
 
 &soc {
 	i2c@78b9000 { /* BLSP1 QUP5 */
-		qcom,clk-freq-out = <400000>;
 		tsc@24 {
 			compatible = "cy,cyttsp4_i2c_adapter";
 			reg = <0x24>;
@@ -197,7 +196,6 @@
 	};
 
 	i2c@78ba000 { /* BLSP1 QUP6 */
-		qcom,clk-freq-out = <400000>;
 		nfc@28 {
 			compatible = "nxp,pn547";
 			reg = <0x28>;
@@ -217,7 +215,6 @@
 	};
 
 	i2c@78b6000 { /* BLSP1 QUP2 */
-		qcom,clk-freq-out = <400000>;
 		lp5562@30 {
 			compatible = "ti,lp5562";
 			reg = <0x30>;
@@ -326,10 +323,6 @@
 		};
 	};
 
-	i2c@78b8000 { /* BLSP1 QUP4 */
-		qcom,clk-freq-out = <400000>;
-	};
-
 	gpio_keys {
 		camera_focus {
 			debounce-interval = <100>;
@@ -372,10 +365,6 @@
 	status = "disabled";
 };
 
-&i2c_0 {
-	qcom,clk-freq-out = <400000>;
-};
-
 &i2c_4 {
 	smb1360_otg_supply: smb1360-chg-fg@14 {
 		compatible = "qcom,smb1360-chg-fg";
@@ -402,10 +391,6 @@
 		qcom,shdn-after-pwroff;
 		qcom,charging-timeout = <192>;
 	};
-};
-
-&i2c_6 {
-	qcom,clk-freq-out = <400000>;
 };
 
 &pm8916_chg {
