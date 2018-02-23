@@ -543,55 +543,6 @@
 		};
 	};
 
-	ext-codec-lines {
-		qcom,pins = <&gp 67>;
-		qcom,num-grp-pins = <1>;
-		qcom,pin-func = <0>;
-		label = "ext-codec-lines";
-
-		ext_codec_lines_act: lines_on {
-			drive-strength = <8>;
-			bias-disable;
-			output-high;
-		};
-		ext_codec_lines_sus: lines_off {
-			drive-strength = <2>;
-			bias-disable;
-		};
-	};
-
-	cdc-ext-pa-lines {
-		qcom,pins = <&gp 113>, <&gp 114>, <&gp 115>;
-		qcom,num-grp-pins = <3>;
-		qcom,pin-func = <1>;
-		label = "cdc-ext-pa-lines";
-
-		cdc_ext_pa_act: ext_pa_on {
-			drive-strength = <8>;
-			bias-pull-none;
-		};
-		cdc_ext_pa_sus: ext_pa_off {
-			drive-strength = <2>;
-			bias-disable;
-		};
-	};
-
-	cdc-ext-pa-ws-line {
-		qcom,pins = <&gp 110>;
-		qcom,num-grp-pins = <1>;
-		qcom,pin-func = <2>;
-		label = "cdc-ext-pa-ws-line";
-
-		cdc_ext_pa_ws_act: ext_pa_on {
-			drive-strength = <8>;
-			bias-pull-none;
-		};
-		cdc_ext_pa_ws_sus: ext_pa_off {
-			drive-strength = <2>;
-			bias-disable;
-		};
-	};
-
 	cam_sensor_rear {
 		qcom,pins =  <&gp 28>, <&gp 33>, <&gp 34>, <&gp 36>;
 		qcom,num-grp-pins = <4>;
