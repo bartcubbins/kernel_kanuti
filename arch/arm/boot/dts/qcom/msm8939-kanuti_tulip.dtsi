@@ -252,11 +252,6 @@
 			};
 		};
 
-		audio_amp@34 {
-			compatible = "nxp,tfa9887";
-			reg = <0x34>;
-		};
-
 		mems_accel@10 {
 			compatible = "bosch,bma2x2";
 			reg = <0x10>;
