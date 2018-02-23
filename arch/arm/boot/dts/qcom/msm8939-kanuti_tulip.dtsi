@@ -590,16 +590,6 @@
 	status = "disabled";
 };
 
-&pm8916_l1 {
-	regulator-max-microvolt = <1300000>;
-	qcom,init-voltage = <1300000>;
-};
-
 &pm8916_l10 {
 	qcom,init-voltage = <2800000>;
-};
-
-&pm8916_l18 {
-	regulator-max-microvolt = <2850000>;
-	qcom,init-voltage = <2850000>;
 };
