@@ -1373,18 +1373,6 @@ static int mdss_dsi_pinctrl_set_state(
 	struct mdss_panel_info *pinfo = NULL;
 	int rc = -EFAULT;
 
-#ifdef CONFIG_MACH_SONY_TULIP
-	/*
-	 * Pavel Dubrova 21/2/2018
-	 * WORST HACK EVER FROM MY SIDE
-	 * Must be reworked as soon as possible
-	 *
-	 * It's required the first pinctrl setup not to be done.
-	 * LK have initial gpio when boot to kernel don't request gpio.
- 	 */
-	return 0;
- #endif
-
 	if (IS_ERR_OR_NULL(ctrl_pdata->pin_res.pinctrl))
 		return PTR_ERR(ctrl_pdata->pin_res.pinctrl);
 
