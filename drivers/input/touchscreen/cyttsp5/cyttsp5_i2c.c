@@ -29,7 +29,7 @@
 
 #define CY_I2C_DATA_SIZE  (2 * 256)
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 /* cyttsp detection */
 extern bool cyttsp_i2c_driver;
 #endif
