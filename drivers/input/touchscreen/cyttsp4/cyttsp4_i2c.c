@@ -186,16 +186,18 @@ static int cyttsp4_ping_hw(struct cyttsp4_i2c *ts_i2c)
 	int rc, retry = 3;
 	char buf;
 
-	mutex_lock(&ts_i2c->lock);
+//	mutex_lock(&ts_i2c->lock);
 	while (retry--) {
+		mutex_lock(&ts_i2c->lock);
 		rc = cyttsp4_i2c_read_block_data(ts_i2c, 0x00, 1, &buf, 1);
+		mutex_unlock(&ts_i2c->lock);
 		if (rc)
 			printk("%s: Read unsuccessful, try=%d\n", __func__, 3 - retry);
 		else
 			break;
-		msleep(100);
+//		msleep(100);
 	}
-	mutex_unlock(&ts_i2c->lock);
+//	mutex_unlock(&ts_i2c->lock);
 
 	return rc;
 }
@@ -251,6 +253,12 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	i2c_set_clientdata(client, ts_i2c);
 	dev_set_drvdata(&client->dev, ts_i2c);
 
+	rc = cyttsp4_ping_hw(ts_i2c);
+	if (rc) {
+		dev_err(dev, "%s: No HW detected\n", __func__);
+		goto add_adapter_err;
+	}
+
 	dev_dbg(dev, "%s: add adap='%s' (CYTTSP4_I2C_NAME=%s)\n", __func__,
 		ts_i2c->id, CYTTSP4_I2C_NAME);
 
@@ -302,13 +310,13 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	}
 
 	pm_runtime_enable(&client->dev);
-
+/*
 	rc = cyttsp4_ping_hw(ts_i2c);
 	if (rc) {
 		dev_err(dev, "%s: No HW detected\n", __func__);
 		goto add_adapter_err;
 	}
-
+*/
 	rc = cyttsp4_add_adapter(ts_i2c->id, &ops, dev);
 	if (rc) {
 		dev_err(dev, "%s: Error on probe %s\n", __func__,
