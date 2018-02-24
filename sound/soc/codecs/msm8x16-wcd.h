@@ -61,7 +61,7 @@ extern const u8 msm8x16_wcd_reg_readonly[MSM8X16_WCD_CACHE_SIZE];
 extern const u8 msm8x16_wcd_reset_reg_defaults[MSM8X16_WCD_CACHE_SIZE];
 extern const u8 cajon_digital_reg[MSM8X16_WCD_CACHE_SIZE];
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 extern int vdd_spkr_gpio;
 #endif
 

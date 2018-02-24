@@ -65,7 +65,7 @@ static int msm_btsco_ch = 1;
 static int msm_ter_mi2s_tx_ch = 1;
 static int msm_pri_mi2s_rx_ch = 1;
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 int vdd_spkr_gpio = -1;
 #endif
 
@@ -2555,7 +2555,7 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 	const char *ext_pa = "qcom,msm-ext-pa";
 	const char *mclk = "qcom,msm-mclk-freq";
 	const char *spk_ext_pa = "qcom,msm-spk-ext-pa";
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	const char *vdd_spkr = "qcom,cdc-vdd-spkr-gpios";
 #endif
 	const char *ptr = NULL;
@@ -2633,7 +2633,7 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 		}
 	}
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	vdd_spkr_gpio = of_get_named_gpio(pdev->dev.of_node,
 				vdd_spkr, 0);
 	if (vdd_spkr_gpio < 0) {
@@ -2804,7 +2804,7 @@ static int msm8x16_asoc_machine_remove(struct platform_device *pdev)
 		iounmap(pdata->vaddr_gpio_mux_pcm_ctl);
 	snd_soc_unregister_card(card);
 	mutex_destroy(&pdata->cdc_mclk_mutex);
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	gpio_free(vdd_spkr_gpio);
 #endif
 	return 0;
