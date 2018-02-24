@@ -3113,7 +3113,7 @@ static int msm8x16_wcd_codec_enable_spk_pa(struct snd_soc_dapm_widget *w,
 	dev_dbg(w->codec->dev, "%s %d %s\n", __func__, event, w->name);
 	switch (event) {
 	case SND_SOC_DAPM_PRE_PMU:
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 		if (vdd_spkr_gpio >= 0) {
 			gpio_direction_output(vdd_spkr_gpio, 1);
 			pr_debug("%s: Enabled 5V external supply for speaker\n",
@@ -3218,7 +3218,7 @@ static int msm8x16_wcd_codec_enable_spk_pa(struct snd_soc_dapm_widget *w,
 		}
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 		if (vdd_spkr_gpio >= 0) {
 			gpio_direction_output(vdd_spkr_gpio, 0);
 			pr_debug("%s: Disabled 5V external supply for speaker\n",

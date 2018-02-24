@@ -30,7 +30,7 @@
 #include <linux/qpnp/qpnp-adc.h>
 #include <linux/completion.h>
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 #include <soc/qcom/smem.h>
 #include <linux/usb/msm_hsusb.h>
 #include <linux/reboot.h>
@@ -258,7 +258,7 @@
 #define SMB1360_FG_RESET_DELAY_MS	1500
 
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 #define BRAIN_WORK_PERIOD_MS		10000
 #define PWR_ON_EVENT_USB_CHG		0x10
 #define MAX_REG_LOOP_CHAR		10
@@ -498,7 +498,7 @@ struct smb1360_chip {
 	struct otp_backup_pool		otp_backup;
 	u8				current_gain_otp_reg;
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	struct delayed_work		brain_work;
 	struct wake_lock		unplug_wake_lock;
 	enum chg_sony_state		chg_state;
@@ -1210,7 +1210,7 @@ static int smb1360_get_prop_batt_health(struct smb1360_chip *chip)
 	return ret.intval;
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 static int smb1360_tulip_batt_capacity_extension(struct smb1360_chip *chip, int soc)
 {
 	int rc, report_soc;
@@ -1321,7 +1321,7 @@ static int smb1360_get_prop_batt_capacity(struct smb1360_chip *chip)
 
 	chip->soc_now = (chip->batt_full ? 100 : bound(soc, 0, 100));
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	return smb1360_tulip_batt_capacity_extension(chip, soc);
 #else
 	return chip->soc_now;
@@ -1454,7 +1454,7 @@ static int smb1360_get_prop_current_now(struct smb1360_chip *chip)
 	return chip->current_now;
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 static void smb1360_get_prop_usb_present(struct smb1360_chip *chip)
 {
 	int rc;
@@ -2315,7 +2315,7 @@ static int chg_fastchg_handler(struct smb1360_chip *chip, u8 rt_stat)
 	return 0;
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 static int chg_recharge_handler(struct smb1360_chip *chip, u8 rt_stat)
 {
 	int rc;
@@ -2390,7 +2390,7 @@ static int usbin_uv_handler(struct smb1360_chip *chip, u8 rt_stat)
 
 	pr_debug("chip->usb_present = %d usb_present = %d\n",
 				chip->usb_present, usb_present);
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	return tulip_usbin_uv_handler(chip, rt_stat);
 #else
 	if (chip->usb_present && !usb_present) {
@@ -2464,7 +2464,7 @@ static int empty_soc_handler(struct smb1360_chip *chip, u8 rt_stat)
 			pr_warn_ratelimited("SOC is 0\n");
 		} else {
 			chip->empty_soc = false;
-#ifndef CONFIG_MACH_SONY_TULIP
+#ifndef CONFIG_ARCH_SONY_KANUTI
 			pm_relax(chip->dev);
 #endif
 		}
@@ -2760,7 +2760,7 @@ static struct irq_handler_info handlers[] = {
 			},
 			{
 				.name		= "recharge",
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 				.smb_irq 	= chg_recharge_handler,
 #endif
 			},
@@ -2778,7 +2778,7 @@ static struct irq_handler_info handlers[] = {
 			{
 				.name		= "safety_timeout",
 			},
-#ifndef CONFIG_MACH_SONY_TULIP
+#ifndef CONFIG_ARCH_SONY_KANUTI
 			{
 				.name		= "aicl_done",
 				.smb_irq	= aicl_done_handler,
@@ -4026,7 +4026,7 @@ static int smb1360_enable(struct smb1360_chip *chip, bool enable)
 	int rc = 0;
 	u8 val = 0, shdn_cmd_polar;
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	smb1360_enable_wd(chip, !enable);
 	smb1360_get_wd_status(chip);
 #endif
@@ -4161,7 +4161,7 @@ static int smb1360_otp_gain_init(struct smb1360_chip *chip)
 	return rc;
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 static int smb1360_read_reg(struct smb1360_chip *chip, int reg)
 {
 	s32 rc;
@@ -4175,7 +4175,7 @@ static int smb1360_read_reg(struct smb1360_chip *chip, int reg)
 	}
 
 	pr_info("the value of reg:%03X is %x\n", reg, val);
-	
+
 out:
 	mutex_unlock(&chip->read_write_lock);
 	return rc;
@@ -4238,7 +4238,7 @@ static int smb1360_hw_init(struct smb1360_chip *chip)
 					CHG_EN_BY_PIN_BIT
 					| CHG_EN_ACTIVE_LOW_BIT
 					| PRE_TO_FAST_REQ_CMD_BIT
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 					| AUTO_RECHG_EN_BIT
 #endif
 					,0);
@@ -4501,7 +4501,7 @@ static int smb1360_hw_init(struct smb1360_chip *chip)
 			pr_err("Couldn't set OTG current limit, rc = %d\n", rc);
 	}
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	rc = smb1360_masked_write(chip, FG_SLEEP_REG, SLEEP_ALLOW_BIT,
 					SLEEP_ALLOW_BIT);
 	if (rc)
@@ -5011,7 +5011,7 @@ static int smb_parse_dt(struct smb1360_chip *chip)
 	return 0;
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 int config_safety_time(int safety_time) {
 	struct smb1360_chip *chip = the_chip;
 	int rc, i;
@@ -5261,7 +5261,7 @@ static int smb1360_probe(struct i2c_client *client,
 		goto fail_hw_init;
 	}
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	INIT_DELAYED_WORK(&chip->brain_work, brain_work);
 	schedule_delayed_work(&chip->brain_work, 0);
 	wake_lock_init(&chip->unplug_wake_lock,
@@ -5419,7 +5419,7 @@ static int smb1360_probe(struct i2c_client *client,
 				rc);
 	}
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	config_safety_time(192);
 #endif
 
@@ -5442,7 +5442,7 @@ static int smb1360_remove(struct i2c_client *client)
 {
 	struct smb1360_chip *chip = i2c_get_clientdata(client);
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	cancel_delayed_work_sync(&chip->brain_work);
 #endif
 
@@ -5465,7 +5465,7 @@ static int smb1360_suspend(struct device *dev)
 	struct i2c_client *client = to_i2c_client(dev);
 	struct smb1360_chip *chip = i2c_get_clientdata(client);
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	cancel_delayed_work_sync(&chip->brain_work);
 #endif
 
@@ -5543,7 +5543,7 @@ static int smb1360_resume(struct device *dev)
 
 	power_supply_changed(&chip->batt_psy);
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	schedule_delayed_work(&chip->brain_work, msecs_to_jiffies(3000));
 #endif
 

@@ -3109,7 +3109,7 @@ static const char *chg_to_string(enum usb_chg_type chg_type)
 	}
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 static int external_chg_type = 0;
 #endif
 
@@ -3270,12 +3270,12 @@ static void msm_chg_detect_work(struct work_struct *w)
 
 	msm_otg_dbg_log_event(phy, "CHG WORK: QUEUE", motg->chg_type, delay);
 	queue_delayed_work(motg->otg_wq, &motg->chg_work, delay);
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 	external_chg_type = motg->chg_type;
 #endif
 }
 
-#ifdef CONFIG_MACH_SONY_TULIP
+#ifdef CONFIG_ARCH_SONY_KANUTI
 int get_chg_type(void)
 {
 	return external_chg_type;
