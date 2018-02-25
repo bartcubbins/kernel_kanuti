@@ -191,11 +191,13 @@ static int cyttsp4_ping_hw(struct cyttsp4_i2c *ts_i2c)
 		mutex_lock(&ts_i2c->lock);
 		rc = cyttsp4_i2c_read_block_data(ts_i2c, 0x00, 1, &buf, 1);
 		mutex_unlock(&ts_i2c->lock);
-		if (rc)
+		if (rc) {
 			printk("%s: Read unsuccessful, try=%d\n", __func__, 3 - retry);
-		else
+			msleep(100);
+		} else {
 			break;
 //		msleep(100);
+		}
 	}
 //	mutex_unlock(&ts_i2c->lock);
 

@@ -45,7 +45,7 @@
 #include "cyttsp4_regs.h"
 #include "cyttsp4_devtree.h"
 
-#define ENABLE_VIRTUAL_KEYS
+//#define ENABLE_VIRTUAL_KEYS
 
 #define MAX_NAME_LENGTH		64
 

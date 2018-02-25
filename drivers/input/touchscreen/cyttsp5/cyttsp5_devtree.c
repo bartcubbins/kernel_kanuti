@@ -31,7 +31,7 @@
 #include <linux/cyttsp5_platform.h>
 #include <linux/of_gpio.h>
 
-#define ENABLE_VIRTUAL_KEYS
+//#define ENABLE_VIRTUAL_KEYS
 
 #define MAX_NAME_LENGTH		64
 
