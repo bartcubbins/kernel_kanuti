@@ -85,15 +85,15 @@
 					cy,vkeys_x = <720>;
 					cy,vkeys_y = <1280>;
 
-					cy,virtual_keys = /* KeyCode CenterX CenterY Width Height */
-						/* KEY_BACK */
-						<158 1360 90 160 180
-						/* KEY_MENU */
-						139 1360 270 160 180
-						/* KEY_HOME */
-						102 1360 450 160 180
-						/* KEY SEARCH */
-						217 1360 630 160 180>;
+					//cy,virtual_keys = /* KeyCode CenterX CenterY Width Height */
+					//	/* KEY_BACK */
+					//	<158 1360 90 160 180
+					//	/* KEY_MENU */
+					//	139 1360 270 160 180
+					//	/* KEY_HOME */
+					//	102 1360 450 160 180
+					//	/* KEY SEARCH */
+					//	217 1360 630 160 180>;
 				};
 			};
 		};
@@ -167,15 +167,15 @@
 					cy,vkeys_x = <720>;
 					cy,vkeys_y = <1280>;
 
-					cy,virtual_keys = /* KeyCode CenterX CenterY Width Height */
-						/* KEY_BACK */
-						<158 1360 90 160 180
-						/* KEY_MENU */
-						139 1360 270 160 180
-						/* KEY_HOMEPAGE */
-						172 1360 450 160 180
-						/* KEY SEARCH */
-						217 1360 630 160 180>;
+					//cy,virtual_keys = /* KeyCode CenterX CenterY Width Height */
+					//	/* KEY_BACK */
+					//	<158 1360 90 160 180
+					//	/* KEY_MENU */
+					//	139 1360 270 160 180
+					//	/* KEY_HOMEPAGE */
+					//	172 1360 450 160 180
+					//	/* KEY SEARCH */
+					//	217 1360 630 160 180>;
 				};
 
 				cy,btn {
