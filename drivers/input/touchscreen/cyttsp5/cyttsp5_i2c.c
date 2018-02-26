@@ -27,7 +27,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/version.h>
 
-#define CY_I2C_DATA_SIZE  (2 * 256)
+#define CY_I2C_DATA_SIZE (2 * 256)
 
 #ifdef CONFIG_ARCH_SONY_KANUTI
 /* cyttsp detection */
@@ -114,44 +114,38 @@ static struct cyttsp5_bus_ops cyttsp5_i2c_bus_ops = {
 	.write_read_specific = cyttsp5_i2c_write_read_specific,
 };
 
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 static struct of_device_id cyttsp5_i2c_of_match[] = {
 	{ .compatible = "cy,cyttsp5_i2c_adapter", },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, cyttsp5_i2c_of_match);
-#endif
 
 static int cyttsp5_ping_hw(struct device *dev)
 {
-    int rc, retry = 3;
-    char buf;
+        int rc, retry = 3;
+        char buf;
 
-    while (retry--)
-    {
-        rc = cyttsp5_i2c_read_default(dev, &buf, 1);
-        if (rc)
-            printk("%s: Read unsuccessful, try=%d\n", __func__, 3 - retry);
-        else
-            break;
-        msleep(100);
-    }
+        while (retry--) {
+                rc = cyttsp5_i2c_read_default(dev, &buf, 1);
+                if (rc)
+                        printk("%s: Read unsuccessful, try=%d\n", __func__, 3 - retry);
+                else
+                        break;
+                msleep(100);
+        }
 
-    return rc;
+        return rc;
 }
 
 static int cyttsp5_i2c_probe(struct i2c_client *client,
 	const struct i2c_device_id *i2c_id)
 {
 	struct device *dev = &client->dev;
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	const struct of_device_id *match;
-#endif
 	struct regulator *vdd;
 	struct regulator *vcc;
 	struct regulator *vreg_l27;
-	int rc;
-	int retval;
+	int rc, retval;
 
 #ifdef CONFIG_ARCH_SONY_KANUTI
 	/* cyttsp detection */
@@ -165,6 +159,24 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 
 	dev_dbg(dev, "%s: debug on\n", __func__);
 	dev_vdbg(dev, "%s: verbose debug on\n", __func__);
+
+	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
+		dev_err(dev, "I2C functionality not Supported\n");
+		return -EIO;
+	}
+
+	rc = cyttsp5_ping_hw(dev);
+	if (rc) {
+		dev_err(dev, "%s: No HW detected\n", __func__);
+		return -ENODEV;
+	}
+
+	match = of_match_device(of_match_ptr(cyttsp5_i2c_of_match), dev);
+	if (match) {
+		rc = cyttsp5_devtree_create_and_get_pdata(dev);
+		if (rc < 0)
+			return rc;
+	}
 
 	vdd = regulator_get(&client->dev, "vdd");
 	if (IS_ERR(vdd)) {
@@ -196,7 +208,7 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 
 	vreg_l27 = regulator_get(&client->dev, "vdd_l27");
 	if (IS_ERR(vreg_l27)) {
-		printk("%s: Failed to get vreg_l27 regulator\n", __func__);
+		printk("%s: Failed to get vreg_127 regulator\n", __func__);
 	} else {
 		retval = regulator_set_voltage(vreg_l27,  2050000, 2100000);
 		if(retval) {
@@ -213,52 +225,26 @@ static int cyttsp5_i2c_probe(struct i2c_client *client,
 		}
 	}
 
-	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
-		dev_err(dev, "I2C functionality not Supported\n");
-		return -EIO;
-	}
-
-    rc = cyttsp5_ping_hw(dev);
-    if (rc) {
-        dev_err(dev, "%s: No HW detected\n", __func__);
-        return rc;
-    }
-
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
-	match = of_match_device(of_match_ptr(cyttsp5_i2c_of_match), dev);
-	if (match) {
-		rc = cyttsp5_devtree_create_and_get_pdata(dev);
-		if (rc < 0)
-			return rc;
-	}
-#endif
-
 	rc = cyttsp5_probe(&cyttsp5_i2c_bus_ops, &client->dev, client->irq,
 			  CY_I2C_DATA_SIZE);
 
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	if (rc && match)
 		cyttsp5_devtree_clean_pdata(dev);
-#endif
 
 	return rc;
 }
 
 static int cyttsp5_i2c_remove(struct i2c_client *client)
 {
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
+	struct cyttsp5_core_data *cd = i2c_get_clientdata(client);
 	struct device *dev = &client->dev;
 	const struct of_device_id *match;
-#endif
-	struct cyttsp5_core_data *cd = i2c_get_clientdata(client);
 
 	cyttsp5_release(cd);
 
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 	match = of_match_device(of_match_ptr(cyttsp5_i2c_of_match), dev);
 	if (match)
 		cyttsp5_devtree_clean_pdata(dev);
-#endif
 
 	return 0;
 }
@@ -274,9 +260,7 @@ static struct i2c_driver cyttsp5_i2c_driver = {
 		.name = CYTTSP5_I2C_NAME,
 		.owner = THIS_MODULE,
 		.pm = &cyttsp5_pm_ops,
-#ifdef CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICETREE_SUPPORT
 		.of_match_table = cyttsp5_i2c_of_match,
-#endif
 	},
 	.probe = cyttsp5_i2c_probe,
 	.remove = cyttsp5_i2c_remove,

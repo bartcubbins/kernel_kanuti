@@ -113,7 +113,6 @@ typedef int (*cyttsp5_platform_read) (struct device *dev, void *buf, int size);
 struct cyttsp5_core_platform_data {
 	int irq_gpio;
 	int rst_gpio;
-	int tp_id_gpio;
 	int level_irq_udelay;
 	u16 hid_desc_register;
 	u16 vendor_id;

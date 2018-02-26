@@ -69,11 +69,8 @@ static void cyttsp5_report_slot_liftoff(struct cyttsp5_mt_data *md,
 
 static int cyttsp5_input_register_device(struct input_dev *input, int max_slots)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0))
 	input_mt_init_slots(input, max_slots, 0);
-#else
-	input_mt_init_slots(input, max_slots);
-#endif
+
 	return input_register_device(input);
 }
 
@@ -85,4 +82,3 @@ void cyttsp5_init_function_ptrs(struct cyttsp5_mt_data *md)
 	md->mt_function.input_report = cyttsp5_input_report;
 	md->mt_function.input_register_device = cyttsp5_input_register_device;
 }
-

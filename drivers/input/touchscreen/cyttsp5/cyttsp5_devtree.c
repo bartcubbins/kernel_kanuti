@@ -31,16 +31,10 @@
 #include <linux/cyttsp5_platform.h>
 #include <linux/of_gpio.h>
 
-#ifndef CONFIG_ARCH_SONY_KANUTI
-#define ENABLE_VIRTUAL_KEYS
-#endif
-
-#define MAX_NAME_LENGTH		64
+#define MAX_NAME_LENGTH 64
 
 enum cyttsp5_device_type {
 	DEVICE_MT,
-	DEVICE_BTN,
-	DEVICE_PROXIMITY,
 	DEVICE_TYPE_MAX,
 };
 
@@ -53,21 +47,8 @@ struct cyttsp5_pdata_ptr {
 	void **pdata;
 };
 
-#ifdef ENABLE_VIRTUAL_KEYS
-static struct kobject *board_properties_kobj;
-
-struct cyttsp5_virtual_keys {
-	struct kobj_attribute kobj_attr;
-	u16 *data;
-	int size;
-};
-#endif
-
 struct cyttsp5_extended_mt_platform_data {
 	struct cyttsp5_mt_platform_data pdata;
-#ifdef ENABLE_VIRTUAL_KEYS
-	struct cyttsp5_virtual_keys vkeys;
-#endif
 };
 
 static inline int get_inp_dev_name(struct device_node *dev_node,
@@ -152,109 +133,6 @@ static void free_touch_framework(struct touch_framework *frmwrk)
 	kfree(frmwrk);
 }
 
-#ifdef ENABLE_VIRTUAL_KEYS
-#define VIRTUAL_KEY_ELEMENT_SIZE	5
-static ssize_t virtual_keys_show(struct kobject *kobj,
-		struct kobj_attribute *attr, char *buf)
-{
-	struct cyttsp5_virtual_keys *vkeys = container_of(attr,
-		struct cyttsp5_virtual_keys, kobj_attr);
-	u16 *data = vkeys->data;
-	int size = vkeys->size;
-	int index;
-	int i;
-
-	index = 0;
-	for (i = 0; i < size; i += VIRTUAL_KEY_ELEMENT_SIZE)
-		index += scnprintf(buf + index, CY_MAX_PRBUF_SIZE - index,
-			"0x01:%d:%d:%d:%d:%d\n",
-			data[i], data[i+1], data[i+2], data[i+3], data[i+4]);
-
-	return index;
-}
-
-static int setup_virtual_keys(struct device_node *dev_node,
-		const char *inp_dev_name, struct cyttsp5_virtual_keys *vkeys)
-{
-	char *name;
-	u16 *data;
-	int size;
-	int rc;
-
-	data = create_and_get_u16_array(dev_node, "cy,virtual_keys", &size);
-	if (data == NULL)
-		return 0;
-	else if (IS_ERR(data)) {
-		rc = PTR_ERR(data);
-		goto fail;
-	}
-
-	/* Check for valid virtual keys size */
-	if (size % VIRTUAL_KEY_ELEMENT_SIZE) {
-		rc = -EINVAL;
-		goto fail_free_data;
-	}
-
-	name = kzalloc(MAX_NAME_LENGTH, GFP_KERNEL);
-	if (!name) {
-		rc = -ENOMEM;
-		goto fail_free_data;
-	}
-
-	snprintf(name, MAX_NAME_LENGTH, "virtualkeys.%s", inp_dev_name);
-
-	vkeys->data = data;
-	vkeys->size = size;
-
-	/* TODO: Instantiate in board file and export it */
-	if (board_properties_kobj == NULL)
-		board_properties_kobj =
-			kobject_create_and_add("board_properties", NULL);
-	if (board_properties_kobj == NULL) {
-		pr_err("%s: Cannot get board_properties kobject!\n", __func__);
-		rc = -EINVAL;
-		goto fail_free_name;
-	}
-
-	/* Initialize dynamic SysFs attribute */
-	sysfs_attr_init(&vkeys->kobj_attr.attr);
-	vkeys->kobj_attr.attr.name = name;
-	vkeys->kobj_attr.attr.mode = S_IRUGO;
-	vkeys->kobj_attr.show = virtual_keys_show;
-
-	rc = sysfs_create_file(board_properties_kobj, &vkeys->kobj_attr.attr);
-	if (rc)
-		goto fail_del_kobj;
-
-	return 0;
-
-fail_del_kobj:
-	kobject_del(board_properties_kobj);
-fail_free_name:
-	kfree(name);
-	vkeys->kobj_attr.attr.name = NULL;
-fail_free_data:
-	kfree(data);
-	vkeys->data = NULL;
-fail:
-	return rc;
-}
-
-static void free_virtual_keys(struct cyttsp5_virtual_keys *vkeys)
-{
-	if (board_properties_kobj)
-		sysfs_remove_file(board_properties_kobj,
-			&vkeys->kobj_attr.attr);
-
-
-	kobject_del(board_properties_kobj);
-	board_properties_kobj = NULL;
-
-	kfree(vkeys->data);
-	kfree(vkeys->kobj_attr.attr.name);
-}
-#endif
-
 static void *create_and_get_mt_pdata(struct device_node *dev_node)
 {
 	struct cyttsp5_extended_mt_platform_data *ext_pdata;
@@ -296,14 +174,6 @@ static void *create_and_get_mt_pdata(struct device_node *dev_node)
 		rc = PTR_ERR(pdata->frmwrk);
 		goto fail_free_pdata;
 	}
-#ifdef ENABLE_VIRTUAL_KEYS
-	rc = setup_virtual_keys(dev_node, pdata->inp_dev_name,
-			&ext_pdata->vkeys);
-	if (rc) {
-		pr_err("%s: Cannot setup virtual keys!\n", __func__);
-		goto fail_free_pdata;
-	}
-#endif
 	return pdata;
 
 fail_free_pdata:
@@ -321,83 +191,7 @@ static void free_mt_pdata(void *pdata)
 			struct cyttsp5_extended_mt_platform_data, pdata);
 
 	free_touch_framework(mt_pdata->frmwrk);
-#ifdef ENABLE_VIRTUAL_KEYS
-	free_virtual_keys(&ext_mt_pdata->vkeys);
-#endif
 	kfree(ext_mt_pdata);
-}
-
-static void *create_and_get_btn_pdata(struct device_node *dev_node)
-{
-	struct cyttsp5_btn_platform_data *pdata;
-	int rc;
-
-	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-	if (!pdata) {
-		rc = -ENOMEM;
-		goto fail;
-	}
-
-	rc = get_inp_dev_name(dev_node, &pdata->inp_dev_name);
-	if (rc)
-		goto fail_free_pdata;
-
-	return pdata;
-
-fail_free_pdata:
-	kfree(pdata);
-fail:
-	return ERR_PTR(rc);
-}
-
-static void free_btn_pdata(void *pdata)
-{
-	struct cyttsp5_btn_platform_data *btn_pdata =
-		(struct cyttsp5_btn_platform_data *)pdata;
-
-	kfree(btn_pdata);
-}
-
-static void *create_and_get_proximity_pdata(struct device_node *dev_node)
-{
-	struct cyttsp5_proximity_platform_data *pdata;
-	int rc;
-
-	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-	if (!pdata) {
-		rc = -ENOMEM;
-		goto fail;
-	}
-
-	rc = get_inp_dev_name(dev_node, &pdata->inp_dev_name);
-	if (rc)
-		goto fail_free_pdata;
-
-	pdata->frmwrk = create_and_get_touch_framework(dev_node);
-	if (pdata->frmwrk == NULL) {
-		rc = -EINVAL;
-		goto fail_free_pdata;
-	} else if (IS_ERR(pdata->frmwrk)) {
-		rc = PTR_ERR(pdata->frmwrk);
-		goto fail_free_pdata;
-	}
-
-	return pdata;
-
-fail_free_pdata:
-	kfree(pdata);
-fail:
-	return ERR_PTR(rc);
-}
-
-static void free_proximity_pdata(void *pdata)
-{
-	struct cyttsp5_proximity_platform_data *proximity_pdata =
-		(struct cyttsp5_proximity_platform_data *)pdata;
-
-	free_touch_framework(proximity_pdata->frmwrk);
-
-	kfree(proximity_pdata);
 }
 
 static struct cyttsp5_device_pdata_func device_pdata_funcs[DEVICE_TYPE_MAX] = {
@@ -405,29 +199,17 @@ static struct cyttsp5_device_pdata_func device_pdata_funcs[DEVICE_TYPE_MAX] = {
 		.create_and_get_pdata = create_and_get_mt_pdata,
 		.free_pdata = free_mt_pdata,
 	},
-	[DEVICE_BTN] = {
-		.create_and_get_pdata = create_and_get_btn_pdata,
-		.free_pdata = free_btn_pdata,
-	},
-	[DEVICE_PROXIMITY] = {
-		.create_and_get_pdata = create_and_get_proximity_pdata,
-		.free_pdata = free_proximity_pdata,
-	},
 };
 
 static struct cyttsp5_pdata_ptr pdata_ptr[DEVICE_TYPE_MAX];
 
 static const char *device_names[DEVICE_TYPE_MAX] = {
 	[DEVICE_MT] = "cy,mt",
-	[DEVICE_BTN] = "cy,btn",
-	[DEVICE_PROXIMITY] = "cy,proximity",
 };
 
 static void set_pdata_ptr(struct cyttsp5_platform_data *pdata)
 {
 	pdata_ptr[DEVICE_MT].pdata = (void **)&pdata->mt_pdata;
-	pdata_ptr[DEVICE_BTN].pdata = (void **)&pdata->btn_pdata;
-	pdata_ptr[DEVICE_PROXIMITY].pdata = (void **)&pdata->prox_pdata;
 }
 
 static int get_device_type(struct device_node *dev_node,
@@ -552,14 +334,7 @@ static struct cyttsp5_core_platform_data *create_and_get_core_pdata(
 	}
 
 	/* Required fields */
-#if 0
-	rc = of_property_read_u32(core_node, "cy,irq_gpio", &value);
-	if (rc)
-		goto fail_free;
-	pdata->irq_gpio = value;
-#else
 	pdata->irq_gpio	= of_get_named_gpio(core_node, "gpios", 1);
-#endif
 	rc = of_property_read_u32(core_node, "cy,hid_desc_register", &value);
 	if (rc)
 		goto fail_free;
@@ -569,15 +344,7 @@ static struct cyttsp5_core_platform_data *create_and_get_core_pdata(
 	/* rst_gpio is optional since a platform may use
 	 * power cycling instead of using the XRES pin
 	 */
-#if 0
-	rc = of_property_read_u32(core_node, "cy,rst_gpio", &value);
-	if (!rc)
-		pdata->rst_gpio = value;
-#else
 	pdata->rst_gpio	= of_get_named_gpio(core_node, "gpios", 0);
-#endif
-
-	pdata->tp_id_gpio = of_get_named_gpio(core_node, "gpios", 3);
 
 	rc = of_property_read_u32(core_node, "cy,level_irq_udelay", &value);
 	if (!rc)
@@ -648,61 +415,35 @@ static void free_core_pdata(void *pdata)
 	kfree(core_pdata);
 }
 
-static bool	pinctrl_init( struct device *dev )
+static bool pinctrl_init(struct device *dev)
 {
-	struct pinctrl		*ts_pinctrl;
+	struct pinctrl *ts_pinctrl;
+	struct pinctrl_state *gpio_state_active /*, *gpio_state_suspend */;
 
-	struct pinctrl_state	*gpio_state_active /*, *gpio_state_suspend */;
-
-	int			ret;
+	int ret;
 
 	/* Get pinctrl if target uses pinctrl */
-	ts_pinctrl	= devm_pinctrl_get( dev );
+	ts_pinctrl = devm_pinctrl_get(dev);
 
-	if( IS_ERR_OR_NULL( ts_pinctrl ) )
+	if (IS_ERR_OR_NULL(ts_pinctrl))
 	{
-
-		printk( "DTUCH : Target does not use pinctrl\n" );
-
-		return	false;
-
+		printk ("%s: Target does not use pinctrl\n", __func__);
+		return false;
 	}
 
-	gpio_state_active	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_active" );
-
-	if( IS_ERR_OR_NULL( gpio_state_active ) )
-	{
-
-		printk( "DTUCH : Can not get ts default pinstate\n" );
-
-		return	false;
-
+	gpio_state_active = pinctrl_lookup_state(ts_pinctrl, "pmx_ts_active");
+	if (IS_ERR_OR_NULL(gpio_state_active)) {
+		printk("%s: Can not get ts default pinstate\n", __func__);
+		return false;
 	}
 
-//	gpio_state_suspend	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_suspend" );
-//
-//	if( IS_ERR_OR_NULL( gpio_state_suspend ) )
-//	{
-//
-//		printk( "DTUCH : Can not get ts sleep pinstate\n" );
-//
-//		return	false;
-//
-//	}
-
-	ret	= pinctrl_select_state( ts_pinctrl, gpio_state_active );
-
-	if( ret )
-	{
-
-		printk( "DTUCH : can not set pins\n" );
-
-		return	false;
-
+	ret = pinctrl_select_state( ts_pinctrl, gpio_state_active );
+	if (ret) {
+		printk("%s: can not set pins\n", __func__);
+		return false;
 	}
 
-	return	true;
-
+	return true;
 }
 
 int cyttsp5_devtree_create_and_get_pdata(struct device *adap_dev)
@@ -716,11 +457,11 @@ int cyttsp5_devtree_create_and_get_pdata(struct device *adap_dev)
 	if (!adap_dev->of_node)
 		return 0;
 
-	if( pinctrl_init( adap_dev ) )
-		printk( "DTUCH : set Pin-Control done\n" );
+	if (pinctrl_init(adap_dev))
+		printk("%s: set Pin-Control done\n", __func__);
 	else
 	{
-		printk( "DTUCH : pinctrl_init() failed!!!\n" );
+		printk("%s: pinctrl_init() failed!!!\n", __func__);
 		return -EPERM;
 	}
 

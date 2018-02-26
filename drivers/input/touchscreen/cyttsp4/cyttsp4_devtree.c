@@ -34,9 +34,7 @@
 /* cyttsp */
 #include <linux/cyttsp4_bus.h>
 #include <linux/cyttsp4_core.h>
-#include <linux/cyttsp4_btn.h>
 #include <linux/cyttsp4_mt.h>
-#include <linux/cyttsp4_proximity.h>
 #include <linux/cyttsp4_platform.h>
 
 #include <linux/pinctrl/consumer.h>
@@ -45,16 +43,10 @@
 #include "cyttsp4_regs.h"
 #include "cyttsp4_devtree.h"
 
-#ifndef CONFIG_ARCH_SONY_KANUTI
-#define ENABLE_VIRTUAL_KEYS
-#endif
-
-#define MAX_NAME_LENGTH		64
+#define MAX_NAME_LENGTH 64
 
 enum cyttsp4_device_type {
 	DEVICE_MT,
-	DEVICE_BTN,
-	DEVICE_PROXIMITY,
 	DEVICE_TYPE_MAX,
 };
 
@@ -63,21 +55,8 @@ struct cyttsp4_device_pdata_func {
 	void (*free_pdata)(void *);
 };
 
-#ifdef ENABLE_VIRTUAL_KEYS
-static struct kobject *board_properties_kobj;
-
-struct cyttsp4_virtual_keys {
-	struct kobj_attribute kobj_attr;
-	u16 *data;
-	int size;
-};
-#endif
-
 struct cyttsp4_extended_mt_platform_data {
 	struct cyttsp4_mt_platform_data pdata;
-#ifdef ENABLE_VIRTUAL_KEYS
-	struct cyttsp4_virtual_keys vkeys;
-#endif
 };
 
 static inline int get_inp_dev_name(struct device_node *dev_node,
@@ -162,105 +141,6 @@ static void free_touch_framework(struct touch_framework *frmwrk)
 	kfree(frmwrk);
 }
 
-#ifdef ENABLE_VIRTUAL_KEYS
-#define VIRTUAL_KEY_ELEMENT_SIZE	5
-static ssize_t virtual_keys_show(struct kobject *kobj,
-		struct kobj_attribute *attr, char *buf)
-{
-	struct cyttsp4_virtual_keys *vkeys = container_of(attr,
-		struct cyttsp4_virtual_keys, kobj_attr);
-	u16 *data = vkeys->data;
-	int size = vkeys->size;
-	int index;
-	int i;
-
-	index = 0;
-	for (i = 0; i < size; i += VIRTUAL_KEY_ELEMENT_SIZE)
-		index += scnprintf(buf + index, CY_MAX_PRBUF_SIZE - index,
-			"0x01:%d:%d:%d:%d:%d\n",
-			data[i], data[i+1], data[i+2], data[i+3], data[i+4]);
-
-	return index;
-}
-
-static int setup_virtual_keys(struct device_node *dev_node,
-		const char *inp_dev_name, struct cyttsp4_virtual_keys *vkeys)
-{
-	char *name;
-	u16 *data;
-	int size;
-	int rc;
-
-	data = create_and_get_u16_array(dev_node, "cy,virtual_keys", &size);
-	if (data == NULL)
-		return 0;
-	else if (IS_ERR(data)) {
-		rc = PTR_ERR(data);
-		goto fail;
-	}
-
-	/* Check for valid virtual keys size */
-	if (size % VIRTUAL_KEY_ELEMENT_SIZE) {
-		rc = -EINVAL;
-		goto fail_free_data;
-	}
-
-	name = kzalloc(MAX_NAME_LENGTH, GFP_KERNEL);
-	if (name == NULL) {
-		rc = -ENOMEM;
-		goto fail_free_data;
-	}
-
-	snprintf(name, MAX_NAME_LENGTH, "virtualkeys.%s", inp_dev_name);
-
-	vkeys->data = data;
-	vkeys->size = size;
-
-	/* TODO: Instantiate in board file and export it */
-	if (board_properties_kobj == NULL)
-		board_properties_kobj =
-			kobject_create_and_add("board_properties", NULL);
-	if (board_properties_kobj == NULL) {
-		pr_err("%s: Cannot get board_properties kobject!\n", __func__);
-		rc = -EINVAL;
-		goto fail_free_name;
-	}
-
-	/* Initialize dynamic SysFs attribute */
-	sysfs_attr_init(&vkeys->kobj_attr.attr);
-	vkeys->kobj_attr.attr.name = name;
-	vkeys->kobj_attr.attr.mode = S_IRUGO;
-	vkeys->kobj_attr.show = virtual_keys_show;
-
-	rc = sysfs_create_file(board_properties_kobj, &vkeys->kobj_attr.attr);
-	if (rc)
-		goto fail_del_kobj;
-
-	return 0;
-
-fail_del_kobj:
-	kobject_del(board_properties_kobj);
-fail_free_name:
-	kfree(name);
-	vkeys->kobj_attr.attr.name = NULL;
-fail_free_data:
-	kfree(data);
-	vkeys->data = NULL;
-fail:
-	return rc;
-}
-
-static void free_virtual_keys(struct cyttsp4_virtual_keys *vkeys)
-{
-	if (board_properties_kobj)
-		sysfs_remove_file(board_properties_kobj,
-			&vkeys->kobj_attr.attr);
-
-	kfree(vkeys->data);
-	kfree(vkeys->kobj_attr.attr.name);
-}
-#endif
-
 static void *create_and_get_mt_pdata(struct device_node *dev_node)
 {
 	struct cyttsp4_extended_mt_platform_data *ext_pdata;
@@ -302,14 +182,6 @@ static void *create_and_get_mt_pdata(struct device_node *dev_node)
 		rc = PTR_ERR(pdata->frmwrk);
 		goto fail_free_pdata;
 	}
-#ifdef ENABLE_VIRTUAL_KEYS
-	rc = setup_virtual_keys(dev_node, pdata->inp_dev_name,
-			&ext_pdata->vkeys);
-	if (rc) {
-		pr_err("%s: Cannot setup virtual keys!\n", __func__);
-		goto fail_free_pdata;
-	}
-#endif
 	return pdata;
 
 fail_free_pdata:
@@ -327,83 +199,7 @@ static void free_mt_pdata(void *pdata)
 			struct cyttsp4_extended_mt_platform_data, pdata);
 
 	free_touch_framework(mt_pdata->frmwrk);
-#ifdef ENABLE_VIRTUAL_KEYS
-	free_virtual_keys(&ext_mt_pdata->vkeys);
-#endif
 	kfree(ext_mt_pdata);
-}
-
-static void *create_and_get_btn_pdata(struct device_node *dev_node)
-{
-	struct cyttsp4_btn_platform_data *pdata;
-	int rc;
-
-	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-	if (pdata == NULL) {
-		rc = -ENOMEM;
-		goto fail;
-	}
-
-	rc = get_inp_dev_name(dev_node, &pdata->inp_dev_name);
-	if (rc)
-		goto fail_free_pdata;
-
-	return pdata;
-
-fail_free_pdata:
-	kfree(pdata);
-fail:
-	return ERR_PTR(rc);
-}
-
-static void free_btn_pdata(void *pdata)
-{
-	struct cyttsp4_btn_platform_data *btn_pdata =
-		(struct cyttsp4_btn_platform_data *)pdata;
-
-	kfree(btn_pdata);
-}
-
-static void *create_and_get_proximity_pdata(struct device_node *dev_node)
-{
-	struct cyttsp4_proximity_platform_data *pdata;
-	int rc;
-
-	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-	if (pdata == NULL) {
-		rc = -ENOMEM;
-		goto fail;
-	}
-
-	rc = get_inp_dev_name(dev_node, &pdata->inp_dev_name);
-	if (rc)
-		goto fail_free_pdata;
-
-	pdata->frmwrk = create_and_get_touch_framework(dev_node);
-	if (pdata->frmwrk == NULL) {
-		rc = -EINVAL;
-		goto fail_free_pdata;
-	} else if (IS_ERR(pdata->frmwrk)) {
-		rc = PTR_ERR(pdata->frmwrk);
-		goto fail_free_pdata;
-	}
-
-	return pdata;
-
-fail_free_pdata:
-	kfree(pdata);
-fail:
-	return ERR_PTR(rc);
-}
-
-static void free_proximity_pdata(void *pdata)
-{
-	struct cyttsp4_proximity_platform_data *proximity_pdata =
-		(struct cyttsp4_proximity_platform_data *)pdata;
-
-	free_touch_framework(proximity_pdata->frmwrk);
-
-	kfree(proximity_pdata);
 }
 
 static struct cyttsp4_device_pdata_func device_pdata_funcs[DEVICE_TYPE_MAX] = {
@@ -411,20 +207,10 @@ static struct cyttsp4_device_pdata_func device_pdata_funcs[DEVICE_TYPE_MAX] = {
 		.create_and_get_pdata = create_and_get_mt_pdata,
 		.free_pdata = free_mt_pdata,
 	},
-	[DEVICE_BTN] = {
-		.create_and_get_pdata = create_and_get_btn_pdata,
-		.free_pdata = free_btn_pdata,
-	},
-	[DEVICE_PROXIMITY] = {
-		.create_and_get_pdata = create_and_get_proximity_pdata,
-		.free_pdata = free_proximity_pdata,
-	},
 };
 
 static const char *device_names[DEVICE_TYPE_MAX] = {
 	[DEVICE_MT] = "cy,mt",
-	[DEVICE_BTN] = "cy,btn",
-	[DEVICE_PROXIMITY] = "cy,proximity",
 };
 
 static int get_device_type(struct device_node *dev_node,
@@ -697,32 +483,32 @@ fail:
 	return rc;
 }
 
-static bool	pinctrl_init( struct device *dev )
+static bool pinctrl_init(struct device *dev)
 {
-	struct pinctrl		*ts_pinctrl;
-	struct pinctrl_state	*gpio_state_active /*, *gpio_state_suspend */;
-	int			ret;
+	struct pinctrl *ts_pinctrl;
+	struct pinctrl_state *gpio_state_active /*, *gpio_state_suspend */;
+	int ret;
 
 	/* Get pinctrl if target uses pinctrl */
-	ts_pinctrl	= devm_pinctrl_get( dev );
+	ts_pinctrl = devm_pinctrl_get(dev);
 
 	if (IS_ERR_OR_NULL(ts_pinctrl)) {
-		printk( "%s: Target does not use pinctrl\n",__func__ );
-		return	false;
+		printk("%s: Target does not use pinctrl\n",__func__);
+		return false;
 	}
 
-	gpio_state_active	= pinctrl_lookup_state( ts_pinctrl, "pmx_ts_active" );
+	gpio_state_active = pinctrl_lookup_state( ts_pinctrl, "pmx_ts_active");
 
 	if(IS_ERR_OR_NULL( gpio_state_active)) {
-		printk( "%s: Can not get ts default pinstate\n",__func__ );
-		return	false;
+		printk("%s: Can not get ts default pinstate\n",__func__);
+		return false;
 	}
 
-	ret	= pinctrl_select_state( ts_pinctrl, gpio_state_active );
+	ret = pinctrl_select_state(ts_pinctrl, gpio_state_active);
 
-	if (ret){
-		printk( "%s: can not set pins\n",__func__ );
-		return	false;
+	if (ret) {
+		printk("%s: can not set pins\n",__func__);
+		return false;
 	}
 	return	true;
 }
@@ -737,10 +523,10 @@ int cyttsp4_devtree_register_devices(struct device *adap_dev)
 	if (!adap_dev->of_node)
 		return 0;
 
-	if( !pinctrl_init( adap_dev ) )
-		printk( "%s: pinctrl_init() failed!!!\n",__func__ );
+	if (!pinctrl_init(adap_dev))
+		printk("%s: pinctrl_init() failed!!!\n",__func__);
 	else
-		printk( "%s: set Pin-Control done\n",__func__ );
+		printk("%s: set Pin-Control done\n",__func__);
 
 	rc = of_property_read_string(adap_dev->of_node, "cy,adapter_id",
 			&adap_id);

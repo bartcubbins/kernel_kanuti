@@ -887,15 +887,6 @@ struct cyttsp5_core_data {
 	bool wait_until_wake;
 	u8 panel_id;
 	bool tp_id;
-#if NEED_SUSPEND_NOTIFIER
-	/*
-	 * This notifier is used to receive suspend prepare events
-	 * When device is PM runtime suspended, pm_generic_suspend()
-	 * does not call our PM suspend callback for kernels with
-	 * version less than 3.3.0.
-	 */
-	struct notifier_block pm_notifier;
-#endif
 	struct work_struct startup_work;
 	struct cyttsp5_sysinfo sysinfo;
 	void *exclusive_dev;

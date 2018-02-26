@@ -5010,106 +5010,6 @@ static ssize_t cyttsp5_easy_wakeup_gesture_store(struct device *dev,
 	return size;
 }
 
-/* Show Panel ID via sysfs */
-static ssize_t cyttsp5_panel_id_show(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	struct cyttsp5_core_data *cd = dev_get_drvdata(dev);
-	ssize_t ret;
-
-	ret = snprintf(buf, CY_MAX_PRBUF_SIZE, "0x%02X\n",
-			cd->panel_id);
-	return ret;
-}
-
-/* Show Touch Module ID via sysfs */
-static ssize_t cyttsp5_tp_id_show(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	struct cyttsp5_core_data *cd = dev_get_drvdata(dev);
-	ssize_t ret;
-
-	dev_info(dev, "%s: GPIO%d = %d\n", __func__, cd->cpdata->tp_id_gpio,
-			gpio_get_value(cd->cpdata->tp_id_gpio));
-	ret = snprintf(buf, CY_MAX_PRBUF_SIZE, "0x%02X\n",
-			gpio_get_value(cd->cpdata->tp_id_gpio));
-	return ret;
-}
-
-/* PERI-FG-TOUCH_GLOVE_MODE-01+[ */
-/* Show Glove Mode via sysfs */
-static ssize_t cyttsp5_glove_show(struct device *dev,
-        struct device_attribute *attr, char *buf)
-{
-    struct cyttsp5_core_data *cd = dev_get_drvdata(dev);
-    u32 cur_mode = 255;
-    int rc = 0;
-    int tries;
-
-    cyttsp5_stop_wd_timer(cd);
-
-    for (tries = 0; tries < 3; tries++) {
-        rc = cyttsp5_hid_output_get_param_(cd, 0x02, &cur_mode);
-        if (rc < 0)
-            msleep(20);
-        else
-            break;
-    }
-    dev_vdbg(dev, "%s: tries=%d rc=%d cur_mode=0x%02X\n", __func__, tries, rc, cur_mode);
-
-    cyttsp5_start_wd_timer(cd);
-
-    return snprintf(buf, CY_MAX_PRBUF_SIZE, "0x%02X\n", cur_mode);
-}
-
-/* Store Glove Mode via sysfs */
-static ssize_t cyttsp5_glove_store(struct device *dev,
-        struct device_attribute *attr, const char *buf, size_t size)
-{
-    struct cyttsp5_core_data *cd = dev_get_drvdata(dev);
-    unsigned long value;
-    u32 scan_type;
-    int rc;
-    int tries = 0;
-
-    rc = kstrtoul(buf, 10, &value);
-    if (rc < 0) {
-        dev_err(dev, "%s: Invalid value\n", __func__);
-        goto cyttsp5_touch_mode_store_exit;
-    }
-
-    cyttsp5_stop_wd_timer(cd);
-
-    switch (value)
-    {
-        case 0:
-            scan_type = 1;	/* Finger only */
-            break;
-        case 1:
-            scan_type = 3;	/* Finger+Glove */
-            break;
-        default:
-            dev_err(dev, "%s: Invalid value: %ld\n", __func__, value);
-            goto cyttsp5_touch_mode_store_switch;
-    }
-    for (tries = 0; tries < 3; tries++) {
-        rc = cyttsp5_hid_output_set_param(cd, 0x02, scan_type);
-        if (rc < 0)
-            msleep(20);
-        else
-            break;
-    }
-    if (rc < 0)
-        dev_err(dev, "%s: touch_mode_enable execute failed 3 times, rc = %d\n", __func__, rc);
-
-cyttsp5_touch_mode_store_switch:
-    cyttsp5_start_wd_timer(cd);
-
-cyttsp5_touch_mode_store_exit:
-    return size;
-}
-/* PERI-FG-TOUCH_GLOVE_MODE-01+] */
-
 static struct device_attribute attributes[] = {
 	__ATTR(ic_ver, S_IRUGO, cyttsp5_ic_ver_show, NULL),
 	__ATTR(drv_ver, S_IRUGO, cyttsp5_drv_ver_show, NULL),
@@ -5119,9 +5019,6 @@ static struct device_attribute attributes[] = {
 	__ATTR(drv_debug, S_IWUSR | S_IWGRP, NULL, cyttsp5_drv_debug_store),
 	__ATTR(sleep_status, S_IRUGO, cyttsp5_sleep_status_show, NULL),
 	__ATTR(easy_wakeup_gesture, S_IRUGO | S_IWUSR | S_IWGRP, cyttsp5_easy_wakeup_gesture_show, cyttsp5_easy_wakeup_gesture_store),
-	__ATTR(panel_id, S_IRUGO, cyttsp5_panel_id_show, NULL),
-	__ATTR(tp_id, S_IRUGO, cyttsp5_tp_id_show, NULL),
-	__ATTR(glove, S_IRUGO | S_IWUSR | S_IWGRP, cyttsp5_glove_show, cyttsp5_glove_store),	/* PERI-FG-TOUCH_GLOVE_MODE-01+ */
 };
 
 static int add_sysfs_interfaces(struct device *dev)

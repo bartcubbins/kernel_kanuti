@@ -257,7 +257,11 @@ static int cyttsp4_i2c_probe(struct i2c_client *client,
 	rc = cyttsp4_ping_hw(ts_i2c);
 	if (rc) {
 		dev_err(dev, "%s: No HW detected\n", __func__);
-		goto add_adapter_err;
+		pm_runtime_disable(&client->dev);
+		dev_set_drvdata(&client->dev, NULL);
+		i2c_set_clientdata(client, NULL);
+		kfree(ts_i2c);
+		return -ENODEV;
 	}
 
 	vdd = regulator_get(&client->dev, "vdd");

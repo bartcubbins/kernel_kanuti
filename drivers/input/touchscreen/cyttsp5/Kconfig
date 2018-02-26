@@ -58,20 +58,6 @@ config TOUCHSCREEN_CYPRESS_CYTTSP5_I2C
 	  To compile this driver as a module, choose M here: the
 	  module will be called cyttsp5_i2c.
 
-config TOUCHSCREEN_CYPRESS_CYTTSP5_SPI
-	tristate "Cypress TrueTouch Gen5 SPI"
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5
-	select SPI
-	default n
-	help
-	  Say Y here to enable SPI bus interface to Cypress TrueTouch(tm)
-	  Standard Product Generation5 touchscreen controller.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called cyttsp5_spi.
-
 choice
 	bool "Cypress TrueTouch Gen5 MultiTouch Protocol"
 	depends on TOUCHSCREEN_CYPRESS_CYTTSP5
@@ -95,66 +81,6 @@ config TOUCHSCREEN_CYPRESS_CYTTSP5_MT_B
 	  controller.
 
 endchoice
-
-config TOUCHSCREEN_CYPRESS_CYTTSP5_BUTTON
-	bool "Cypress TrueTouch Gen5 MultiTouch CapSense Button"
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5
-	default n
-	help
-	  Say Y here to enable CapSense reporting on Cypress TrueTouch(tm)
-	  Standard Product Generation5 touchscreen controller.
-
-	  If unsure, say N.
-
-config TOUCHSCREEN_CYPRESS_CYTTSP5_PROXIMITY
-	bool "Cypress TrueTouch Gen5 Proximity"
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5
-	default n
-	help
-	  Say Y here to enable proximity reporting on Cypress TrueTouch(tm)
-	  Standard Product Generation5 touchscreen controller.
-
-	  If unsure, say N.
-
-config TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS
-	tristate "Cypress TrueTouch Gen5 MultiTouch Device Access"
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5
-	default n
-	help
-	  Say Y here to enable Cypress TrueTouch(tm) Standard Product
-	  Generation5 touchscreen controller device access module.
-
-	  This modules adds an interface to access touchscreen
-	  controller using driver sysfs nodes.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called cyttsp5_device_access.
-
-config TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS_API
-	bool "Enable Device Access kernel API"
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS
-	default n
-	help
-	  Say Y here to enable Device access kernel API which provides
-	  access to Cypress TrueTouch(tm) Standard Product Generation5
-	  touchscreen controller for other modules.
-
-	  If unsure, say N.
-
-config TOUCHSCREEN_CYPRESS_CYTTSP5_TEST_DEVICE_ACCESS_API
-	tristate "Simple Test module for Device Access kernel API"
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS
-	depends on TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS_API
-	default n
-	help
-	  Say Y here to enable test module for Device access kernel API.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called cyttsp5_test_device_access_api.
 
 config TOUCHSCREEN_CYPRESS_CYTTSP5_LOADER
 	tristate "Cypress TrueTouch Gen5 MultiTouch Loader"
@@ -235,4 +161,3 @@ config TOUCHSCREEN_CYPRESS_CYTTSP5_DEBUG_MDL
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called cyttsp5_debug.
-

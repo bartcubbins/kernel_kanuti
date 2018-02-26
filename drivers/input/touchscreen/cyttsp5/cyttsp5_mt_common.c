@@ -161,14 +161,6 @@ static void cyttsp5_mt_process_touch(struct cyttsp5_mt_data *md,
 		touch->abs[CY_TCH_OR] *= -1;
 	}
 
-	/* Convert MAJOR/MINOR from mm to resolution */
-#if 0
-	tmp = touch->abs[CY_TCH_MAJ] * 100 * si->sensing_conf_data.res_x;
-	touch->abs[CY_TCH_MAJ] = tmp / si->sensing_conf_data.len_x;
-	tmp = touch->abs[CY_TCH_MIN] * 100 * si->sensing_conf_data.res_x;
-	touch->abs[CY_TCH_MIN] = tmp / si->sensing_conf_data.len_x;
-#endif
-
 	dev_vdbg(dev, "%s: flip=%s inv-x=%s inv-y=%s x=%04X(%d) y=%04X(%d)\n",
 		__func__, flipped ? "true" : "false",
 		md->pdata->flags & CY_MT_FLAG_INV_X ? "true" : "false",
@@ -251,7 +243,6 @@ static void cyttsp5_get_mt_touches(struct cyttsp5_mt_data *md,
 		input_report_abs( md->input, ABS_MT_POSITION_Y, tch->abs[CY_TCH_Y] );
 		input_report_abs( md->input, ABS_MT_TOUCH_MAJOR, tch->abs[CY_TCH_MAJ] );
 		input_report_abs( md->input, ABS_MT_TOUCH_MINOR, tch->abs[CY_TCH_MIN] );
-		input_report_abs( md->input, ABS_MT_PRESSURE, tch->abs[CY_TCH_P] <= 5 ? 255 + tch->abs[CY_TCH_P] + 1 : tch->abs[CY_TCH_P] );	/* PERI-FG-TOUCH_GLOVE_MODE-00* */
 
 		/* If touch type is hover, send P as distance, reset P */
 		if (tch->abs[CY_TCH_O] == CY_OBJ_HOVER) {
@@ -540,9 +531,6 @@ static int cyttsp5_setup_input_device(struct device *dev)
 	int rc;
 
 	dev_vdbg(dev, "%s: Initialize event signals\n", __func__);
-	//__set_bit(EV_ABS, md->input->evbit);
-	//__set_bit(EV_REL, md->input->evbit);
-	//__set_bit(EV_KEY, md->input->evbit);
 	set_bit( EV_SYN, md->input->evbit );
 	set_bit( EV_KEY, md->input->evbit );
 	set_bit( EV_ABS, md->input->evbit );
