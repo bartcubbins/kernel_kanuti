@@ -200,9 +200,6 @@ static int mdss_pll_clock_register(struct platform_device *pdev,
 	case MDSS_HDMI_PLL_8996_V3_1_8:
 		rc = hdmi_8996_v3_1p8_pll_clock_register(pdev, pll_res);
 		break;
-	case MDSS_DSI_PLL_LPM:
-		rc = dsi_pll_clock_register_lpm(pdev, pll_res);
-		break;
 	case MDSS_UNKNOWN_PLL:
 	default:
 		rc = -EINVAL;
