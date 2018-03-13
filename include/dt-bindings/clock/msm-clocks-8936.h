@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2015, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -200,6 +200,8 @@
 #define clk_pixel_clk_src                       0x8b6f83d8
 #define clk_byte_clk_src                        0x3a911c53
 #define clk_gcc_snoc_qosgen_clk			0x37d40ce2
+#define clk_dsi_pll0_byte_clk_src               0x44539836
+#define clk_dsi_pll0_pixel_clk_src              0x5767c287
 
 /* clock_rpm controlled clocks */
 #define clk_pcnoc_clk				0xc1296d0f
