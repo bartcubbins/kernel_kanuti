@@ -23,8 +23,6 @@
 
 #include <linux/msm-bus.h>
 
-#include <linux/msm_iommu_domains.h>
-
 #include "mdss.h"
 #include "mdss_dsi.h"
 #include "mdss_panel.h"
