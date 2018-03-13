@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -744,10 +744,10 @@
 
 	clock_gcc_mdss: qcom,gcc-mdss@1a98300 {
 		compatible = "qcom,gcc-mdss-8936";
-		clocks = <&mdss_dsi0_pll clk_pixel_clk_src>,
-			 <&mdss_dsi0_pll clk_byte_clk_src>,
-			 <&mdss_dsi0_pll clk_pixel_clk_src>,
-			 <&mdss_dsi0_pll clk_byte_clk_src>;
+		clocks = <&mdss_dsi0_pll clk_dsi_pll0_pixel_clk_src>,
+			 <&mdss_dsi0_pll clk_dsi_pll0_byte_clk_src>,
+			 <&mdss_dsi0_pll clk_dsi_pll0_pixel_clk_src>,
+			 <&mdss_dsi0_pll clk_dsi_pll0_byte_clk_src>;
 		clock-names = "pclk0_src", "byte0_src", "pclk1_src",
 				 "byte1_src";
 		#clock-cells = <1>;
