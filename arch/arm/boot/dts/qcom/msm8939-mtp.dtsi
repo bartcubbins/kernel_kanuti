@@ -293,21 +293,22 @@
 };
 
 &msm_gpio {
-	&pmx_mdss {
+	pmx_mdss {
 		mdss_dsi_active: mdss_dsi_active {
 			mux {
-				pins = "gpio97", "gpio25", "gpio98";
+				pins = "gpio114", "gpio117", "gpio25", "gpio10";
 			};
-		config {
-				pins = "gpio97", "gpio25", "gpio98";
+			config {
+				pins = "gpio114", "gpio117", "gpio25", "gpio10";
+			};
 		};
 
 		mdss_dsi_suspend: mdss_dsi_suspend {
 			mux {
-				pins = "gpio97", "gpio25", "gpio98";
+				pins = "gpio114", "gpio117", "gpio25", "gpio10";
                         };
 			config {
-				pins = "gpio97", "gpio25", "gpio98";
+				pins = "gpio114", "gpio117", "gpio25", "gpio10";
 			};
 		};
 	};
@@ -318,7 +319,7 @@
 				pins = "gpio24";
 			};
 			config {
-				pins = "gpio24"
+				pins = "gpio24";
 			};
 		};
 
