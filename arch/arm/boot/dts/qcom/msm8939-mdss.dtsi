@@ -112,6 +112,14 @@
 		qcom,mdss-prefill-post-scaler-buffer-pixels = <2560>;
 		qcom,mdss-prefill-pingpong-buffer-pixels = <6400>;
 		qcom,mdss-prefill-fbc-lines = <2>;
+		
+		smmu_mdp_unsec: qcom,smmu_mdp_unsec_cb {
+			compatible = "qcom,smmu_mdp_unsec";
+		};
+
+		smmu_mdp_sec: qcom,smmu_mdp_sec_cb {
+			compatible = "qcom,smmu_mdp_sec";
+		};
 
 		mdss_fb0: qcom,mdss_fb_primary {
 			cell-index = <0>;
