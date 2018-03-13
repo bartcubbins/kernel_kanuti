@@ -292,14 +292,46 @@
 	qcom,mdss-pref-prim-intf = "dsi";
 };
 
-&pmx_mdss {
-	qcom,num-grp-pins = <3>;
-	qcom,pins = <&gp 97>, <&gp 25>, <&gp 98>;
-};
+&msm_gpio {
+	pmx_mdss {
+		mdss_dsi_active: mdss_dsi_active {
+			mux {
+				pins = "gpio97", "gpio25", "gpio98";
+			};
+			config {
+				pins = "gpio97", "gpio25", "gpio98";
+			};
+		};
 
-&pmx_mdss_te {
-	qcom,num-grp-pins = <1>;
-	qcom,pins = <&gp 24>;
+		mdss_dsi_suspend: mdss_dsi_suspend {
+			mux {
+				pins = "gpio97", "gpio25", "gpio98";
+                        };
+			config {
+				pins = "gpio97", "gpio25", "gpio98";
+			};
+		};
+	};
+
+	pmx_mdss_te {
+		mdss_te_active: mdss_te_active {
+			mux {
+				pins = "gpio24";
+			};
+			config {
+				pins = "gpio24";
+			};
+		};
+
+		mdss_te_suspend: mdss_te_suspend {
+			mux {
+				pins = "gpio24";
+			};
+			config {
+				pins = "gpio24";
+			};
+		};
+	};
 };
 
 &mdss_dsi0 {
