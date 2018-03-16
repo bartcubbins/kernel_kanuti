@@ -43,14 +43,18 @@ obj-$(CONFIG_ARCH_MDM9640)      += clock-a7.o
 obj-$(CONFIG_ARCH_MDM9650)	+= clock-a7.o
 obj-$(CONFIG_ARCH_SDX20)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MDM9607)	+= clock-a7.o
+ifneq ($(CONFIG_ARCH_SONY_KANUTI), y)
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-a7.o
+endif
 obj-$(CONFIG_ARCH_MSM8909)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MSM8953)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-cpu-8939.o
+ifneq ($(CONFIG_ARCH_SONY_KANUTI), y)
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-gcc-8952.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-gcc-8953.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-rcgwr.o
 obj-$(CONFIG_ARCH_MSM8916)	+= clock-cpu-8953.o
+endif
 obj-$(CONFIG_ARCH_MSM8953)	+= clock-gcc-8953.o
 obj-$(CONFIG_ARCH_MSM8953)	+= clock-rcgwr.o
 obj-$(CONFIG_ARCH_MSM8953)	+= clock-cpu-8953.o
