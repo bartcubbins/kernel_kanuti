@@ -230,6 +230,13 @@
 			vdd-supply = <&pm8916_l17>;
 			vddio-supply = <&pm8916_l6>;
 
+			pinctrl-names = "mdss_default", "mdss_sleep";
+			pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
+			pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
+
+			qcom,platform-enable-gpio = <&msm_gpio 97 0>;
+			qcom,platform-reset-gpio = <&msm_gpio 25 0>;
+
 			clocks = <&clock_gcc_mdss clk_gcc_mdss_byte0_clk>,
 				 <&clock_gcc_mdss clk_gcc_mdss_pclk0_clk>,
 				 <&clock_gcc clk_gcc_mdss_esc0_clk>;
@@ -277,6 +284,8 @@
 				01 c0 00 00 0a 00 00 01 97
 				01 c0 00 00 0f 00 00 01 97
 				00 40 00 00 00 00 00 01 ff];
+
+			status= "disabled";
 		};
 	};
 

@@ -43,6 +43,7 @@
 		fairchild,vsel-gpio = <&msm_gpio 111 1>;
 		fairchild,restore-reg;
 		fairchild,disable-suspend;
+		status = "disabled";
 	};
 };
 
@@ -108,7 +109,7 @@
 		qcom,cpr-irq-line = <0>;
 		qcom,cpr-step-quotient = <13>;
 		qcom,cpr-up-threshold = <0>;
-		qcom,cpr-down-threshold = <3>;
+		qcom,cpr-down-threshold = <8>;
 		qcom,cpr-idle-clocks = <15>;
 		qcom,cpr-gcnt-time = <1>;
 		qcom,vdd-apc-step-up-limit = <1>;
@@ -850,7 +851,7 @@
 		pm8916_l10: regulator-l10 {
 			regulator-min-microvolt = <2700000>;
 			regulator-max-microvolt = <2800000>;
-			qcom,init-voltage = <2700000>;
+			qcom,init-voltage = <2800000>;
 			status = "okay";
 		};
 	};
