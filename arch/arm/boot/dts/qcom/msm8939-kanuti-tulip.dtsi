@@ -309,21 +309,12 @@
 	};
 
 	gpio_keys {
-		camera_focus {
-			debounce-interval = <100>;
-		};
-
 		vol_down {
 			label = "volume_down";
 			gpios = <&msm_gpio 51 0x1>;
 			linux,input-type = <1>;
 			linux,code = <114>;
 			gpio-key,wakeup;
-			debounce-interval = <100>;
-		};
-
-		vol_up {
-			gpios = <&msm_gpio 11 0x1>;
 			debounce-interval = <100>;
 		};
 	};
@@ -404,10 +395,6 @@
 &mdss_dsi0 {
 	qcom,dsi-pref-prim-pan = <&dsi_nt35521_720_vid>;
 	qcom,platform-bklight-en-gpio = <&msm_gpio 10 0>;
-};
-
-&mdss_dsi1 {
-	status = "disabled";
 };
 
 &pm8916_mpps {
@@ -549,99 +536,5 @@
 };
 
 &sdhc_2 {
-	cd-gpios = <&msm_gpio 38 0>;
-};
-
-&sdc2_cd_off {
-	config {
-		/delete-property/ bias-disable;
-		bias-pull-up;
-	};
-};
-
-&usbid_default {
-	config {
-		/delete-property/ bias-pull-up;
-		bias-pull-down;
-	};
-};
-
-&cam_sensor_rear_default {
-	mux {
-		pins = "gpio28", "gpio33", "gpio34", "gpio36";
-	};
-
-	config {
-		pins = "gpio28", "gpio33", "gpio34", "gpio36";
-	};
-};
-
-&cam_sensor_rear_sleep {
-	mux {
-		pins = "gpio28", "gpio33", "gpio34", "gpio36";
-	};
-
-	config {
-		pins = "gpio28", "gpio33", "gpio34", "gpio36";
-	};
-};
-
-&cam_sensor_front_default {
-	mux {
-		pins = "gpio121";
-	};
-
-	config {
-		pins = "gpio121";
-		/delete-property/ bias-disable;
-		bias-pull-down;
-	};
-};
-
-&cam_sensor_front_sleep {
-	mux {
-		pins = "gpio121";
-	};
-
-	config {
-		pins = "gpio121";
-		bias-pull-down;
-	};
-};
-
-&cam_sensor_flash_default {
-	mux {
-		pins = "gpio98", "gpio97";
-	};
-
-	config {
-		pins = "gpio98", "gpio97";
-	};
-};
-
-&cam_sensor_flash_sleep {
-	mux {
-		pins = "gpio98", "gpio97";
-	};
-
-	config {
-		pins = "gpio98", "gpio97";
-		bias-pull-down;
-	};
-};
-
-&sdc2_cd_off {
-	config {
-		/delete-property/ bias-disable;
-		bias-pull-up;
-	};
-};
-
-/* Regulators */
-&fan53555 {
-	status = "disabled";
-};
-
-&pm8916_l10 {
-	qcom,init-voltage = <2800000>;
+	cd-gpios = <&msm_gpio 38 0>; /* FIX ME PROPERLY! */
 };
