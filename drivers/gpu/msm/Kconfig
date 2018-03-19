@@ -3,7 +3,6 @@ choice
 
 config MSM_KGSL_CURRENT
 	bool "Use regular KGSL stack"
-	default y
 
 config MSM_KGSL_LEGACY
 	bool "Use legacy KGSL stack"
