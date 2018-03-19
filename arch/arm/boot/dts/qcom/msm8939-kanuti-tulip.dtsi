@@ -11,11 +11,6 @@
  */
 
 / {
-        aliases {
-		/delete-property/ spi0;
-		/delete-property/ spi5;
-        };
-
 	firmware: firmware {
 		android {
 			compatible = "android,firmware";
@@ -341,14 +336,6 @@
 		qcom,cdc-vdd-spkr-gpios = <&msm_gpio 49 0>;
 		/delete-node/ qcom,cdc-us-euro-gpios;
 	};
-};
-
-&spi_0 {
-	status = "disabled";
-};
-
-&spi_5 {
-	status = "disabled";
 };
 
 &i2c_4 {
