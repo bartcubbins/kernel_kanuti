@@ -406,10 +406,6 @@
 	qcom,platform-bklight-en-gpio = <&msm_gpio 10 0>;
 };
 
-&mdss_dsi1 {
-	status = "disabled";
-};
-
 &pm8916_mpps {
 	mpp@a300 { /* MPP4: NC */
 		status = "disabled";
