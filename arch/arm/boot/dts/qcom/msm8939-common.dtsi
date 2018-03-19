@@ -774,7 +774,7 @@
 	qcom_tzlog: tz-log@8600720 {
 		compatible = "qcom,tz-log";
 		reg = <0x08600720 0x1000>;
-		status = "disabled";
+		status = "ok";
 	};
 
 	qcom_rng: qrng@22000 {
@@ -824,7 +824,7 @@
                 qcom,use-sw-aes-xts-algo;
                 qcom,use-sw-aes-ccm-algo;
                 qcom,use-sw-ahash-algo;
-		status = "disabled";
+		status = "ok";
 		qcom,ce-opp-freq = <100000000>;
 	};
 
@@ -850,7 +850,7 @@
 			 <&clock_gcc clk_gcc_crypto_axi_clk>;
 		clock-names = "core_clk_src", "core_clk",
 				"iface_clk", "bus_clk";
-		status = "disabled";
+		status = "ok";
 		qcom,ce-opp-freq = <100000000>;
 	};
 
@@ -877,7 +877,7 @@
 			 <&clock_gcc clk_gcc_crypto_axi_clk>;
 		clock-names = "core_clk_src", "core_clk",
 				"iface_clk", "bus_clk";
-		status = "disabled";
+		status = "ok";
 		qcom,ce-opp-freq = <100000000>;
 	};
 
@@ -992,10 +992,13 @@
 				"qcom,msm-uartdm", "qcom,msm-hsl-uart";
 		reg = <0x78b0000 0x200>;
 		interrupts = <0 108 0>;
-		status = "disabled";
+		status = "ok";
 		clocks = <&clock_gcc clk_gcc_blsp1_uart2_apps_clk>,
 			 <&clock_gcc clk_gcc_blsp1_ahb_clk>;
 		clock-names = "core_clk", "iface_clk";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&uart_console_sleep>;
 	};
 
 	/* Add DMA driver for BLSP1, this is a replacement of BAM */
