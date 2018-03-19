@@ -1386,26 +1386,6 @@ static int btusb_probe(struct usb_interface *intf,
 	if (ignore_sniffer && id->driver_info & BTUSB_SNIFFER)
 		return -ENODEV;
 
-	if (id->driver_info & BTUSB_ATH3012) {
-		struct usb_device *udev = interface_to_usbdev(intf);
-		/* Old firmware would otherwise let ath3k driver load
-		 * patch and sysconfig files */
-		err = get_rome_version(udev, &version);
-		if (err < 0) {
-			if (le16_to_cpu(udev->descriptor.bcdDevice) <= 0x0001)
-				BT_INFO("FW for ar3k is yet to be downloaded");
-			else
-				BT_ERR("Failed to get ROME USB version");
-			return -ENODEV;
-		}
-		BT_INFO("Rome Version: 0x%x", version.rom_version);
-		err = rome_download(udev, &version);
-		if (err < 0) {
-			BT_ERR("Failed to download ROME firmware");
-			return -ENODEV;
-		}
-	}
-
 	data = devm_kzalloc(&intf->dev, sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
