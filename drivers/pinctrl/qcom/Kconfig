@@ -142,4 +142,13 @@ config PINCTRL_MSM8909
 	help
 	  This is the pinctrl, pinmux, pinconf and gpiolib driver for the
 	  QTI TLMM block found in the QTI MSM8909 platform.
+
+config PINCTRL_MSM8939
+	tristate "Qualcomm 8939 pin controller driver"
+	depends on GPIOLIB && OF && (ARCH_MSM8916 || COMPILE_TEST)
+	select PINCTRL_MSM
+	help
+	  This is the pinctrl, pinmux, pinconf and gpiolib driver for the
+	  QTI TLMM block found in the QTI MSM8939 platform.
+
 endif
