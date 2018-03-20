@@ -52,7 +52,6 @@
 #define clk_blsp1_uart1_apps_clk_src		0xf8146114
 #define clk_blsp1_uart2_apps_clk_src		0xfc9c2f73
 #define clk_byte0_clk_src			0x75cc885b
-#define clk_byte1_clk_src                       0x312c3558
 #define clk_cci_clk_src				0x822f3d97
 #define clk_cpp_clk_src				0x8382f56d
 #define clk_camss_top_ahb_clk_src		0xa68afe9c
@@ -76,7 +75,6 @@
 #define clk_mclk1_clk_src			0xa73cad0c
 #define clk_mclk2_clk_src                       0x6be1dc47
 #define clk_pclk0_clk_src			0xccac1f35
-#define clk_pclk1_clk_src                       0x2e50c1c0
 #define clk_pdm2_clk_src			0x31e494fd
 #define clk_sdcc1_apps_clk_src			0xd4975db2
 #define clk_sdcc2_apps_clk_src			0xfc46c821
@@ -161,14 +159,12 @@
 #define clk_gcc_mdss_ahb_clk			0xbfb92ed3
 #define clk_gcc_mdss_axi_clk			0x668f51de
 #define clk_gcc_mdss_byte0_clk			0x35da7862
-#define clk_gcc_mdss_byte1_clk                  0xf0c31438
 #define clk_gcc_mdss_esc0_clk			0xaec5cb25
 #define clk_gcc_mdss_esc1_clk                   0xc8b33763
 #define clk_gcc_mdss_mdp_clk			0x22f3521f
 #define clk_gcc_mdss_mdp_vote_clk		0x588460a4
 #define clk_gcc_mdss_mdp_rotator_vote_clk	0x5b1f675e
 #define clk_gcc_mdss_pclk0_clk			0xcc5c5c77
-#define clk_gcc_mdss_pclk1_clk                  0x1de4a617
 #define clk_gcc_mdss_vsync_clk			0x32a09f1f
 #define clk_gcc_mss_cfg_ahb_clk			0x111cde81
 #define clk_gcc_mss_q6_bimc_axi_clk		0x67544d62
