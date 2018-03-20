@@ -73,3 +73,4 @@ IRQCHIP_DECLARE(8953_pinctrl, "qcom,msm8953-pinctrl",
 						pinctrl_irq_dummy);
 IRQCHIP_DECLARE(8909_pinctrl, "qcom,msm8909-pinctrl", pinctrl_irq_dummy);
 IRQCHIP_DECLARE(8916_pinctrl, "qcom,msm8916-pinctrl", pinctrl_irq_dummy);
+IRQCHIP_DECLARE(8939_pinctrl, "qcom,msm8939-pinctrl", pinctrl_irq_dummy);
