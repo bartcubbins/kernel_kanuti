@@ -2814,8 +2814,10 @@ static int arm_smmu_add_device(struct device *dev)
 	}
 
 	if (dev_is_pci(dev)) {
+#ifdef CONFIG_PCI_MSM
 		u32 sid;
 		int tmp;
+#endif
 
 		cfg = kzalloc(sizeof(*cfg), GFP_KERNEL);
 		if (!cfg) {
@@ -2824,6 +2826,7 @@ static int arm_smmu_add_device(struct device *dev)
 		}
 
 		cfg->num_streamids = 1;
+#ifdef CONFIG_PCI_MSM
 		ret = msm_pcie_configure_sid(dev, &sid, &tmp);
 		if (ret) {
 			dev_err(dev,
@@ -2833,6 +2836,7 @@ static int arm_smmu_add_device(struct device *dev)
 			goto out_put_group;
 		}
 		cfg->streamids[0] = sid;
+#endif
 		releasefn = __arm_smmu_release_pci_iommudata;
 	} else {
 		struct arm_smmu_master *master;
