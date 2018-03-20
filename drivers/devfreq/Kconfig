@@ -72,6 +72,16 @@ config DEVFREQ_GOV_QCOM_ADRENO_TZ
 	  Sets the frequency using a "on-demand" algorithm.
 	  This governor is unlikely to be useful for other devices.
 
+config DEVFREQ_GOV_QCOM_ADRENO_TZ_CURRENT
+        tristate "QCOM Adreno Trustzone Current"
+        depends on DEVFREQ_GOV_QCOM_ADRENO_TZ && QCOM_KGSL_CURRENT
+        default y
+
+config DEVFREQ_GOV_QCOM_ADRENO_TZ_LEGACY
+        tristate "QCOM Adreno Trustzone Legacy"
+        depends on DEVFREQ_GOV_QCOM_ADRENO_TZ && QCOM_KGSL_LEGACY
+        default y
+
 config DEVFREQ_GOV_CPUFREQ
 	tristate "CPUfreq"
 	depends on CPU_FREQ
