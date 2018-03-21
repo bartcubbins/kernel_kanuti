@@ -58,7 +58,6 @@
 #define clk_csi0phytimer_clk_src		0xc8a309be
 #define clk_csi1phytimer_clk_src		0x7c0fe23a
 #define clk_esc0_clk_src			0xb41d7c38
-#define clk_esc1_clk_src                        0x6f7cfe22
 #define clk_gfx3d_clk_src			0x917f76ef
 #define clk_gp1_clk_src				0xad85b97a
 #define clk_gp2_clk_src				0xfb1f0065
@@ -148,7 +147,6 @@
 #define clk_gcc_mdss_axi_clk			0x668f51de
 #define clk_gcc_mdss_byte0_clk			0x35da7862
 #define clk_gcc_mdss_esc0_clk			0xaec5cb25
-#define clk_gcc_mdss_esc1_clk                   0xc8b33763
 #define clk_gcc_mdss_mdp_clk			0x22f3521f
 #define clk_gcc_mdss_mdp_vote_clk		0x588460a4
 #define clk_gcc_mdss_mdp_rotator_vote_clk	0x5b1f675e
