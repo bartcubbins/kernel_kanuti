@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -108,7 +108,6 @@ static void __iomem *virt_dbgbase;
 #define SDCC2_APPS_CBCR					0x43018
 #define SDCC2_AHB_CBCR					0x4301C
 #define BLSP1_AHB_CBCR					0x01008
-#define BLSP1_QUP1_SPI_APPS_CBCR			0x02004
 #define BLSP1_QUP1_I2C_APPS_CBCR			0x02008
 #define BLSP1_QUP1_I2C_APPS_CMD_RCGR			0x0200C
 #define BLSP1_QUP2_I2C_APPS_CMD_RCGR			0x03000
@@ -116,26 +115,15 @@ static void __iomem *virt_dbgbase;
 #define BLSP1_QUP4_I2C_APPS_CMD_RCGR			0x05000
 #define BLSP1_QUP5_I2C_APPS_CMD_RCGR			0x06000
 #define BLSP1_QUP6_I2C_APPS_CMD_RCGR			0x07000
-#define BLSP1_QUP1_SPI_APPS_CMD_RCGR			0x02024
 #define BLSP1_UART1_APPS_CBCR				0x0203C
 #define BLSP1_UART1_APPS_CMD_RCGR			0x02044
-#define BLSP1_QUP2_SPI_APPS_CBCR			0x0300C
 #define BLSP1_QUP2_I2C_APPS_CBCR			0x03010
-#define BLSP1_QUP2_SPI_APPS_CMD_RCGR			0x03014
 #define BLSP1_UART2_APPS_CBCR				0x0302C
 #define BLSP1_UART2_APPS_CMD_RCGR			0x03034
-#define BLSP1_QUP3_SPI_APPS_CBCR			0x0401C
 #define BLSP1_QUP3_I2C_APPS_CBCR			0x04020
-#define BLSP1_QUP3_SPI_APPS_CMD_RCGR			0x04024
-#define BLSP1_QUP4_SPI_APPS_CBCR			0x0501C
 #define BLSP1_QUP4_I2C_APPS_CBCR			0x05020
-#define BLSP1_QUP4_SPI_APPS_CMD_RCGR			0x05024
-#define BLSP1_QUP5_SPI_APPS_CBCR			0x0601C
 #define BLSP1_QUP5_I2C_APPS_CBCR			0x06020
-#define BLSP1_QUP5_SPI_APPS_CMD_RCGR			0x06024
-#define BLSP1_QUP6_SPI_APPS_CBCR			0x0701C
 #define BLSP1_QUP6_I2C_APPS_CBCR			0x07020
-#define BLSP1_QUP6_SPI_APPS_CMD_RCGR			0x07024
 #define PDM_AHB_CBCR					0x44004
 #define PDM2_CBCR					0x4400C
 #define PDM2_CMD_RCGR					0x44010
@@ -886,31 +874,6 @@ static struct rcg_clk blsp1_qup1_i2c_apps_clk_src = {
 	},
 };
 
-static struct clk_freq_tbl ftbl_gcc_blsp1_qup1_6_spi_apps_clk[] = {
-	F(    960000,	      gcc_xo,  10,	  1,	2),
-	F(   4800000,	      gcc_xo,   4,	  0,	0),
-	F(   9600000,	      gcc_xo,   2,	  0,	0),
-	F(  16000000,	   gpll0_out_main,  10,	  1,	5),
-	F(  19200000,	      gcc_xo,   1,	  0,	0),
-	F(  25000000,	   gpll0_out_main,  16,	  1,	2),
-	F(  50000000,	   gpll0_out_main,  16,	  0,	0),
-	F_END
-};
-
-static struct rcg_clk blsp1_qup1_spi_apps_clk_src = {
-	.cmd_rcgr_reg = BLSP1_QUP1_SPI_APPS_CMD_RCGR,
-	.set_rate = set_rate_mnd,
-	.freq_tbl = ftbl_gcc_blsp1_qup1_6_spi_apps_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "blsp1_qup1_spi_apps_clk_src",
-		.ops = &clk_ops_rcg_mnd,
-		VDD_DIG_FMAX_MAP2(LOW, 25000000, NOMINAL, 50000000),
-		CLK_INIT(blsp1_qup1_spi_apps_clk_src.c),
-	},
-};
-
 static struct rcg_clk blsp1_qup2_i2c_apps_clk_src = {
 	.cmd_rcgr_reg = BLSP1_QUP2_I2C_APPS_CMD_RCGR,
 	.set_rate = set_rate_hid,
@@ -922,20 +885,6 @@ static struct rcg_clk blsp1_qup2_i2c_apps_clk_src = {
 		.ops = &clk_ops_rcg,
 		VDD_DIG_FMAX_MAP1(LOW, 50000000),
 		CLK_INIT(blsp1_qup2_i2c_apps_clk_src.c),
-	},
-};
-
-static struct rcg_clk blsp1_qup2_spi_apps_clk_src = {
-	.cmd_rcgr_reg = BLSP1_QUP2_SPI_APPS_CMD_RCGR,
-	.set_rate = set_rate_mnd,
-	.freq_tbl = ftbl_gcc_blsp1_qup1_6_spi_apps_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "blsp1_qup2_spi_apps_clk_src",
-		.ops = &clk_ops_rcg_mnd,
-		VDD_DIG_FMAX_MAP2(LOW, 25000000, NOMINAL, 50000000),
-		CLK_INIT(blsp1_qup2_spi_apps_clk_src.c),
 	},
 };
 
@@ -953,20 +902,6 @@ static struct rcg_clk blsp1_qup3_i2c_apps_clk_src = {
 	},
 };
 
-static struct rcg_clk blsp1_qup3_spi_apps_clk_src = {
-	.cmd_rcgr_reg = BLSP1_QUP3_SPI_APPS_CMD_RCGR,
-	.set_rate = set_rate_mnd,
-	.freq_tbl = ftbl_gcc_blsp1_qup1_6_spi_apps_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "blsp1_qup3_spi_apps_clk_src",
-		.ops = &clk_ops_rcg_mnd,
-		VDD_DIG_FMAX_MAP2(LOW, 25000000, NOMINAL, 50000000),
-		CLK_INIT(blsp1_qup3_spi_apps_clk_src.c),
-	},
-};
-
 static struct rcg_clk blsp1_qup4_i2c_apps_clk_src = {
 	.cmd_rcgr_reg = BLSP1_QUP4_I2C_APPS_CMD_RCGR,
 	.set_rate = set_rate_hid,
@@ -978,20 +913,6 @@ static struct rcg_clk blsp1_qup4_i2c_apps_clk_src = {
 		.ops = &clk_ops_rcg,
 		VDD_DIG_FMAX_MAP1(LOW, 50000000),
 		CLK_INIT(blsp1_qup4_i2c_apps_clk_src.c),
-	},
-};
-
-static struct rcg_clk blsp1_qup4_spi_apps_clk_src = {
-	.cmd_rcgr_reg = BLSP1_QUP4_SPI_APPS_CMD_RCGR,
-	.set_rate = set_rate_mnd,
-	.freq_tbl = ftbl_gcc_blsp1_qup1_6_spi_apps_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "blsp1_qup4_spi_apps_clk_src",
-		.ops = &clk_ops_rcg_mnd,
-		VDD_DIG_FMAX_MAP2(LOW, 25000000, NOMINAL, 50000000),
-		CLK_INIT(blsp1_qup4_spi_apps_clk_src.c),
 	},
 };
 
@@ -1009,20 +930,6 @@ static struct rcg_clk blsp1_qup5_i2c_apps_clk_src = {
 	},
 };
 
-static struct rcg_clk blsp1_qup5_spi_apps_clk_src = {
-	.cmd_rcgr_reg = BLSP1_QUP5_SPI_APPS_CMD_RCGR,
-	.set_rate = set_rate_mnd,
-	.freq_tbl = ftbl_gcc_blsp1_qup1_6_spi_apps_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "blsp1_qup5_spi_apps_clk_src",
-		.ops = &clk_ops_rcg_mnd,
-		VDD_DIG_FMAX_MAP2(LOW, 25000000, NOMINAL, 50000000),
-		CLK_INIT(blsp1_qup5_spi_apps_clk_src.c),
-	},
-};
-
 static struct rcg_clk blsp1_qup6_i2c_apps_clk_src = {
 	.cmd_rcgr_reg = BLSP1_QUP6_I2C_APPS_CMD_RCGR,
 	.set_rate = set_rate_hid,
@@ -1034,20 +941,6 @@ static struct rcg_clk blsp1_qup6_i2c_apps_clk_src = {
 		.ops = &clk_ops_rcg,
 		VDD_DIG_FMAX_MAP1(LOW, 50000000),
 		CLK_INIT(blsp1_qup6_i2c_apps_clk_src.c),
-	},
-};
-
-static struct rcg_clk blsp1_qup6_spi_apps_clk_src = {
-	.cmd_rcgr_reg = BLSP1_QUP6_SPI_APPS_CMD_RCGR,
-	.set_rate = set_rate_mnd,
-	.freq_tbl = ftbl_gcc_blsp1_qup1_6_spi_apps_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "blsp1_qup6_spi_apps_clk_src",
-		.ops = &clk_ops_rcg_mnd,
-		VDD_DIG_FMAX_MAP2(LOW, 25000000, NOMINAL, 50000000),
-		CLK_INIT(blsp1_qup6_spi_apps_clk_src.c),
 	},
 };
 
@@ -1618,18 +1511,6 @@ static struct branch_clk gcc_blsp1_qup1_i2c_apps_clk = {
 	},
 };
 
-static struct branch_clk gcc_blsp1_qup1_spi_apps_clk = {
-	.cbcr_reg = BLSP1_QUP1_SPI_APPS_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_blsp1_qup1_spi_apps_clk",
-		.parent = &blsp1_qup1_spi_apps_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_blsp1_qup1_spi_apps_clk.c),
-	},
-};
-
 static struct branch_clk gcc_blsp1_qup2_i2c_apps_clk = {
 	.cbcr_reg = BLSP1_QUP2_I2C_APPS_CBCR,
 	.has_sibling = 0,
@@ -1639,18 +1520,6 @@ static struct branch_clk gcc_blsp1_qup2_i2c_apps_clk = {
 		.parent = &blsp1_qup2_i2c_apps_clk_src.c,
 		.ops = &clk_ops_branch,
 		CLK_INIT(gcc_blsp1_qup2_i2c_apps_clk.c),
-	},
-};
-
-static struct branch_clk gcc_blsp1_qup2_spi_apps_clk = {
-	.cbcr_reg = BLSP1_QUP2_SPI_APPS_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_blsp1_qup2_spi_apps_clk",
-		.parent = &blsp1_qup2_spi_apps_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_blsp1_qup2_spi_apps_clk.c),
 	},
 };
 
@@ -1666,18 +1535,6 @@ static struct branch_clk gcc_blsp1_qup3_i2c_apps_clk = {
 	},
 };
 
-static struct branch_clk gcc_blsp1_qup3_spi_apps_clk = {
-	.cbcr_reg = BLSP1_QUP3_SPI_APPS_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_blsp1_qup3_spi_apps_clk",
-		.parent = &blsp1_qup3_spi_apps_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_blsp1_qup3_spi_apps_clk.c),
-	},
-};
-
 static struct branch_clk gcc_blsp1_qup4_i2c_apps_clk = {
 	.cbcr_reg = BLSP1_QUP4_I2C_APPS_CBCR,
 	.has_sibling = 0,
@@ -1687,18 +1544,6 @@ static struct branch_clk gcc_blsp1_qup4_i2c_apps_clk = {
 		.parent = &blsp1_qup4_i2c_apps_clk_src.c,
 		.ops = &clk_ops_branch,
 		CLK_INIT(gcc_blsp1_qup4_i2c_apps_clk.c),
-	},
-};
-
-static struct branch_clk gcc_blsp1_qup4_spi_apps_clk = {
-	.cbcr_reg = BLSP1_QUP4_SPI_APPS_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_blsp1_qup4_spi_apps_clk",
-		.parent = &blsp1_qup4_spi_apps_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_blsp1_qup4_spi_apps_clk.c),
 	},
 };
 
@@ -1714,18 +1559,6 @@ static struct branch_clk gcc_blsp1_qup5_i2c_apps_clk = {
 	},
 };
 
-static struct branch_clk gcc_blsp1_qup5_spi_apps_clk = {
-	.cbcr_reg = BLSP1_QUP5_SPI_APPS_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_blsp1_qup5_spi_apps_clk",
-		.parent = &blsp1_qup5_spi_apps_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_blsp1_qup5_spi_apps_clk.c),
-	},
-};
-
 static struct branch_clk gcc_blsp1_qup6_i2c_apps_clk = {
 	.cbcr_reg = BLSP1_QUP6_I2C_APPS_CBCR,
 	.has_sibling = 0,
@@ -1735,18 +1568,6 @@ static struct branch_clk gcc_blsp1_qup6_i2c_apps_clk = {
 		.parent = &blsp1_qup6_i2c_apps_clk_src.c,
 		.ops = &clk_ops_branch,
 		CLK_INIT(gcc_blsp1_qup6_i2c_apps_clk.c),
-	},
-};
-
-static struct branch_clk gcc_blsp1_qup6_spi_apps_clk = {
-	.cbcr_reg = BLSP1_QUP6_SPI_APPS_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_blsp1_qup6_spi_apps_clk",
-		.parent = &blsp1_qup6_spi_apps_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_blsp1_qup6_spi_apps_clk.c),
 	},
 };
 
@@ -2990,19 +2811,13 @@ static struct mux_clk gcc_debug_mux = {
 		{&gcc_sdcc2_apps_clk.c,			0x0070},
 		{&gcc_sdcc2_ahb_clk.c,			0x0071},
 		{&gcc_blsp1_ahb_clk.c,			0x0088},
-		{&gcc_blsp1_qup1_spi_apps_clk.c,	0x008a},
 		{&gcc_blsp1_qup1_i2c_apps_clk.c,	0x008b},
 		{&gcc_blsp1_uart1_apps_clk.c,		0x008c},
-		{&gcc_blsp1_qup2_spi_apps_clk.c,	0x008e},
 		{&gcc_blsp1_qup2_i2c_apps_clk.c,	0x0090},
 		{&gcc_blsp1_uart2_apps_clk.c,		0x0091},
-		{&gcc_blsp1_qup3_spi_apps_clk.c,	0x0093},
 		{&gcc_blsp1_qup3_i2c_apps_clk.c,	0x0094},
-		{&gcc_blsp1_qup4_spi_apps_clk.c,	0x0098},
 		{&gcc_blsp1_qup4_i2c_apps_clk.c,	0x0099},
-		{&gcc_blsp1_qup5_spi_apps_clk.c,	0x009c},
 		{&gcc_blsp1_qup5_i2c_apps_clk.c,	0x009d},
-		{&gcc_blsp1_qup6_spi_apps_clk.c,	0x00a1},
 		{&gcc_blsp1_qup6_i2c_apps_clk.c,	0x00a2},
 		{&gcc_camss_ahb_clk.c,			0x00a8},
 		{&gcc_camss_top_ahb_clk.c,		0x00a9},
@@ -3114,17 +2929,11 @@ static struct clk_lookup msm_clocks_lookup[] = {
 	CLK_LIST(mdp_clk_src),
 	CLK_LIST(gfx3d_clk_src),
 	CLK_LIST(blsp1_qup1_i2c_apps_clk_src),
-	CLK_LIST(blsp1_qup1_spi_apps_clk_src),
 	CLK_LIST(blsp1_qup2_i2c_apps_clk_src),
-	CLK_LIST(blsp1_qup2_spi_apps_clk_src),
 	CLK_LIST(blsp1_qup3_i2c_apps_clk_src),
-	CLK_LIST(blsp1_qup3_spi_apps_clk_src),
 	CLK_LIST(blsp1_qup4_i2c_apps_clk_src),
-	CLK_LIST(blsp1_qup4_spi_apps_clk_src),
 	CLK_LIST(blsp1_qup5_i2c_apps_clk_src),
-	CLK_LIST(blsp1_qup5_spi_apps_clk_src),
 	CLK_LIST(blsp1_qup6_i2c_apps_clk_src),
-	CLK_LIST(blsp1_qup6_spi_apps_clk_src),
 	CLK_LIST(blsp1_uart1_apps_clk_src),
 	CLK_LIST(blsp1_uart2_apps_clk_src),
 	CLK_LIST(cci_clk_src),
@@ -3169,17 +2978,11 @@ static struct clk_lookup msm_clocks_lookup[] = {
 
 	/* Branches */
 	CLK_LIST(gcc_blsp1_qup1_i2c_apps_clk),
-	CLK_LIST(gcc_blsp1_qup1_spi_apps_clk),
 	CLK_LIST(gcc_blsp1_qup2_i2c_apps_clk),
-	CLK_LIST(gcc_blsp1_qup2_spi_apps_clk),
 	CLK_LIST(gcc_blsp1_qup3_i2c_apps_clk),
-	CLK_LIST(gcc_blsp1_qup3_spi_apps_clk),
 	CLK_LIST(gcc_blsp1_qup4_i2c_apps_clk),
-	CLK_LIST(gcc_blsp1_qup4_spi_apps_clk),
 	CLK_LIST(gcc_blsp1_qup5_i2c_apps_clk),
-	CLK_LIST(gcc_blsp1_qup5_spi_apps_clk),
 	CLK_LIST(gcc_blsp1_qup6_i2c_apps_clk),
-	CLK_LIST(gcc_blsp1_qup6_spi_apps_clk),
 	CLK_LIST(gcc_blsp1_uart1_apps_clk),
 	CLK_LIST(gcc_blsp1_uart2_apps_clk),
 	CLK_LIST(gcc_camss_cci_ahb_clk),
