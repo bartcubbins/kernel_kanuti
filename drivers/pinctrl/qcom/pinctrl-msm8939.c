@@ -480,7 +480,6 @@ enum msm8939_functions {
 	msm_mux_wcss_bt,
 	msm_mux_wcss_fm,
 	msm_mux_wcss_wlan,
-	msm_mux_webcam1_rst,
 	msm_mux_NA,
 };
 
@@ -842,9 +841,6 @@ static const char * const wcss_fm_groups[] = {
 static const char * const wcss_wlan_groups[] = {
 	"gpio40", "gpio41", "gpio42", "gpio43", "gpio44"
 };
-static const char * const webcam1_rst_groups[] = {
-	"gpio28"
-};
 
 static const struct msm_function msm8939_functions[] = {
 	FUNCTION(adsp_ext),
@@ -958,8 +954,7 @@ static const struct msm_function msm8939_functions[] = {
 	FUNCTION(uim_batt),
 	FUNCTION(wcss_bt),
 	FUNCTION(wcss_fm),
-	FUNCTION(wcss_wlan),
-	FUNCTION(webcam1_rst)
+	FUNCTION(wcss_wlan)
 };
 
 static const struct msm_pingroup msm8939_groups[] = {
