@@ -183,7 +183,6 @@ static void __iomem *virt_dbgbase;
 #define VSYNC_CMD_RCGR					0x4D02C
 #define BYTE0_CMD_RCGR					0x4D044
 #define ESC0_CMD_RCGR					0x4D05C
-#define ESC1_CMD_RCGR                                   0x4D0A8
 #define MDSS_BCR					0x4D074
 #define MDSS_AHB_CBCR					0x4D07C
 #define MDSS_AXI_CBCR					0x4D080
@@ -192,7 +191,6 @@ static void __iomem *virt_dbgbase;
 #define MDSS_VSYNC_CBCR					0x4D090
 #define MDSS_BYTE0_CBCR					0x4D094
 #define MDSS_ESC0_CBCR					0x4D098
-#define MDSS_ESC1_CBCR                                  0x4D09C
 #define CSI0PHYTIMER_CMD_RCGR				0x4E000
 #define CAMSS_CSI0PHYTIMER_CBCR				0x4E01C
 #define CSI1PHYTIMER_CMD_RCGR				0x4F000
@@ -1264,20 +1262,6 @@ static struct rcg_clk esc0_clk_src = {
 	},
 };
 
-static struct rcg_clk esc1_clk_src = {
-	.cmd_rcgr_reg = ESC1_CMD_RCGR,
-	.set_rate = set_rate_hid,
-	.freq_tbl = ftbl_gcc_mdss_esc0_1_clk,
-	.current_freq = &rcg_dummy_freq,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "esc1_clk_src",
-		.ops = &clk_ops_rcg,
-		VDD_DIG_FMAX_MAP1(LOW, 19200000),
-		CLK_INIT(esc1_clk_src.c),
-	},
-};
-
 static struct clk_freq_tbl ftbl_gcc_mdss_mdp_clk[] = {
 	F(  50000000,	   gpll0_out_aux,  16,	  0,	0),
 	F(  80000000,	   gpll0_out_aux,  10,	  0,	0),
@@ -2229,17 +2213,6 @@ static struct branch_clk gcc_mdss_esc0_clk = {
 	},
 };
 
-static struct branch_clk gcc_mdss_esc1_clk = {
-	.cbcr_reg = MDSS_ESC1_CBCR,
-	.has_sibling = 0,
-	.base = &virt_bases[GCC_BASE],
-	.c = {
-		.dbg_name = "gcc_mdss_esc1_clk",
-		.parent = &esc1_clk_src.c,
-		.ops = &clk_ops_branch,
-		CLK_INIT(gcc_mdss_esc1_clk.c),
-	},
-};
 static struct branch_clk gcc_mdss_mdp_clk = {
 	.cbcr_reg = MDSS_MDP_CBCR,
 	.bcr_reg = MDSS_BCR,
@@ -2879,7 +2852,6 @@ static struct mux_clk gcc_debug_mux = {
 		{&gcc_mdss_vsync_clk.c,			0x01fb},
 		{&gcc_mdss_byte0_clk.c,			0x01fc},
 		{&gcc_mdss_esc0_clk.c,			0x01fd},
-		{&gcc_mdss_esc1_clk.c,			0x01bc},
 		{&gcc_bimc_gpu_clk.c,			0x0157},
 		{&gcc_cpp_tbu_clk.c,			0x00e9},
 		{&gcc_mdp_rt_tbu_clk.c,			0x00ee},
@@ -2950,7 +2922,6 @@ static struct clk_lookup msm_clocks_lookup[] = {
 	CLK_LIST(gp2_clk_src),
 	CLK_LIST(gp3_clk_src),
 	CLK_LIST(esc0_clk_src),
-	CLK_LIST(esc1_clk_src),
 	CLK_LIST(vsync_clk_src),
 	CLK_LIST(pdm2_clk_src),
 	CLK_LIST(sdcc1_apps_clk_src),
@@ -3029,7 +3000,6 @@ static struct clk_lookup msm_clocks_lookup[] = {
 	CLK_LIST(gcc_mdss_ahb_clk),
 	CLK_LIST(gcc_mdss_axi_clk),
 	CLK_LIST(gcc_mdss_esc0_clk),
-	CLK_LIST(gcc_mdss_esc1_clk),
 	CLK_LIST(gcc_mdss_mdp_clk),
 	CLK_LIST(gcc_mdss_vsync_clk),
 	CLK_LIST(gcc_mss_cfg_ahb_clk),
