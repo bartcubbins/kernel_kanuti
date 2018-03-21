@@ -621,10 +621,6 @@
 };
 
 /* Regulators */
-&fan53555 {
-	status = "disabled";
-};
-
 &pm8916_l10 {
 	qcom,init-voltage = <2800000>;
 };
