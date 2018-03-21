@@ -30,20 +30,6 @@
 		onnn,discharge-enable;
 		onnn,restore-reg;
 	};
-
-	fan53555: fan53555-regulator@60 {
-		compatible = "fairchild,fan53555-regulator";
-		reg = <0x60>;
-		fairchild,backup-vsel = <1>;
-		regulator-min-microvolt = <1050000>;
-		regulator-max-microvolt = <1350000>;
-		regulator-ramp-delay = <1250>;
-		pintrl-names = "default";
-		pinctrl-0 = <&ext_buck_vsel_default>;
-		fairchild,vsel-gpio = <&msm_gpio 111 1>;
-		fairchild,restore-reg;
-		fairchild,disable-suspend;
-	};
 };
 
 /* Memory accelerator and CPR controlled regulators */
