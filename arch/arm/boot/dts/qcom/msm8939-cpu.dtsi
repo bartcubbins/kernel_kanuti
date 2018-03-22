@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2015, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -53,12 +53,22 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile0>;
 			qcom,acc = <&acc0>;
-			next-level-cache = <&L2_1>;
 			qcom,sleep-status = <&cpu0_slp_sts>;
+			next-level-cache = <&L2_1>;
 			L2_1: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-level = <2>;
 			      power-domain = <&l2ccc_1>;
+			      /* A53 L2 dump not supported */
+			      qcom,dump-size = <0x0>;
+			};
+			L1_I_100: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_100: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
 			};
 		};
 
@@ -69,8 +79,16 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile1>;
 			qcom,acc = <&acc1>;
-			next-level-cache = <&L2_1>;
 			qcom,sleep-status = <&cpu1_slp_sts>;
+			next-level-cache = <&L2_1>;
+			L1_I_101: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_101: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
+			};
 		};
 
 		CPU2: cpu@102 {
@@ -80,8 +98,16 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile2>;
 			qcom,acc = <&acc2>;
-			next-level-cache = <&L2_1>;
 			qcom,sleep-status = <&cpu2_slp_sts>;
+			next-level-cache = <&L2_1>;
+			L1_I_102: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_102: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
+			};
 		};
 
 		CPU3: cpu@103 {
@@ -91,8 +117,16 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile3>;
 			qcom,acc = <&acc3>;
-			next-level-cache = <&L2_1>;
 			qcom,sleep-status = <&cpu3_slp_sts>;
+			next-level-cache = <&L2_1>;
+			L1_I_103: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_103: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
+			};
 		};
 
 		CPU4: cpu@0 {
@@ -102,12 +136,21 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile4>;
 			qcom,acc = <&acc4>;
-			next-level-cache = <&L2_0>;
 			qcom,sleep-status = <&cpu4_slp_sts>;
+			next-level-cache = <&L2_0>;
 			L2_0: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-level = <2>;
 			      power-domain = <&l2ccc_0>;
+			      qcom,dump-size = <0x0>;
+			};
+			L1_I_0: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_0: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
 			};
 		};
 
@@ -118,8 +161,16 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile4>;
 			qcom,acc = <&acc5>;
-			next-level-cache = <&L2_0>;
 			qcom,sleep-status = <&cpu5_slp_sts>;
+			next-level-cache = <&L2_0>;
+			L1_I_1: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_1: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
+			};
 		};
 
 		CPU6: cpu@2 {
@@ -129,8 +180,16 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile4>;
 			qcom,acc = <&acc6>;
-			next-level-cache = <&L2_0>;
 			qcom,sleep-status = <&cpu6_slp_sts>;
+			next-level-cache = <&L2_0>;
+			L1_I_2: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_2: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
+			};
 		};
 
 		CPU7: cpu@3 {
@@ -140,8 +199,16 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile4>;
 			qcom,acc = <&acc7>;
-			next-level-cache = <&L2_0>;
 			qcom,sleep-status = <&cpu7_slp_sts>;
+			next-level-cache = <&L2_0>;
+			L1_I_3: l1-icache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x8800>;
+			};
+			L1_D_3: l1-dcache {
+				compatible = "arm,arch-cache";
+				qcom,dump-size = <0x9000>;
+			};
 		};
 	};
 };
@@ -237,5 +304,83 @@
 	cpu7_slp_sts: cpu-sleep-status@b1b8008 {
 		reg = <0xb1b8008 0x100>;
 		qcom,sleep-status-mask= <0x40000>;
+	};
+
+	cpuss_dump {
+		compatible = "qcom,cpuss-dump";
+		qcom,l2_dump0 {
+			/* L2 cache dump for A53 cluster */
+			qcom,dump-node = <&L2_0>;
+			qcom,dump-id = <0xC0>;
+		};
+		qcom,l2_dump1 {
+			/* L2 cache dump for A53 cluster */
+			qcom,dump-node = <&L2_1>;
+			qcom,dump-id = <0xC1>;
+		};
+		qcom,l1_i_cache0 {
+			qcom,dump-node = <&L1_I_0>;
+			qcom,dump-id = <0x60>;
+		};
+		qcom,l1_i_cache1 {
+			qcom,dump-node = <&L1_I_1>;
+			qcom,dump-id = <0x61>;
+		};
+		qcom,l1_i_cache2 {
+			qcom,dump-node = <&L1_I_2>;
+			qcom,dump-id = <0x62>;
+		};
+		qcom,l1_i_cache3 {
+			qcom,dump-node = <&L1_I_3>;
+			qcom,dump-id = <0x63>;
+		};
+		qcom,l1_i_cache100 {
+			qcom,dump-node = <&L1_I_100>;
+			qcom,dump-id = <0x64>;
+		};
+		qcom,l1_i_cache101 {
+			qcom,dump-node = <&L1_I_101>;
+			qcom,dump-id = <0x65>;
+		};
+		qcom,l1_i_cache102 {
+			qcom,dump-node = <&L1_I_102>;
+			qcom,dump-id = <0x66>;
+		};
+		qcom,l1_i_cache103 {
+			qcom,dump-node = <&L1_I_103>;
+			qcom,dump-id = <0x67>;
+		};
+		qcom,l1_d_cache0 {
+			qcom,dump-node = <&L1_D_0>;
+			qcom,dump-id = <0x80>;
+		};
+		qcom,l1_d_cache1 {
+			qcom,dump-node = <&L1_D_1>;
+			qcom,dump-id = <0x81>;
+		};
+		qcom,l1_d_cache2 {
+			qcom,dump-node = <&L1_D_2>;
+			qcom,dump-id = <0x82>;
+		};
+		qcom,l1_d_cache3 {
+			qcom,dump-node = <&L1_D_3>;
+			qcom,dump-id = <0x83>;
+		};
+		qcom,l1_d_cache100 {
+			qcom,dump-node = <&L1_D_100>;
+			qcom,dump-id = <0x84>;
+		};
+		qcom,l1_d_cache101 {
+			qcom,dump-node = <&L1_D_101>;
+			qcom,dump-id = <0x85>;
+		};
+		qcom,l1_d_cache102 {
+			qcom,dump-node = <&L1_D_102>;
+			qcom,dump-id = <0x86>;
+		};
+		qcom,l1_d_cache103 {
+			qcom,dump-node = <&L1_D_103>;
+			qcom,dump-id = <0x87>;
+		};
 	};
 };
