@@ -445,37 +445,7 @@
 	qcom,platform-bklight-en-gpio = <&msm_gpio 10 0>;
 };
 
-&pm8916_mpps {
-	mpp@a000 { /* MPP 1 */
-		/* VDD_PX */
-		status = "disabled";
-	};
-
-	mpp@a100 { /* MPP 2 */
-		/* HR LED */
-		status = "disabled";
-	};
-
-	mpp@a200 { /* MPP 3 */
-		/* VREF DAC */
-		status = "disabled";
-	};
-
-	mpp@a300 { /* MPP4: NC */
-		status = "disabled";
-	};
-};
-
 &pm8916_gpios {
-	gpio@c000 { /* GPIO 1 */
-		/* Battery UICC Alarm */
-		status = "disabled";
-	};
-
-	gpio@c100 { /* GPIO 2: NC */
-		status = "disabled";
-	};
-
 	gpio@c200 { /* GPIO 3: Camera */
 		qcom,mode = <1>;		/* Digital output */
 		qcom,output-type = <0>;		/* CMOS logic */
@@ -485,13 +455,7 @@
 		qcom,master-en = <1>;		/* Enable GPIO */
 		status = "ok";
 	};
-
-	gpio@c300 { /* GPIO 4 */
-		/* External regulator control for APC */
-		status = "disabled";
-	};
 };
-
 
 /* Pinctrl */
 &msm_gpio {
