@@ -2859,12 +2859,15 @@ static int mhi_dev_probe(struct platform_device *pdev)
 			pr_err("Error reading MHI Dev DT\n");
 			return rc;
 		}
+
+#ifdef CONFIG_IPC_LOGGING
 		mhi_ipc_log = ipc_log_context_create(MHI_IPC_LOG_PAGES,
 								"mhi", 0);
 		if (mhi_ipc_log == NULL) {
 			dev_err(&pdev->dev,
 				"Failed to create IPC logging context\n");
 		}
+#endif
 		mhi_uci_init();
 		mhi_update_state_info(MHI_STATE_CONFIGURED);
 	}
