@@ -770,12 +770,12 @@
 		pmx_mdss {
 			mdss_dsi_active: mdss_dsi_active {
 				mux {
-					pins = "gpio 114", "gpio 17", "gpio 25", "gpio 10";
+					pins = "gpio25";
 					function = "gpio";
 				};
 
 				config {
-					pins = "gpio 114", "gpio 17", "gpio 25", "gpio 10";
+					pins = "gpio25";
 					drive-strength = <8>; /* 8 mA */
 					bias-disable = <0>; /* no pull */
 					output-high;
@@ -784,12 +784,12 @@
 
 			mdss_dsi_suspend: mdss_dsi_suspend {
 				mux {
-					pins = "gpio 114", "gpio 17", "gpio 25", "gpio 10";
+					pins = "gpio25";
 					function = "gpio";
 				};
 
 				config {
-					pins = "gpio 114", "gpio 17", "gpio 25", "gpio 10";
+					pins = "gpio25";
 					drive-strength = <2>; /* 2 mA */
 					bias-pull-down; /* pull down */
 					output-low;
