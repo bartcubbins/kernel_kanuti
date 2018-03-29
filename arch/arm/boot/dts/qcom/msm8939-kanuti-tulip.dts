@@ -15,7 +15,7 @@
 #include "msm8939.dtsi"
 #include "msm8939-pinctrl.dtsi"
 #include "msm8939-mtp.dtsi"
-#include "msm8939-audio-internal_codec.dtsi"
+#include "msm8939-audio.dtsi"
 #include "msm8939-kanuti-tulip.dtsi"
 //#include "msm8939-kanuti-tulip_camera.dtsi"
 #include "dsi-panel-somc-tulip.dtsi"
