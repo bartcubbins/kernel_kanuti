@@ -615,11 +615,13 @@ int mhi_dev_net_interface_init(void)
 	if (!mhi_net_client)
 		return -ENOMEM;
 
+#ifdef CONFIG_IPC_LOGGING
 	mhi_net_ipc_log = ipc_log_context_create(MHI_NET_IPC_PAGES,
 						"mhi-net", 0);
 	if (mhi_net_ipc_log == NULL)
 		mhi_dev_net_log(MHI_DBG,
 				"Failed to create IPC logging for mhi_dev_net\n");
+#endif
 	mhi_net_ctxt.client_handle = mhi_net_client;
 
 	/*Process pending packet work queue*/
