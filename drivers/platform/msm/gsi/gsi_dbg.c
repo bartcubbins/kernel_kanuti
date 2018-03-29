@@ -642,6 +642,7 @@ static ssize_t gsi_enable_ipc_low(struct file *file,
 	if (kstrtos8(dbg_buff, 0, &option))
 		return -EFAULT;
 
+#ifdef CONFIG_IPC_LOGGING
 	mutex_lock(&gsi_ctx->mlock);
 	if (option) {
 		if (!gsi_ipc_logbuf_low) {
@@ -656,6 +657,7 @@ static ssize_t gsi_enable_ipc_low(struct file *file,
 		gsi_ctx->ipc_logbuf_low = NULL;
 	}
 	mutex_unlock(&gsi_ctx->mlock);
+#endif
 
 	return count;
 }
