@@ -3,7 +3,7 @@ obj-$(CONFIG_ARCH_MDM9640) += board-9640.o
 obj-$(CONFIG_ARCH_MDM9607) += board-9607.o
 obj-$(CONFIG_ARCH_MDM9650) += board-9650.o
 obj-$(CONFIG_ARCH_SDX20) += board-sdx20.o
-ifndef CONFIG_ARCH_SONY_KANUTI
+ifneq ($(CONFIG_ARCH_SONY_KANUTI), y)
 obj-$(CONFIG_ARCH_MSM8916) += board-8952.o
 endif
 obj-$(CONFIG_ARCH_MSM8917) += board-8917.o
