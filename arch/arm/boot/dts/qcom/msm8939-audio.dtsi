@@ -12,7 +12,7 @@
 
 &soc {
 	sound {
-		compatible = "qcom,msm8x16-audio-codec";
+		compatible = "qcom,msm8952-audio-codec";
 		qcom,model = "msm8939-snd-card-mtp";
 		qcom,msm-snd-card-id = <0>;
 		qcom,msm-codec-type = "internal";
