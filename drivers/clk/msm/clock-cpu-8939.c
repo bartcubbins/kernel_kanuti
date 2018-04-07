@@ -484,7 +484,7 @@ static int add_opp(struct clk *c, struct device *cpudev, struct device *vregdev,
 	if (!IS_ERR_OR_NULL(oppl))
 		use_voltages = true;
 
-	while (1) {
+	do {
 		rate = c->fmax[j++];
 		level = find_vdd_level(c, rate);
 		if (level <= 0) {
@@ -531,7 +531,7 @@ static int add_opp(struct clk *c, struct device *cpudev, struct device *vregdev,
 		}
 		if (rate >= max_rate)
 			break;
-	}
+	} while (1);
 
 	return 0;
 }
