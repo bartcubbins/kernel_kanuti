@@ -527,7 +527,9 @@
 		interrupt-names = "tsens-upper-lower";
 		qcom,sensors = <9>;
 		qcom,slope = <2911 2789 2906 2763 2922 2867 2833 2838 2840>;
-	//	qcom,sensor-id = <0 1 2 3 5 6 7 8 9>;
+		qcom,sensor-id = <0 1 2 3 5 6 7 8 9>;
+		qcom,client-id = <0 1 2 3 5 6 7 8 9>;
+		qcom,valid-status-check;
 	};
 
 	qcom,sensor-information {
@@ -617,12 +619,12 @@
 
 	qcom,msm-thermal {
 		compatible = "qcom,msm-thermal";
-		qcom,sensor-id = <5>;
+		qcom,sensor-id = <9>;
 		qcom,poll-ms = <250>;
-		qcom,limit-temp = <60>;
+		qcom,limit-temp = <80>;
 		qcom,temp-hysteresis = <10>;
 		qcom,freq-step = <2>;
-		qcom,core-limit-temp = <80>;
+		qcom,core-limit-temp = <90>;
 		qcom,core-temp-hysteresis = <10>;
 		qcom,hotplug-temp = <105>;
 		qcom,hotplug-temp-hysteresis = <15>;
