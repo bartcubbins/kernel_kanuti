@@ -15,7 +15,7 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 		cpu-map {
-			cluster1 {
+			cluster0 {
 				core0 {
 					cpu = <&CPU4>;
 				};
@@ -30,7 +30,7 @@
 				};
 			};
 
-			cluster0 {
+			cluster1 {
 				core0 {
 					cpu = <&CPU0>;
 				};
