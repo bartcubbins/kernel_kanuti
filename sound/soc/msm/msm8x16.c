@@ -2715,6 +2715,8 @@ pr_info("---------------------------------BEGIN 8x16 PROBE!!--------------------
 		mbhc_cfg.hs_ext_micbias = false;
 	}
 
+pr_info("---------------------------------BEGIN 8x16 mclk init!!---------------------------\n");
+
 	/* initialize the mclk */
 	pdata->digital_cdc_clk.i2s_cfg_minor_version =
 					AFE_API_VERSION_I2S_CONFIG;

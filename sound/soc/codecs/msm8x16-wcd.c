@@ -5753,6 +5753,9 @@ static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 	int i, ret;
 	const char *subsys_name = NULL;
 
+pr_info("---------------------------------BEGIN 8x16-wcd PROBE!!---------------------------\n");
+
+
 	dev_dbg(codec->dev, "%s()\n", __func__);
 
 	msm8x16_wcd_priv = kzalloc(sizeof(struct msm8x16_wcd_priv), GFP_KERNEL);
@@ -5902,6 +5905,10 @@ static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 		registered_codec = NULL;
 		return -ENOMEM;
 	}
+
+pr_info("---------------------------------FINISH 8x16-wcd PROBE!!---------------------------\n");
+
+
 	return 0;
 }
 
