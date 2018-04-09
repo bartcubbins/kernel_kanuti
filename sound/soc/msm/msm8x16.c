@@ -2557,7 +2557,7 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 	int num_strings;
 	int ret, id, i;
 
-pr_info("---------------------------------BEGIN 8x16 PROBE!!---------------------------/n");
+pr_info("---------------------------------BEGIN 8x16 PROBE!!---------------------------\n");
 
 	pdata = devm_kzalloc(&pdev->dev,
 			sizeof(struct msm8916_asoc_mach_data), GFP_KERNEL);
@@ -2759,7 +2759,7 @@ pr_info("---------------------------------BEGIN 8x16 PROBE!!--------------------
 		goto err;
 	}
 
-pr_info("---------------------------------8x16 PROBED!!---------------------------/n");
+pr_info("---------------------------------8x16 PROBED!!---------------------------\n");
 
 	return 0;
 err:
