@@ -1950,7 +1950,7 @@ static struct snd_soc_dai_link msm8x16_dai[] = {
 	{
 		.name = LPASS_BE_PRI_MI2S_RX,
 		.stream_name = "Primary MI2S Playback",
-		//.cpu_dai_name = "msm-dai-q6-mi2s.0",
+		.cpu_dai_name = "msm-dai-q6-mi2s.0",
 		.platform_name = "msm-pcm-routing",
 		.codec_name     = "tombak_codec",
 		.codec_dai_name = "msm8x16_wcd_i2s_rx1",
