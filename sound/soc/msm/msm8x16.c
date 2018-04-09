@@ -1950,7 +1950,7 @@ static struct snd_soc_dai_link msm8x16_dai[] = {
 	{
 		.name = LPASS_BE_PRI_MI2S_RX,
 		.stream_name = "Primary MI2S Playback",
-		.cpu_dai_name = "msm-dai-q6-mi2s.0",
+		//.cpu_dai_name = "msm-dai-q6-mi2s.0",
 		.platform_name = "msm-pcm-routing",
 		.codec_name     = "tombak_codec",
 		.codec_dai_name = "msm8x16_wcd_i2s_rx1",
@@ -2735,6 +2735,8 @@ pr_info("---------------------------------BEGIN 8x16 mclk init!!----------------
 	ret = snd_soc_of_parse_card_name(card, "qcom,model");
 	if (ret)
 		goto err;
+
+pr_info("---------------------------------BEGIN 8x16 timer init!!---------------------------\n");
 	/* initialize timer */
 	INIT_DELAYED_WORK(&pdata->disable_mclk_work, disable_mclk);
 	mutex_init(&pdata->cdc_mclk_mutex);
@@ -2748,11 +2750,14 @@ pr_info("---------------------------------BEGIN 8x16 mclk init!!----------------
 	if (ret)
 		goto err;
 
+pr_info("---------------------------------8x16 BEGIN DAI!!---------------------------\n");
 	ret = msm8x16_populate_dai_link_component_of_node(card);
 	if (ret) {
 		ret = -EPROBE_DEFER;
 		goto err;
 	}
+pr_info("---------------------------------8x16 FINISH DAI!!---------------------------\n");
+
 
 	ret = snd_soc_register_card(card);
 	if (ret) {
