@@ -2557,6 +2557,8 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 	int num_strings;
 	int ret, id, i;
 
+pr_info("---------------------------------BEGIN 8x16 PROBE!!---------------------------/n");
+
 	pdata = devm_kzalloc(&pdev->dev,
 			sizeof(struct msm8916_asoc_mach_data), GFP_KERNEL);
 	if (!pdata) {
@@ -2616,7 +2618,7 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 	pdata->spk_ext_pa_gpio = of_get_named_gpio(pdev->dev.of_node,
 				spk_ext_pa, 0);
 	if (pdata->spk_ext_pa_gpio < 0) {
-		dev_dbg(&pdev->dev,
+		dev_err(&pdev->dev,
 			"%s: missing %s in dt node\n", __func__, spk_ext_pa);
 	} else {
 		if (!gpio_is_valid(pdata->spk_ext_pa_gpio)) {
@@ -2682,7 +2684,7 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 			else if (!strcmp(ext_pa_str, "quaternary"))
 				pdata->ext_pa = (pdata->ext_pa | QUAT_MI2S_ID);
 		}
-		pr_debug("%s: ext_pa = %d\n", __func__, pdata->ext_pa);
+		pr_err("%s: ext_pa = %d\n", __func__, pdata->ext_pa);
 		pinctrl = devm_pinctrl_get(&pdev->dev);
 		if (IS_ERR(pinctrl)) {
 			pr_err("%s: Unable to get pinctrl handle\n",
@@ -2756,6 +2758,9 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 			ret);
 		goto err;
 	}
+
+pr_info("---------------------------------8x16 PROBED!!---------------------------/n");
+
 	return 0;
 err:
 	if (pdata->vaddr_gpio_mux_spkr_ctl)
