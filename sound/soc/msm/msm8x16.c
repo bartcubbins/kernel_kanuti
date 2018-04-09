@@ -797,7 +797,7 @@ static int msm8x16_enable_extcodec_ext_clk(struct snd_soc_codec *codec,
 					AFE_PORT_ID_QUATERNARY_MI2S_RX,
 					&pdata->digital_cdc_clk);
 			mutex_unlock(&pdata->cdc_mclk_mutex);
-			tapan_mclk_enable(codec, 1, dapm);
+			//tapan_mclk_enable(codec, 1, dapm);
 		}
 	} else {
 		if (atomic_dec_return(&pdata->mclk_rsc_ref) == 0) {
@@ -811,7 +811,7 @@ static int msm8x16_enable_extcodec_ext_clk(struct snd_soc_codec *codec,
 					AFE_PORT_ID_QUATERNARY_MI2S_RX,
 					&pdata->digital_cdc_clk);
 			mutex_unlock(&pdata->cdc_mclk_mutex);
-			tapan_mclk_enable(codec, 0, dapm);
+			//tapan_mclk_enable(codec, 0, dapm);
 		}
 	}
 	return ret;
@@ -1447,9 +1447,9 @@ static int msm_audrx_init_wcd(struct snd_soc_pcm_runtime *rtd)
 
 	/* start mbhc */
 	wcd9xxx_mbhc_cfg.calibration = def_tapan_mbhc_cal();
-	if (wcd9xxx_mbhc_cfg.calibration)
-		ret = tapan_hs_detect(codec, &wcd9xxx_mbhc_cfg);
-	else
+	if (!wcd9xxx_mbhc_cfg.calibration)
+		//ret = tapan_hs_detect(codec, &wcd9xxx_mbhc_cfg);
+	//else
 		ret = -ENOMEM;
 	return ret;
 }
