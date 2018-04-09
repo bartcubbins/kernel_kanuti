@@ -2735,8 +2735,6 @@ pr_info("---------------------------------BEGIN 8x16 mclk init!!----------------
 	ret = snd_soc_of_parse_card_name(card, "qcom,model");
 	if (ret)
 		goto err;
-
-pr_info("---------------------------------BEGIN 8x16 timer init!!---------------------------\n");
 	/* initialize timer */
 	INIT_DELAYED_WORK(&pdata->disable_mclk_work, disable_mclk);
 	mutex_init(&pdata->cdc_mclk_mutex);
@@ -2750,14 +2748,11 @@ pr_info("---------------------------------BEGIN 8x16 timer init!!---------------
 	if (ret)
 		goto err;
 
-pr_info("---------------------------------8x16 BEGIN DAI!!---------------------------\n");
 	ret = msm8x16_populate_dai_link_component_of_node(card);
 	if (ret) {
 		ret = -EPROBE_DEFER;
 		goto err;
 	}
-pr_info("---------------------------------8x16 FINISH DAI!!---------------------------\n");
-
 
 	ret = snd_soc_register_card(card);
 	if (ret) {
