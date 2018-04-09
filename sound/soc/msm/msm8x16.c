@@ -731,8 +731,8 @@ static int msm8x16_enable_codec_ext_clk(struct snd_soc_codec *codec,
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
 	pdata = snd_soc_card_get_drvdata(codec->component.card);
-	pr_debug("%s: codec name %s enable %d mclk ref counter %d\n",
-		   __func__, codec->name, enable,
+	pr_debug("%s: enable %d mclk ref counter %d\n",
+		   __func__, enable,
 		   atomic_read(&pdata->mclk_rsc_ref));
 	if (enable) {
 		if (!atomic_read(&pdata->mclk_rsc_ref)) {
@@ -782,8 +782,8 @@ static int msm8x16_enable_extcodec_ext_clk(struct snd_soc_codec *codec,
 
 	pdata = snd_soc_card_get_drvdata(codec->component.card);
 
-	pr_debug("%s: enable = %d  codec name %s enable %d mclk ref counter %d\n",
-		   __func__, enable, codec->name, enable,
+	pr_debug("%s enable %d mclk ref counter %d\n",
+		   __func__, enable,
 		   atomic_read(&pdata->mclk_rsc_ref));
 	if (enable) {
 		if (atomic_inc_return(&pdata->mclk_rsc_ref) == 1) {
