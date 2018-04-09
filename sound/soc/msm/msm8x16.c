@@ -283,7 +283,7 @@ static int msm_auxpcm_be_params_fixup(struct snd_soc_pcm_runtime *rtd,
 
 static int enable_spk_ext_pa(struct snd_soc_codec *codec, int enable)
 {
-	struct snd_soc_card *card = codec->card;
+	struct snd_soc_card *card = codec->component.card;
 	struct msm8916_asoc_mach_data *pdata = snd_soc_card_get_drvdata(card);
 	int ret = 0;
 
@@ -391,7 +391,7 @@ static int loopback_mclk_put(struct snd_kcontrol *kcontrol,
 	struct msm8916_asoc_mach_data *pdata = NULL;
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	conf_int_codec_mux(pdata);
 	pr_debug("%s: mclk_rsc_ref %d enable %ld\n",
 			__func__, atomic_read(&pdata->mclk_rsc_ref),
@@ -730,7 +730,7 @@ static int msm8x16_enable_codec_ext_clk(struct snd_soc_codec *codec,
 	int ret = 0;
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	pr_debug("%s: codec name %s enable %d mclk ref counter %d\n",
 		   __func__, codec->name, enable,
 		   atomic_read(&pdata->mclk_rsc_ref));
@@ -780,7 +780,7 @@ static int msm8x16_enable_extcodec_ext_clk(struct snd_soc_codec *codec,
 	int ret = 0;
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 
 	pr_debug("%s: enable = %d  codec name %s enable %d mclk ref counter %d\n",
 		   __func__, enable, codec->name, enable,
@@ -876,7 +876,7 @@ static int msm8x16_mclk_event(struct snd_soc_dapm_widget *w,
 	struct msm8916_asoc_mach_data *pdata = NULL;
 	int ret = 0;
 
-	pdata = snd_soc_card_get_drvdata(w->codec->card);
+	pdata = snd_soc_card_get_drvdata(w->codec->component.card);
 	pr_debug("%s: event = %d\n", __func__, event);
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMD:
@@ -2244,7 +2244,7 @@ void disable_mclk(struct work_struct *work)
 
 static bool msm8x16_swap_gnd_mic(struct snd_soc_codec *codec)
 {
-	struct snd_soc_card *card = codec->card;
+	struct snd_soc_card *card = codec->component.card;
 	struct msm8916_asoc_mach_data *pdata = snd_soc_card_get_drvdata(card);
 	int value, ret;
 
