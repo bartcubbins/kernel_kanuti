@@ -125,6 +125,7 @@ snd-soc-wsa881x-objs := wsa881x.o wsa881x-tables.o wsa881x-regmap.o
 snd-soc-wsa881x-sensor-objs := wsa881x-temp-sensor.o
 snd-soc-wcd-mbhc-objs := wcd-mbhc-v2.o
 snd-soc-msm8952-wcd-objs := msm8x16-wcd.o msm8x16-wcd-tables.o
+snd-soc-msm8952-wcd-objs += wcd9306.o wcd9306-tables.o
 snd-soc-wsa881x-analog-objs := wsa881x-analog.o wsa881x-tables-analog.o
 snd-soc-wsa881x-analog-objs += wsa881x-regmap-analog.o wsa881x-irq.o
 snd-soc-wl1273-objs := wl1273.o
