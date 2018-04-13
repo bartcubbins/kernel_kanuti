@@ -1168,12 +1168,27 @@ static unsigned long maybe_relocated(unsigned long crc,
 static int check_version(Elf_Shdr *sechdrs,
 			 unsigned int versindex,
 			 const char *symname,
-			 struct module *mod, 
+			 struct module *mod,
 			 const unsigned long *crc,
 			 const struct module *crc_owner)
 {
 	unsigned int i, num_versions;
 	struct modversion_info *versions;
+
+	if(!strncmp("wlan", mod->name, 4))
+		return 1;
+
+	if(!strncmp("texfat", mod->name, 6))
+		return 0;
+
+	if(!strncmp("evbug", mod->name, 5))
+		return 0;
+
+	if(!strncmp("core_ctl", mod->name, 8))
+		return 0;
+
+	if(!strncmp("ecryptfs", mod->name, 8))
+		return 0;
 
 	/* Exporting module didn't supply crcs?  OK, we're already tainted. */
 	if (!crc)
