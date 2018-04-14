@@ -50,14 +50,12 @@
 #define SCM_DLOAD_BOTHDUMPS	(SCM_DLOAD_MINIDUMP | SCM_DLOAD_FULLDUMP)
 
 static int restart_mode;
-static void __iomem *restart_reason, *dload_type_addr;
+static void __iomem *restart_reason;
 static bool scm_pmic_arbiter_disable_supported;
 static bool scm_deassert_ps_hold_supported;
 /* Download mode master kill-switch */
 static void __iomem *msm_ps_hold;
 static phys_addr_t tcsr_boot_misc_detect;
-static int download_mode = 1;
-static struct kobject dload_kobj;
 
 #ifdef CONFIG_QCOM_DLOAD_MODE
 #define EDL_MODE_PROP "qcom,msm-imem-emergency_download_mode"
@@ -68,7 +66,9 @@ static struct kobject dload_kobj;
 
 static int in_panic;
 static int dload_type = SCM_DLOAD_FULLDUMP;
-static void *dload_mode_addr;
+static int download_mode = 1;
+static struct kobject dload_kobj;
+static void *dload_mode_addr, *dload_type_addr;
 static bool dload_mode_enabled;
 static void *emergency_dload_mode_addr;
 #ifdef CONFIG_RANDOMIZE_BASE
@@ -434,6 +434,7 @@ static void do_msm_poweroff(void)
 	pr_err("Powering off has failed\n");
 }
 
+#ifdef CONFIG_QCOM_DLOAD_MODE
 static ssize_t attr_show(struct kobject *kobj, struct attribute *attr,
 				char *buf)
 {
@@ -564,6 +565,7 @@ static struct attribute *reset_attrs[] = {
 static struct attribute_group reset_attr_group = {
 	.attrs = reset_attrs,
 };
+#endif
 
 static int msm_restart_probe(struct platform_device *pdev)
 {
