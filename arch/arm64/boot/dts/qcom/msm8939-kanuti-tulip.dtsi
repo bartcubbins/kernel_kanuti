@@ -11,11 +11,6 @@
  */
 
 / {
-        aliases {
-		/delete-property/ spi0;
-		/delete-property/ spi5;
-        };
-
 	firmware: firmware {
 		android {
 			compatible = "android,firmware";
@@ -343,14 +338,6 @@
 	};
 };
 
-&spi_0 {
-	status = "disabled";
-};
-
-&spi_5 {
-	status = "disabled";
-};
-
 &i2c_4 {
 	smb1360_otg_supply: smb1360-chg-fg@14 {
 		compatible = "qcom,smb1360-chg-fg";
@@ -404,10 +391,6 @@
 &mdss_dsi0 {
 	qcom,dsi-pref-prim-pan = <&dsi_nt35521_720_vid>;
 	qcom,platform-bklight-en-gpio = <&msm_gpio 10 0>;
-};
-
-&mdss_dsi1 {
-	status = "disabled";
 };
 
 &pm8916_mpps {
