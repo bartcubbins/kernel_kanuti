@@ -208,7 +208,7 @@ static struct inode *pstore_get_inode(struct super_block *sb)
 	struct inode *inode = new_inode(sb);
 	if (inode) {
 		inode->i_ino = get_next_ino();
-		inode->i_atime = inode->i_mtime = inode->i_ctime = current_time(inode);
+		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
 	}
 	return inode;
 }
@@ -351,7 +351,8 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
 		break;
 	}
 
-	mutex_lock(&root->d_inode->i_mutex);
+	inode_lock(d_inode(root));
+	//mutex_lock(&root->d_inode->i_mutex);
 
 	dentry = d_alloc_name(root, name);
 	if (!dentry)
@@ -371,12 +372,14 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
 	list_add(&private->list, &allpstore);
 	spin_unlock_irqrestore(&allpstore_lock, flags);
 
-	mutex_unlock(&root->d_inode->i_mutex);
+	inode_unlock(d_inode(root));
+	//mutex_unlock(&root->d_inode->i_mutex);
 
 	return 0;
 
 fail_lockedalloc:
-	mutex_unlock(&root->d_inode->i_mutex);
+	inode_unlock(d_inode(root));
+	//mutex_unlock(&root->d_inode->i_mutex);
 	kfree(private);
 fail_alloc:
 	iput(inode);
