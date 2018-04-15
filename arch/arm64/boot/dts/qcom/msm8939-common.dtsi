@@ -105,7 +105,7 @@
 #include "msm8939-iommu.dtsi"
 #include "msm8939-bus.dtsi"
 #include "msm8939-mdss.dtsi"
-#include "msm8939-iommu-domains.dtsi"
+//#include "msm8939-iommu-domains.dtsi"
 #include "msm8939-camera.dtsi"
 #include "msm8939-mdss-pll.dtsi"
 
@@ -1599,126 +1599,6 @@
 		qcom,msm-cpudai-auxpcm-data = <0>, <0>;
 		qcom,msm-cpudai-auxpcm-pcm-clk-rate = <2048000>, <2048000>;
 		qcom,msm-auxpcm-interface = "primary";
-	};
-
-	qcom,vidc@1d00000 {
-		compatible = "qcom,msm-vidc";
-		reg = <0x01d00000 0xff000>;
-		interrupts = <0 44 0>;
-		venus-supply = <&gdsc_venus>;
-		venus-core0-supply = <&gdsc_venus_core0>;
-		venus-core1-supply = <&gdsc_venus_core1>;
-		clocks = <&clock_gcc clk_gcc_venus0_vcodec0_clk>,
-			<&clock_gcc clk_gcc_venus0_core0_vcodec0_clk>,
-			<&clock_gcc clk_gcc_venus0_core1_vcodec0_clk>,
-			<&clock_gcc clk_gcc_venus0_ahb_clk>,
-			<&clock_gcc clk_gcc_venus0_axi_clk>;
-		clock-names = "core_clk", "core0_clk", "core1_clk", "iface_clk", "bus_clk";
-		qcom,clock-configs = <0x1 0x0 0x0 0x0 0x0>;
-		qcom,sw-power-collapse;
-		qcom,load-freq-tbl =
-			<489600 266670000 0x0c000000>, /* HEVC  decoder 1080p 60fps  */
-			<489600 266670000 0x030fcfff>, /* Legacy decoder 1080p 60fps  */
-			<489600 266670000 0x01000414>, /* Encoder turbo (wfd) */
-			<244800 133330000 0x0c000000>, /* HEVC decoder 1080p 30fps   */
-			<244800 133330000 0x030ccfff>, /* Legacy decoder 1080p 30fps   */
-			<244800 200000000 0x00030000>, /* VC1 decoder 1080p 30fps  */
-			<244800 200000000 0x01000414>, /* Legacy encoder 1080p 30fps   */
-			<220800 133330000 0x0c000000>, /* HEVC  decoder 720p 60fps  */
-			<220800 133330000 0x030fcfff>, /* Legacy decoder 720p 60fps  */
-			<108000 133330000 0x0c000000>, /* HEVC decoder 720p 30fps   */
-			<108000 133330000 0x030fcfff>, /* Legacy decoder 720p 30fps   */
-			<108000 200000000 0x01000414>, /* Legacy encoder 720p 30fps   */
-			<72000 133330000 0x0c000000>, /* HEVC decoder VGA 60fps   */
-			<72000 133330000 0x030fcfff>, /* Legacy decoder VGA 60fps   */
-			<36000 133330000 0x0c000000>, /* HEVC VGA 30 fps  */
-			<36000 133330000 0x030fcfff>, /* Legacy decoder VGA 30 fps  */
-			<36000 133330000 0x01000414>; /* Legacy encoder VGA 30 fps   */
-
-		qcom,hfi = "venus";
-		qcom,reg-presets = <0xE0020 0x0aaaaaaa>,
-			<0xE0024 0x0aaaaaaa>,
-			<0x80124 0x00000003>;
-		qcom,qdss-presets = <0x825000 0x1000>,
-			<0x826000 0x1000>,
-			<0x821000 0x1000>,
-			<0x802000 0x1000>,
-			<0x9180000 0x1000>,
-			<0x9181000 0x1000>;
-		qcom,max-hw-load = <489600>; /* 1080p @ 30 + 1080p @ 30 */
-		qcom,enable-idle-indicator;
-		qcom,vidc-iommu-domains {
-			qcom,domain-ns {
-				qcom,vidc-domain-phandle = <&venus_domain_ns>;
-				qcom,vidc-partition-buffer-types = <0x7ff>,
-					<0x800>;
-			};
-			qcom,domain-sec-bs {
-				qcom,vidc-domain-phandle = <&venus_domain_sec_bitstream>;
-				qcom,vidc-partition-buffer-types = <0x241>;
-			};
-			qcom,domain-sec-px {
-				qcom,vidc-domain-phandle = <&venus_domain_sec_pixel>;
-				qcom,vidc-partition-buffer-types = <0x106>;
-			};
-			qcom,domain-sec-np {
-				qcom,vidc-domain-phandle = <&venus_domain_sec_non_pixel>;
-				qcom,vidc-partition-buffer-types = <0x480>;
-			};
-		};
-		qcom,msm-bus-clients {
-			qcom,msm-bus-client@0 {
-				qcom,msm-bus,name = "venc-ddr";
-				qcom,msm-bus,num-cases = <6>;
-				qcom,msm-bus,num-paths = <1>;
-				qcom,msm-bus,vectors-KBps =
-					<63 512 0 0>,
-					<63 512 136806 1236684>, /* VGA 30 fps */
-					<63 512 410521 1859686>, /* VGA 60 fps */
-					<63 512 410521 1859686>, /* 720p 30 fps */
-					<63 512 930406 1859686>, /* 720p 60 fps */
-					<63 512 930406 1859686>; /* 1080p 30 fps */
-				qcom,bus-configs = <0x01000414>;
-			};
-			qcom,msm-bus-client@1 {
-				qcom,msm-bus,name = "vdec-core0-ddr";
-				qcom,msm-bus,num-cases = <7>;
-				qcom,msm-bus,num-paths = <1>;
-				qcom,msm-bus,vectors-KBps =
-					<63 512 0 0>,
-					<63 512 101991 644403>,
-					<63 512 204083 1288704>,
-					<63 512 306074 644403>,
-					<63 512 612250 1288704>,
-					<63 512 693863 644403>,
-					<63 512 1387725 2577408>;
-				qcom,bus-configs = <0x030fcfff>;
-			};
-			qcom,msm-bus-client@2 {
-				qcom,msm-bus,name = "vdec-core1-ddr";
-				qcom,msm-bus,num-cases = <7>;
-				qcom,msm-bus,num-paths = <1>;
-				qcom,msm-bus,vectors-KBps =
-					<63 512 0 0>,
-					<63 512 96051 572826>,
-					<63 512 192103 1145754>,
-					<63 512 288256 572826>,
-					<63 512 576410 1145754>,
-					<63 512 653312 572826>,
-					<63 512 1306624 2291405>;
-				qcom,bus-configs = <0x0c000000>;
-			};
-			qcom,msm-bus-client@3 {
-				qcom,msm-bus,name = "venus-arm9-ddr";
-				qcom,msm-bus,num-cases = <2>;
-				qcom,msm-bus,num-paths = <1>;
-				qcom,msm-bus,vectors-KBps =
-					<63 512 0 0>,
-					<63 512 1000 1000>;
-				qcom,bus-configs = <0x00000000>;
-				qcom,bus-passive;
-			};
-		};
 	};
 
 	qcom,pronto@a21b000 {
