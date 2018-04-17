@@ -107,9 +107,9 @@
 #include "msm8939-iommu.dtsi"
 #include "msm8939-bus.dtsi"
 #include "msm8939-mdss.dtsi"
-#include "msm8939-vidc.dtsi"
-#include "msm8939-iommu-domains.dtsi"
-#include "msm8939-camera.dtsi"
+//#include "msm8939-vidc.dtsi"
+//#include "msm8939-iommu-domains.dtsi"
+//#include "msm8939-camera.dtsi"
 #include "msm8939-mdss-pll.dtsi"
 
 &soc {

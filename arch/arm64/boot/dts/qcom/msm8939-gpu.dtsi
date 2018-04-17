@@ -125,7 +125,7 @@
 		vdd-supply = <&gdsc_oxili_gx>;
 
 		/* IOMMU Data */
-		iommu = <&gfx_iommu>;
+		//iommu = <&gfx_iommu>;
 
 		/* Trace bus */
 		coresight-id = <67>;

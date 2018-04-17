@@ -351,7 +351,7 @@ static void msm_iommu_tlb_flush_all(void *cookie)
 }
 
 static void msm_iommu_tlb_flush_range_nosync(unsigned long iova, size_t size,
-					bool leaf, void *cookie)
+					size_t granule, bool leaf, void *cookie)
 {
 	struct iommu_domain *domain = cookie;
 	struct msm_iommu_priv *priv = to_msm_priv(domain);
@@ -636,8 +636,8 @@ static int msm_iommu_dynamic_attach(struct iommu_domain *domain, struct device *
 		.oas		= 40,
 		.tlb		= &msm_iommu_gather_ops,
 		.iommu_dev	= dev,
-		.iova_base	= domain->geometry.aperture_start,
-		.iova_end	= domain->geometry.aperture_end,
+		//.iova_base	= domain->geometry.aperture_start,
+		//.iova_end	= domain->geometry.aperture_end,
 	};
 	domain->geometry.force_aperture = true;
 
@@ -773,8 +773,8 @@ static int msm_iommu_attach_dev(struct iommu_domain *domain, struct device *dev)
 			.cbndx  = ctx_drvdata->num,
 		},
 		.iommu_dev	= iommu_drvdata->dev,
-		.iova_base	= domain->geometry.aperture_start,
-		.iova_end	= domain->geometry.aperture_end,
+		//.iova_base	= domain->geometry.aperture_start,
+		//.iova_end	= domain->geometry.aperture_end,
 	};
 	domain->geometry.force_aperture = true;
 
@@ -1539,11 +1539,13 @@ static int msm_iommu_of_xlate(struct device *dev, struct of_phandle_args *args)
 	return 0;
 }
 
+#if 0
 static int msm_iommu_dma_supported(struct iommu_domain *domain,
 				  struct device *dev, u64 mask)
 {
 	return ((1ULL << 32) - 1) < mask ? 0 : 1;
 }
+#endif
 
 static bool msm_iommu_capable(enum iommu_cap cap)
 {
@@ -1557,6 +1559,7 @@ static bool msm_iommu_capable(enum iommu_cap cap)
 	}
 }
 
+#if 0
 static unsigned long msm_iommu_get_pgsize_bitmap(struct iommu_domain *domain)
 {
 	struct msm_iommu_priv *priv = to_msm_priv(domain);
@@ -1573,6 +1576,7 @@ static unsigned long msm_iommu_get_pgsize_bitmap(struct iommu_domain *domain)
 	 */
 	return priv->pgtbl_cfg.pgsize_bitmap;
 }
+#endif
 
 static struct iommu_ops msm_iommu_ops = {
 	.capable = msm_iommu_capable,
@@ -1589,11 +1593,11 @@ static struct iommu_ops msm_iommu_ops = {
 	.remove_device = msm_iommu_remove_device,
 	.device_group = msm_iommu_device_group,
 	.pgsize_bitmap = (SZ_4K | SZ_64K | SZ_2M | SZ_32M | SZ_1G),
-	.get_pgsize_bitmap = msm_iommu_get_pgsize_bitmap,
+	//.get_pgsize_bitmap = msm_iommu_get_pgsize_bitmap,
 	.domain_set_attr = msm_iommu_domain_set_attr,
 	.domain_get_attr = msm_iommu_domain_get_attr,
 	.of_xlate = msm_iommu_of_xlate,
-	.dma_supported = msm_iommu_dma_supported,
+	//.dma_supported = msm_iommu_dma_supported,
 	.tlbi_domain = msm_iommu_tlbi_domain,
 	.enable_config_clocks	= msm_iommu_enable_clocks,
 	.disable_config_clocks	= msm_iommu_disable_clocks,

@@ -30,6 +30,7 @@
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/of_iommu.h>
+#include <linux/dma-mapping.h>
 
 #include <asm/cacheflush.h>
 
@@ -357,7 +358,7 @@ static int msm_iommu_sec_ptbl_init(struct device *dev)
 	int version;
 	void *cpu_addr;
 	dma_addr_t paddr;
-	DEFINE_DMA_ATTRS(attrs);
+	unsigned long attrs;
 	static bool allocated = false;
 
 	if (allocated)
@@ -383,9 +384,9 @@ static int msm_iommu_sec_ptbl_init(struct device *dev)
 
 	dev_info(dev, "iommu sec: pgtable size: %zu\n", psize);
 
-	dma_set_attr(DMA_ATTR_NO_KERNEL_MAPPING, &attrs);
+	attrs = DMA_ATTR_NO_KERNEL_MAPPING;
 
-	cpu_addr = dma_alloc_attrs(dev, psize, &paddr, GFP_KERNEL, &attrs);
+	cpu_addr = dma_alloc_attrs(dev, psize, &paddr, GFP_KERNEL, attrs);
 	if (!cpu_addr) {
 		dev_err(dev, "failed to allocate %zu bytes for pgtable\n",
 			psize);
@@ -403,7 +404,7 @@ static int msm_iommu_sec_ptbl_init(struct device *dev)
 	return 0;
 
 free_mem:
-	dma_free_attrs(dev, psize, cpu_addr, paddr, &attrs);
+	dma_free_attrs(dev, psize, cpu_addr, paddr, attrs);
 	return ret;
 }
 

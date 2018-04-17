@@ -36,7 +36,7 @@
 
 #define SZ_4G 0xF0000000
 
-#ifdef CONFIG_QCOM_IOMMU
+#ifdef CONFIG_QCOM_IOMMU_V1
 #include <linux/qcom_iommu.h>
 static inline struct bus_type *mdss_mmu_get_bus(struct device *dev)
 {
