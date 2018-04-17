@@ -19,7 +19,7 @@
 #include <linux/clk/msm-clk.h>
 #include <linux/clk/msm-clock-generic.h>
 #include <linux/clk/msm-clk-provider.h>
-#include <dt-bindings/clock/msm-clocks-8952.h>
+#include <dt-bindings/clock/msm-clocks-8936.h>
 
 #include "mdss-pll.h"
 #include "mdss-dsi-pll.h"
@@ -498,6 +498,7 @@ int dsi_pll_clock_register_lpm(struct platform_device *pdev,
 
 	if ((pll_res->target_id == MDSS_PLL_TARGET_8952) ||
 		(pll_res->target_id == MDSS_PLL_TARGET_8937) ||
+		(pll_res->target_id == MDSS_PLL_TARGET_8939) ||
 		(pll_res->target_id == MDSS_PLL_TARGET_8909)) {
 		if (!pll_res->index)
 			rc = of_msm_clock_register(pdev->dev.of_node,
