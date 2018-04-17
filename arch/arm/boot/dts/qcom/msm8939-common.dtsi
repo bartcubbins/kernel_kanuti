@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+
 / {
 	interrupt-parent = <&intc>;
 	aliases {
@@ -1121,16 +1123,17 @@
 			<0x3800000 0x200000>,
 			<0x200a000 0x2100>;
 		reg-names = "core", "chnls", "obsrvr", "intr", "cnfg";
-		interrupts = <0 190 0>;
-		qcom,pmic-arb-channel = <0>;
-		qcom,pmic-arb-max-peripherals = <256>;
-		qcom,pmic-arb-max-periph-interrupts = <256>;
-		qcom,pmic-arb-ee = <0>;
-		#interrupt-cells = <3>;
-		interrupt-controller;
-		#address-cells = <1>;
+		interrupt-names = "periph_irq";
+		interrupts = <GIC_SPI 326 IRQ_TYPE_NONE>;
+		qcom,ee = <0>;
+		qcom,channel = <0>;
+		qcom,reserved-chan = <511>;
+		#address-cells = <2>;
 		#size-cells = <0>;
+		interrupt-controller;
+		#interrupt-cells = <4>;
 		cell-index = <0>;
+		status = "ok";
 	};
 
 	qcom,rmtfs_sharedmem@8e580000 {
