@@ -64,6 +64,7 @@ config ARCH_QCOM
 config ARCH_MSM8916
 	bool "Enable Support for Qualcomm Technologies Inc. MSM8916"
 	depends on ARCH_QCOM
+	select RCU_BOOST if DEBUG_KMEMLEAK
 	select COMMON_CLK_MSM
 	help
 	  This enables support for the MSM8916 chipset. If you do not
