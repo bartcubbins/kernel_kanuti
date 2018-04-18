@@ -1811,7 +1811,7 @@ skip_phy_resume:
 static void msm_otg_notify_chg_current(struct msm_otg *motg, unsigned int mA)
 {
 	struct usb_gadget *g = motg->phy.otg->gadget;
-	union power_supply_propval pval = {0};
+	union power_supply_propval pval = {0, };
 	bool enable;
 	int limit;
 
