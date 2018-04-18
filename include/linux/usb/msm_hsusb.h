@@ -23,6 +23,8 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 #include <linux/usb/otg.h>
+#include <linux/pm_qos.h>
+#include <linux/regulator/driver.h>
 /*
  * The following are bit fields describing the usb_request.udc_priv word.
  * These bit fields are set by function drivers that wish to queue
@@ -366,7 +368,7 @@ struct msm_otg {
 	struct extcon_dev       *extcon_id;
 	struct notifier_block   vbus_nb;
 	struct notifier_block   id_nb;
-	//struct regulator_desc	dpdm_rdesc;
+	struct regulator_desc	dpdm_rdesc;
 	struct regulator_dev	*dpdm_rdev;
 /* Maximum debug message length */
 #define DEBUG_MSG_LEN   128UL
@@ -379,7 +381,7 @@ struct msm_otg {
 	unsigned int vbus_state;
 	unsigned int usb_irq_count;
 	int pm_qos_latency;
-	//struct pm_qos_request pm_qos_req_dma;
+	struct pm_qos_request pm_qos_req_dma;
 	struct delayed_work perf_vote_work;
 };
 

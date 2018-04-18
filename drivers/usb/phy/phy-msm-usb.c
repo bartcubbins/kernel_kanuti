@@ -36,6 +36,7 @@
 #include <linux/reset.h>
 #include <linux/extcon.h>
 #include <soc/qcom/scm.h>
+#include <linux/pm_qos.h>
 
 #include <linux/usb.h>
 #include <linux/usb/otg.h>
@@ -1811,7 +1812,7 @@ skip_phy_resume:
 static void msm_otg_notify_chg_current(struct msm_otg *motg, unsigned int mA)
 {
 	struct usb_gadget *g = motg->phy.otg->gadget;
-	union power_supply_propval pval = {0, };
+	//union power_supply_propval pval = {0, };
 	bool enable;
 	int limit;
 
@@ -1846,14 +1847,14 @@ static void msm_otg_notify_chg_current(struct msm_otg *motg, unsigned int mA)
 		limit = 1000 * mA;
 	}
 
-	pval.intval = enable;
-	if (power_supply_set_property(psy, POWER_SUPPLY_PROP_ONLINE, &pval))
-		goto psy_error;
+	//pval.intval = enable;
+	//if (power_supply_set_property(psy, POWER_SUPPLY_PROP_ONLINE, &pval))
+	//	goto psy_error;
 
-	pval.intval = limit;
-	if (power_supply_set_property(psy, POWER_SUPPLY_PROP_SDP_CURRENT_MAX,
-									&pval))
-		goto psy_error;
+	//pval.intval = limit;
+	//if (power_supply_set_property(psy, POWER_SUPPLY_PROP_SDP_CURRENT_MAX,
+	//								&pval))
+	//	goto psy_error;
 
 psy_error:
 	dev_dbg(motg->phy.dev, "power supply error when setting property\n");
