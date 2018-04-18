@@ -74,6 +74,19 @@
 #define IUNIT		100
 
 /**
+ * Requested USB votes for NOC frequency
+ *
+ * USB_NOC_NOM_VOTE    Vote for NOM set of NOC frequencies
+ * USB_NOC_SVS_VOTE    Vote for SVS set of NOC frequencies
+ *
+ */
+enum usb_noc_mode {
+	USB_NOC_NOM_VOTE = 0,
+	USB_NOC_SVS_VOTE,
+	USB_NOC_NUM_VOTE,
+};
+
+/**
  * Different states involved in USB charger detection.
  *
  * USB_CHG_STATE_UNDEFINED	USB charger is not connected or detection
@@ -144,16 +157,16 @@ enum usb_id_state {
  * @mode: Supported mode (OTG/peripheral/host).
  * @otg_control: OTG switch controlled by user/Id pin
  */
-struct msm_otg_platform_data {
-	int *phy_init_seq;
-	int phy_init_sz;
-	void (*vbus_power)(bool on);
-	unsigned power_budget;
-	enum usb_dr_mode mode;
-	//enum otg_control_type otg_control;
-	//enum msm_usb_phy_type phy_type;
-	void (*setup_gpio)(enum usb_otg_state state);
-};
+//struct msm_otg_platform_data {
+//	int *phy_init_seq;
+//	int phy_init_sz;
+//	void (*vbus_power)(bool on);
+//	unsigned power_budget;
+//	enum usb_dr_mode mode;
+//	//enum otg_control_type otg_control;
+//	//enum msm_usb_phy_type phy_type;
+//	void (*setup_gpio)(enum usb_otg_state state);
+//};
 
 /**
  * struct msm_usb_cable - structure for exteternal connector cable
