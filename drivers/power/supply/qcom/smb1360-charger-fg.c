@@ -2305,6 +2305,7 @@ static int chg_fastchg_handler(struct smb1360_chip *chip, u8 rt_stat)
 static int usbin_uv_handler(struct smb1360_chip *chip, u8 rt_stat)
 {
 	bool usb_present = !rt_stat;
+	union power_supply_propval pval = {0, };
 
 	pr_debug("chip->usb_present = %d usb_present = %d\n",
 				chip->usb_present, usb_present);
