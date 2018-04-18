@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2016, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -19,7 +19,7 @@
 #include <linux/clk/msm-clk.h>
 #include <linux/clk/msm-clock-generic.h>
 #include <linux/clk/msm-clk-provider.h>
-#include <dt-bindings/clock/msm-clocks-8936.h>
+#include <dt-bindings/clock/msm-clocks-8952.h>
 
 #include "mdss-pll.h"
 #include "mdss-dsi-pll.h"
@@ -322,9 +322,113 @@ static struct div_clk dsi_pll0_byte_clk_src = {
 	},
 };
 
+/* DSI PLL1 clock structures */
+static struct dsi_pll_vco_clk dsi_pll1_vco_clk = {
+	.ref_clk_rate = 19200000,
+	.min_rate = 350000000,
+	.max_rate = 750000000,
+	.pll_en_seq_cnt = 9,
+	.pll_enable_seqs[0] = tsmc_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[1] = tsmc_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[2] = tsmc_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[3] = gf_1_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[4] = gf_1_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[5] = gf_1_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[6] = gf_2_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[7] = gf_2_dsi_pll_enable_seq_8916,
+	.pll_enable_seqs[8] = gf_2_dsi_pll_enable_seq_8916,
+	.lpfr_lut_size = 10,
+	.lpfr_lut = lpfr_lut_struct,
+	.c = {
+		.dbg_name = "dsi_pll1_vco_clk",
+		.ops = &clk_ops_dsi_vco,
+		CLK_INIT(dsi_pll1_vco_clk.c),
+	},
+};
+
+static struct div_clk dsi_pll1_analog_postdiv_clk = {
+	.data = {
+		.max_div = 255,
+		.min_div = 1,
+	},
+	.ops = &analog_postdiv_ops,
+	.c = {
+		.parent = &dsi_pll1_vco_clk.c,
+		.dbg_name = "dsi_pll1_analog_postdiv_clk",
+		.ops = &analog_postdiv_clk_ops,
+		.flags = CLKFLAG_NO_RATE_CACHE,
+		CLK_INIT(dsi_pll1_analog_postdiv_clk.c),
+	},
+};
+
+static struct div_clk dsi_pll1_indirect_path_div2_clk = {
+	.ops = &fixed_2div_ops,
+	.data = {
+		.div = 2,
+		.min_div = 2,
+		.max_div = 2,
+	},
+	.c = {
+		.parent = &dsi_pll1_analog_postdiv_clk.c,
+		.dbg_name = "dsi_pll1_indirect_path_div2_clk",
+		.ops = &clk_ops_div,
+		.flags = CLKFLAG_NO_RATE_CACHE,
+		CLK_INIT(dsi_pll1_indirect_path_div2_clk.c),
+	},
+};
+
+static struct div_clk dsi_pll1_pixel_clk_src = {
+	.data = {
+		.max_div = 255,
+		.min_div = 1,
+	},
+	.ops = &digital_postdiv_ops,
+	.c = {
+		.parent = &dsi_pll1_vco_clk.c,
+		.dbg_name = "dsi_pll1_pixel_clk_src",
+		.ops = &pixel_clk_src_ops,
+		.flags = CLKFLAG_NO_RATE_CACHE,
+		CLK_INIT(dsi_pll1_pixel_clk_src.c),
+	},
+};
+
+static struct mux_clk dsi_pll1_byte_mux = {
+	.num_parents = 2,
+	.parents = (struct clk_src[]){
+		{&dsi_pll1_vco_clk.c, 0},
+		{&dsi_pll1_indirect_path_div2_clk.c, 1},
+	},
+	.ops = &byte_mux_ops,
+	.c = {
+		.parent = &dsi_pll1_vco_clk.c,
+		.dbg_name = "dsi_pll1_byte_mux",
+		.ops = &byte_mux_clk_ops,
+		CLK_INIT(dsi_pll1_byte_mux.c),
+	},
+};
+
+static struct div_clk dsi_pll1_byte_clk_src = {
+	.ops = &fixed_4div_ops,
+	.data = {
+		.min_div = 4,
+		.max_div = 4,
+	},
+	.c = {
+		.parent = &dsi_pll1_byte_mux.c,
+		.dbg_name = "dsi_pll1_byte_clk_src",
+		.ops = &byte_clk_src_ops,
+		CLK_INIT(dsi_pll1_byte_clk_src.c),
+	},
+};
+
 static struct clk_lookup dsi_pll0_cc[] = {
 	CLK_LIST(dsi_pll0_pixel_clk_src),
 	CLK_LIST(dsi_pll0_byte_clk_src),
+};
+
+static struct clk_lookup dsi_pll1_cc[] = {
+	CLK_LIST(dsi_pll1_pixel_clk_src),
+	CLK_LIST(dsi_pll1_byte_clk_src),
 };
 
 int dsi_pll_clock_register_lpm(struct platform_device *pdev,
@@ -346,12 +450,21 @@ int dsi_pll_clock_register_lpm(struct platform_device *pdev,
 	}
 
 	/* Set client data to mux, div and vco clocks */
-	dsi_pll0_byte_clk_src.priv = pll_res;
-	dsi_pll0_pixel_clk_src.priv = pll_res;
-	dsi_pll0_byte_mux.priv = pll_res;
-	dsi_pll0_indirect_path_div2_clk.priv = pll_res;
-	dsi_pll0_analog_postdiv_clk.priv = pll_res;
-	dsi_pll0_vco_clk.priv = pll_res;
+	if (!pll_res->index) {
+		dsi_pll0_byte_clk_src.priv = pll_res;
+		dsi_pll0_pixel_clk_src.priv = pll_res;
+		dsi_pll0_byte_mux.priv = pll_res;
+		dsi_pll0_indirect_path_div2_clk.priv = pll_res;
+		dsi_pll0_analog_postdiv_clk.priv = pll_res;
+		dsi_pll0_vco_clk.priv = pll_res;
+	} else {
+		dsi_pll1_byte_clk_src.priv = pll_res;
+		dsi_pll1_pixel_clk_src.priv = pll_res;
+		dsi_pll1_byte_mux.priv = pll_res;
+		dsi_pll1_indirect_path_div2_clk.priv = pll_res;
+		dsi_pll1_analog_postdiv_clk.priv = pll_res;
+		dsi_pll1_vco_clk.priv = pll_res;
+	}
 
 	pll_res->vco_delay = VCO_DELAY_USEC;
 
@@ -384,8 +497,12 @@ int dsi_pll_clock_register_lpm(struct platform_device *pdev,
 	}
 
 	if ((pll_res->target_id == MDSS_PLL_TARGET_8939)) {
-		rc = of_msm_clock_register(pdev->dev.of_node,
-			dsi_pll0_cc, ARRAY_SIZE(dsi_pll0_cc));
+		if (!pll_res->index)
+			rc = of_msm_clock_register(pdev->dev.of_node,
+				dsi_pll0_cc, ARRAY_SIZE(dsi_pll0_cc));
+		else
+			rc = of_msm_clock_register(pdev->dev.of_node,
+				dsi_pll1_cc, ARRAY_SIZE(dsi_pll1_cc));
 		if (rc) {
 			pr_err("Clock register failed\n");
 			rc = -EPROBE_DEFER;

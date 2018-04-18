@@ -53,6 +53,7 @@
 			enable-method = "qcom,arm-cortex-acc";
 			qcom,limits-info = <&mitigation_profile0>;
 			qcom,acc = <&acc0>;
+qcom,spm-spc-as-pc;
 			next-level-cache = <&L2_1>;
 			qcom,sleep-status = <&cpu0_slp_sts>;
 			L2_1: l2-cache {
