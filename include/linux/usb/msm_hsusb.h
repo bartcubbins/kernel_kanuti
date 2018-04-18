@@ -354,7 +354,7 @@ struct msm_otg {
 #define CLOCKS_DOWN			BIT(3)
 #define PHY_REGULATORS_LPM	BIT(4)
 	int reset_counter;
-	struct power_supply usb_psy;
+	struct power_supply *usb_psy;
 	unsigned int online;
 	unsigned int host_mode;
 	unsigned int voltage_max;

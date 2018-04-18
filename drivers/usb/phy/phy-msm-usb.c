@@ -38,6 +38,8 @@
 #include <soc/qcom/scm.h>
 #include <linux/pm_qos.h>
 
+#include <linux/power_supply.h>
+
 #include <linux/usb.h>
 #include <linux/usb/otg.h>
 #include <linux/usb/ulpi.h>
@@ -2931,7 +2933,8 @@ static int otg_power_get_property_usb(struct power_supply *psy,
 				  enum power_supply_property psp,
 				  union power_supply_propval *val)
 {
-	struct msm_otg *motg = container_of(psy, struct msm_otg, usb_psy);
+	//struct msm_otg *motg = container_of(psy, struct msm_otg, usb_psy);
+	struct msm_otg *motg = power_supply_get_drvdata(psy);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_SCOPE:
@@ -2960,7 +2963,8 @@ static int otg_power_get_property_usb(struct power_supply *psy,
 		val->intval = motg->online;
 		break;
 	case POWER_SUPPLY_PROP_TYPE:
-		val->intval = psy->type;
+		//val->intval = psy->type;
+		val->intval = motg->chg_type;
 		break;
 	case POWER_SUPPLY_PROP_HEALTH:
 		val->intval = motg->usbin_health;
@@ -2981,7 +2985,8 @@ static int otg_power_set_property_usb(struct power_supply *psy,
 				  enum power_supply_property psp,
 				  const union power_supply_propval *val)
 {
-	struct msm_otg *motg = container_of(psy, struct msm_otg, usb_psy);
+	//struct msm_otg *motg = container_of(psy, struct msm_otg, usb_psy);
+	struct msm_otg *motg = power_supply_get_drvdata(psy);
 	struct msm_otg_platform_data *pdata = motg->pdata;
 
 	msm_otg_dbg_log_event(&motg->phy, "SET PWR PROPERTY", psp, psy->type);
