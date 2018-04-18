@@ -223,6 +223,7 @@ struct msm_otg {
 	unsigned long inputs;
 	struct work_struct sm_work;
 	atomic_t in_lpm;
+	bool err_event_seen;
 	int async_int;
 	unsigned cur_power;
 	int phy_number;
@@ -245,6 +246,19 @@ struct msm_otg {
 
 	struct gpio_desc *switch_gpio;
 	struct notifier_block reboot;
+};
+
+struct ci13xxx_platform_data {
+	u8 usb_core_id;
+	/*
+	 * value of 2^(log2_itc-1) will be used as the interrupt threshold
+	 * (ITC), when log2_itc is between 1 to 7.
+	 */
+	int log2_itc;
+	bool l1_supported;
+	bool enable_ahb2ahb_bypass;
+	bool enable_streaming;
+	bool enable_axi_prefetch;
 };
 
 #ifdef CONFIG_USB_BAM
