@@ -64,11 +64,11 @@
  * SNPS_28NM_INTEGRATED_PHY	Synopsis 28nm integrated PHY
  *
  */
-enum msm_usb_phy_type {
-	INVALID_PHY = 0,
-	CI_45NM_INTEGRATED_PHY,
-	SNPS_28NM_INTEGRATED_PHY,
-};
+//enum msm_usb_phy_type {
+//	INVALID_PHY = 0,
+//	CI_45NM_INTEGRATED_PHY,
+//	SNPS_28NM_INTEGRATED_PHY,
+//};
 
 #define IDEV_CHG_MAX	1500
 #define IUNIT		100
@@ -151,7 +151,7 @@ struct msm_otg_platform_data {
 	unsigned power_budget;
 	enum usb_dr_mode mode;
 	//enum otg_control_type otg_control;
-	enum msm_usb_phy_type phy_type;
+	//enum msm_usb_phy_type phy_type;
 	void (*setup_gpio)(enum usb_otg_state state);
 };
 
