@@ -72,6 +72,19 @@
 //	SNPS_28NM_INTEGRATED_PHY,
 //};
 
+/**
+ * Maintain state for hvdcp external charger status
+ * DEFAULT	This is used when DCP is detected
+ * ACTIVE	This is used when ioctl is called to block LPM
+ * INACTIVE	This is used when ioctl is called to unblock LPM
+ */
+
+enum usb_ext_chg_status {
+	DEFAULT = 1,
+	ACTIVE,
+	INACTIVE,
+};
+
 #define IDEV_CHG_MAX	1500
 #define IUNIT		100
 
@@ -127,6 +140,7 @@ enum usb_chg_type {
 	USB_SDP_CHARGER,
 	USB_DCP_CHARGER,
 	USB_CDP_CHARGER,
+	USB_PROPRIETARY_CHARGER,
 };
 
 /**
@@ -259,10 +273,14 @@ struct msm_usb_cable {
  */
 struct msm_otg {
 	struct usb_phy phy;
+	enum usb_ext_chg_status ext_chg_active;
+	struct completion ext_chg_wait;
+	bool ext_chg_opened;
 	struct msm_otg_platform_data *pdata;
 	struct platform_device *pdev;
 	int irq;
 	int async_irq;
+	enum usb_chg_state chg_state;
 	int phy_irq;
 	struct clk *xo_clk;
 	struct clk *pclk;
