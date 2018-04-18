@@ -199,66 +199,188 @@ struct msm_usb_cable {
  * @otg: USB OTG Transceiver structure.
  * @pdata: otg device platform data.
  * @irq: IRQ number assigned for HSUSB controller.
- * @clk: clock struct of usb_hs_clk.
- * @pclk: clock struct of usb_hs_pclk.
- * @core_clk: clock struct of usb_hs_core_clk.
+ * @async_irq: IRQ number used by some controllers during low power state
+ * @phy_irq: IRQ number assigned for PHY to notify events like id and line
+		state changes.
+ * @pclk: clock struct of iface_clk.
+ * @core_clk: clock struct of core_bus_clk.
+ * @sleep_clk: clock struct of sleep_clk for USB PHY.
+ * @phy_reset_clk: clock struct of phy_reset_clk for USB PHY. This clock is
+		a reset only clock and resets the PHY, ULPI bridge and
+		CSR wrapper.
+ * @phy_por_clk: clock struct of phy_por_clk for USB PHY. This clock is
+		a reset only clock and resets only the PHY (POR).
+ * @phy_csr_clk: clock struct of phy_csr_clk for USB PHY. This clock is
+		required to access PHY CSR registers via AHB2PHY interface.
+ * @bus_clks: bimc/snoc/pcnoc clock struct.
+ * @core_reset: Reset control for core_clk
+ * @phy_reset: Reset control for phy_reset_clk
+ * @phy_por_reset: Reset control for phy_por_clk
+ * @default_noc_mode: default frequency for NOC clocks - SVS or NOM
+ * @core_clk_rate: core clk max frequency
  * @regs: ioremapped register base address.
+ * @usb_phy_ctrl_reg: relevant PHY_CTRL_REG register base address.
  * @inputs: OTG state machine inputs(Id, SessValid etc).
  * @sm_work: OTG state machine work.
+ * @sm_work_pending: OTG state machine work is pending, queued post pm_resume
+ * @resume_pending: USB h/w lpm_exit pending. Done on next sm_work run
+ * @pm_suspended: OTG device is system(PM) suspended.
+ * @pm_notify: Notifier to receive system wide PM transition events.
+		It is used to defer wakeup events processing until
+		system is RESUMED.
  * @in_lpm: indicates low power mode (LPM) state.
- * @async_int: Async interrupt arrived.
+ * @async_int: IRQ line on which ASYNC interrupt arrived in LPM.
  * @cur_power: The amount of mA available from downstream port.
- * @chg_work: Charger detection work.
- * @chg_state: The state of charger detection process.
+ * @otg_wq: Strict order otg workqueue for OTG works (SM/ID/SUSPEND).
  * @chg_type: The type of charger attached.
- * @dcd_retires: The retry count used to track Data contact
- *               detection process.
- * @manual_pullup: true if VBUS is not routed to USB controller/phy
- *	and controller driver therefore enables pull-up explicitly before
- *	starting controller using usbcmd run/stop bit.
- * @vbus: VBUS signal state trakining, using extcon framework
- * @id: ID signal state trakining, using extcon framework
- * @switch_gpio: Descriptor for GPIO used to control external Dual
- *               SPDT USB Switch.
- * @reboot: Used to inform the driver to route USB D+/D- line to Device
- *	    connector
+ * @bus_perf_client: Bus performance client handle to request BUS bandwidth
+ * @host_bus_suspend: indicates host bus suspend or not.
+ * @device_bus_suspend: indicates device bus suspend or not.
+ * @bus_clks_enabled: indicates pcnoc/snoc/bimc clocks are on or not.
+ * @is_ext_chg_dcp: To indicate whether charger detected by external entity
+		SMB hardware is DCP charger or not.
+ * @ext_id_irq: IRQ for ID interrupt.
+ * @phy_irq_pending: Gets set when PHY IRQ arrives in LPM.
+ * @id_state: Indicates USBID line status.
+ * @rm_pulldown: Indicates pulldown status on D+ and D- data lines.
+ * @extcon_vbus: Used for VBUS notification registration.
+ * @extcon_id: Used for ID notification registration.
+ * @vbus_nb: Notification callback for VBUS event.
+ * @id_nb: Notification callback for ID event.
+ * @dpdm_desc: Regulator descriptor for D+ and D- voting.
+ * @dpdm_rdev: Regulator class device for dpdm regulator.
+ * @dbg_idx: Dynamic debug buffer Index.
+ * @dbg_lock: Dynamic debug buffer Lock.
+ * @buf: Dynamic Debug Buffer.
+ * @max_nominal_system_clk_rate: max freq at which system clock can run in
+		nominal mode.
  */
 struct msm_otg {
 	struct usb_phy phy;
 	struct msm_otg_platform_data *pdata;
+	struct platform_device *pdev;
 	int irq;
-	struct clk *clk;
+	int async_irq;
+	int phy_irq;
+	struct clk *xo_clk;
 	struct clk *pclk;
 	struct clk *core_clk;
+	struct clk *sleep_clk;
+	struct clk *phy_reset_clk;
+	struct clk *phy_por_clk;
+	struct clk *phy_csr_clk;
+	struct clk *bus_clks[USB_NUM_BUS_CLOCKS];
+	struct clk *phy_ref_clk;
+	struct reset_control *core_reset;
+	struct reset_control *phy_reset;
+	struct reset_control *phy_por_reset;
+	long core_clk_rate;
+	long core_clk_svs_rate;
+	long core_clk_nominal_rate;
+	enum usb_noc_mode default_noc_mode;
+	struct resource *io_res;
 	void __iomem *regs;
+	void __iomem *phy_csr_regs;
+	void __iomem *usb_phy_ctrl_reg;
 #define ID		0
 #define B_SESS_VLD	1
+#define A_BUS_SUSPEND	14
 	unsigned long inputs;
 	struct work_struct sm_work;
+	bool sm_work_pending;
+	bool resume_pending;
+	atomic_t pm_suspended;
+	struct notifier_block pm_notify;
 	atomic_t in_lpm;
 	bool err_event_seen;
 	int async_int;
-	unsigned cur_power;
-	int phy_number;
-	struct delayed_work chg_work;
-	enum usb_chg_state chg_state;
+	unsigned int cur_power;
+	struct workqueue_struct *otg_wq;
+	struct delayed_work id_status_work;
 	enum usb_chg_type chg_type;
-	u8 dcd_retries;
-	struct regulator *v3p3;
-	struct regulator *v1p8;
-	struct regulator *vddcx;
+	unsigned int dcd_time;
+	unsigned long caps;
+	uint32_t bus_perf_client;
+	bool host_bus_suspend;
+	bool device_bus_suspend;
+	bool bus_clks_enabled;
+	/*
+	 * Allowing PHY power collpase turns off the HSUSB 3.3v and 1.8v
+	 * analog regulators while going to low power mode.
+	 * Currently only 28nm PHY has the support to allowing PHY
+	 * power collapse since it doesn't have leakage currents while
+	 * turning off the power rails.
+	 */
+#define ALLOW_PHY_POWER_COLLAPSE	BIT(0)
+	/*
+	 * Allow PHY RETENTION mode before turning off the digital
+	 * voltage regulator(VDDCX).
+	 */
+#define ALLOW_PHY_RETENTION		BIT(1)
+	/*
+	 * Allow putting the core in Low Power mode, when
+	 * USB bus is suspended but cable is connected.
+	 */
+#define ALLOW_LPM_ON_DEV_SUSPEND	BIT(2)
+	/*
+	 * Allowing PHY regulators LPM puts the HSUSB 3.3v and 1.8v
+	 * analog regulators into LPM while going to USB low power mode.
+	 */
+#define ALLOW_PHY_REGULATORS_LPM	BIT(3)
+	/*
+	 * Allow PHY RETENTION mode before turning off the digital
+	 * voltage regulator(VDDCX) during host mode.
+	 */
+#define ALLOW_HOST_PHY_RETENTION	BIT(4)
+	/*
+	 * Allow VDD minimization without putting PHY into retention
+	 * for fixing PHY current leakage issue when LDOs ar turned off.
+	 */
+#define ALLOW_VDD_MIN_WITH_RETENTION_DISABLED BIT(5)
 
-	struct reset_control *phy_rst;
-	struct reset_control *link_rst;
-	int vdd_levels[3];
+	/*
+	 * PHY can keep D+ pull-up during peripheral bus suspend and
+	 * D+/D- pull-down during host bus suspend without any
+	 * re-work. This is possible only when PHY DVDD is supplied
+	 * by a PMIC LDO (unlike VDDCX/VDDMX).
+	 */
+#define ALLOW_BUS_SUSPEND_WITHOUT_REWORK BIT(6)
+	unsigned long lpm_flags;
+#define PHY_PWR_COLLAPSED		BIT(0)
+#define PHY_RETENTIONED			BIT(1)
+#define XO_SHUTDOWN			BIT(2)
+#define CLOCKS_DOWN			BIT(3)
+#define PHY_REGULATORS_LPM	BIT(4)
+	int reset_counter;
+	unsigned int online;
 
-	bool manual_pullup;
+	dev_t ext_chg_dev;
+	struct pinctrl *phy_pinctrl;
+	bool is_ext_chg_dcp;
+	struct qpnp_vadc_chip	*vadc_dev;
+	int ext_id_irq;
+	bool phy_irq_pending;
+	enum usb_id_state id_state;
+	bool rm_pulldown;
+	struct extcon_dev       *extcon_vbus;
+	struct extcon_dev       *extcon_id;
+	struct notifier_block   vbus_nb;
+	struct notifier_block   id_nb;
+	//struct regulator_desc	dpdm_rdesc;
+	struct regulator_dev	*dpdm_rdev;
+/* Maximum debug message length */
+#define DEBUG_MSG_LEN   128UL
+/* Maximum number of messages */
+#define DEBUG_MAX_MSG   256UL
+	unsigned int dbg_idx;
+	rwlock_t dbg_lock;
 
-	struct msm_usb_cable vbus;
-	struct msm_usb_cable id;
-
-	struct gpio_desc *switch_gpio;
-	struct notifier_block reboot;
+	char (buf[DEBUG_MAX_MSG])[DEBUG_MSG_LEN];   /* buffer */
+	unsigned int vbus_state;
+	unsigned int usb_irq_count;
+	int pm_qos_latency;
+	//struct pm_qos_request pm_qos_req_dma;
+	struct delayed_work perf_vote_work;
 };
 
 struct ci13xxx_platform_data {
