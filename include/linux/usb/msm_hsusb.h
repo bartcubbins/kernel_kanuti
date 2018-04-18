@@ -49,12 +49,12 @@
  * OTG_USER_CONTROL	Id/VBUS notifcations comes from User via sysfs.
  *
  */
-enum otg_control_type {
-	OTG_NO_CONTROL = 0,
-	OTG_PHY_CONTROL,
-	OTG_PMIC_CONTROL,
-	OTG_USER_CONTROL,
-};
+//enum otg_control_type {
+//	OTG_NO_CONTROL = 0,
+//	OTG_PHY_CONTROL,
+//	OTG_PMIC_CONTROL,
+//	OTG_USER_CONTROL,
+//};
 
 /**
  * PHY used in
@@ -150,7 +150,7 @@ struct msm_otg_platform_data {
 	void (*vbus_power)(bool on);
 	unsigned power_budget;
 	enum usb_dr_mode mode;
-	enum otg_control_type otg_control;
+	//enum otg_control_type otg_control;
 	enum msm_usb_phy_type phy_type;
 	void (*setup_gpio)(enum usb_otg_state state);
 };
