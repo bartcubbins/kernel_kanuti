@@ -2543,6 +2543,17 @@ static struct branch_clk gcc_usb2a_phy_sleep_clk = {
 	},
 };
 
+static struct branch_clk gcc_usb_hs_phy_cfg_ahb_clk = {
+	.cbcr_reg = USB_HS_PHY_CFG_AHB_CBCR,
+	.has_sibling = 1,
+	.base = &virt_bases[GCC_BASE],
+	.c = {
+		.dbg_name = "gcc_usb_hs_phy_cfg_ahb_clk",
+		.ops = &clk_ops_branch,
+		CLK_INIT(gcc_usb_hs_phy_cfg_ahb_clk.c),
+	},
+};
+
 static struct branch_clk gcc_usb_fs_ahb_clk = {
 	.cbcr_reg = USB_FS_AHB_CBCR,
 	.has_sibling = 1,
@@ -2599,6 +2610,26 @@ static struct branch_clk gcc_usb_hs_system_clk = {
 		.parent = &usb_hs_system_clk_src.c,
 		.ops = &clk_ops_branch,
 		CLK_INIT(gcc_usb_hs_system_clk.c),
+	},
+};
+
+static struct reset_clk gcc_usb2_hs_phy_only_clk = {
+	.reset_reg = USB2_HS_PHY_ONLY_BCR,
+	.base = &virt_bases[GCC_BASE],
+	.c = {
+		.dbg_name = "gcc_usb2_hs_phy_only_clk",
+		.ops = &clk_ops_rst,
+		CLK_INIT(gcc_usb2_hs_phy_only_clk.c),
+	},
+};
+
+static struct reset_clk gcc_qusb2_phy_clk = {
+	.reset_reg = QUSB2_PHY_BCR,
+	.base = &virt_bases[GCC_BASE],
+	.c = {
+		.dbg_name = "gcc_qusb2_phy_clk",
+		.ops = &clk_ops_rst,
+		CLK_INIT(gcc_qusb2_phy_clk.c),
 	},
 };
 
@@ -2788,6 +2819,7 @@ static struct mux_clk gcc_debug_mux = {
 		{&gcc_usb_fs_ahb_clk.c,			0x00f1},
 		{&gcc_usb_fs_ic_clk.c,			0x00f4},
 		{&gcc_usb2a_phy_sleep_clk.c,		0x0063},
+		{&gcc_usb_hs_phy_cfg_ahb_clk.c,		0x0064},
 		{&gcc_sdcc1_apps_clk.c,			0x0068},
 		{&gcc_sdcc1_ahb_clk.c,			0x0069},
 		{&gcc_sdcc2_apps_clk.c,			0x0070},
@@ -3023,6 +3055,7 @@ static struct clk_lookup msm_clocks_lookup[] = {
 	CLK_LIST(gcc_sdcc2_ahb_clk),
 	CLK_LIST(gcc_sdcc2_apps_clk),
 	CLK_LIST(gcc_usb2a_phy_sleep_clk),
+	CLK_LIST(gcc_usb_hs_phy_cfg_ahb_clk),
 	CLK_LIST(gcc_usb_hs_ahb_clk),
 	CLK_LIST(gcc_usb_hs_system_clk),
 	CLK_LIST(gcc_usb_fs_ahb_clk),
@@ -3036,6 +3069,10 @@ static struct clk_lookup msm_clocks_lookup[] = {
 	CLK_LIST(gcc_bimc_gfx_clk),
 	CLK_LIST(gcc_bimc_gpu_clk),
 	CLK_LIST(wcnss_m_clk),
+
+	/* Reset clks */
+	CLK_LIST(gcc_usb2_hs_phy_only_clk),
+	CLK_LIST(gcc_qusb2_phy_clk),
 
 	/* Crypto clocks */
 	CLK_LIST(gcc_crypto_clk),

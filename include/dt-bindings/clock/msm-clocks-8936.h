@@ -251,4 +251,11 @@
 #define GCC_USB2_HS_PHY_ONLY_BCR		3
 #define GCC_QUSB2_PHY_BCR			4
 
+#define USB2_HS_PHY_ONLY_BCR		0x41034
+#define QUSB2_PHY_BCR			0x4103C
+#define USB_HS_PHY_CFG_AHB_CBCR		0x41030
+#define clk_gcc_qusb2_phy_clk			0x996884d5
+#define clk_gcc_usb2_hs_phy_only_clk		0x0047179d
+#define clk_gcc_usb_hs_phy_cfg_ahb_clk		0xe13808fd
+
 #endif
