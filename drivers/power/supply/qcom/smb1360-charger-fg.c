@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2015 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013-2015, 2018 The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -3376,7 +3376,7 @@ static int smb1360_otg_regulator_is_enable(struct regulator_dev *rdev)
 	return  (reg & CMD_OTG_EN_BIT) ? 1 : 0;
 }
 
-struct regulator_ops smb1360_otg_reg_ops = {
+static struct regulator_ops smb1360_otg_reg_ops = {
 	.enable		= smb1360_otg_regulator_enable,
 	.disable	= smb1360_otg_regulator_disable,
 	.is_enabled	= smb1360_otg_regulator_is_enable,
@@ -3385,38 +3385,26 @@ struct regulator_ops smb1360_otg_reg_ops = {
 static int smb1360_regulator_init(struct smb1360_chip *chip)
 {
 	int rc = 0;
-	struct regulator_init_data *init_data;
 	struct regulator_config cfg = {};
 
-	init_data = of_get_regulator_init_data(chip->dev, chip->dev->of_node, NULL);
-	if (!init_data) {
-		dev_err(chip->dev, "Unable to allocate memory\n");
-		return -ENOMEM;
-	}
+	chip->otg_vreg.rdesc.owner = THIS_MODULE;
+	chip->otg_vreg.rdesc.type = REGULATOR_VOLTAGE;
+	chip->otg_vreg.rdesc.ops = &smb1360_otg_reg_ops;
+	chip->otg_vreg.rdesc.name =
+		chip->dev->of_node->name;
+	chip->otg_vreg.rdesc.of_match =
+		chip->dev->of_node->name;
 
-	if (init_data->constraints.name) {
-		chip->otg_vreg.rdesc.owner = THIS_MODULE;
-		chip->otg_vreg.rdesc.type = REGULATOR_VOLTAGE;
-		chip->otg_vreg.rdesc.ops = &smb1360_otg_reg_ops;
-		chip->otg_vreg.rdesc.name = init_data->constraints.name;
+	cfg.dev = chip->dev;
+	cfg.driver_data = chip;
 
-		cfg.dev = chip->dev;
-		cfg.init_data = init_data;
-		cfg.driver_data = chip;
-		cfg.of_node = chip->dev->of_node;
-
-		init_data->constraints.valid_ops_mask
-			|= REGULATOR_CHANGE_STATUS;
-
-		chip->otg_vreg.rdev = regulator_register(
+	chip->otg_vreg.rdev = regulator_register(
 					&chip->otg_vreg.rdesc, &cfg);
-		if (IS_ERR(chip->otg_vreg.rdev)) {
-			rc = PTR_ERR(chip->otg_vreg.rdev);
-			chip->otg_vreg.rdev = NULL;
-			if (rc != -EPROBE_DEFER)
-				dev_err(chip->dev,
-					"OTG reg failed, rc=%d\n", rc);
-		}
+	if (IS_ERR(chip->otg_vreg.rdev)) {
+		rc = PTR_ERR(chip->otg_vreg.rdev);
+		chip->otg_vreg.rdev = NULL;
+		if (rc != -EPROBE_DEFER)
+			pr_err("OTG reg failed, rc=%d\n", rc);
 	}
 
 	return rc;
