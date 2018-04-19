@@ -803,7 +803,7 @@ static int msm_iommu_ctx_parse_dt(struct platform_device *pdev,
 	get_secure_ctx(pdev->dev.of_node, ctx_drvdata);
 	get_secure_mapping(pdev->dev.of_node, ctx_drvdata);
 
-	if (drvdata->sec_id != -1) {
+	if (ctx_drvdata->secure_context) {
 		irq = platform_get_irq(pdev, 1);
 		if (irq < 0 && irq == -EPROBE_DEFER)
 			return -EPROBE_DEFER;
