@@ -32,6 +32,7 @@
 #include <dt-bindings/clock/msm-clocks-8936.h>
 
 #include "clock.h"
+#include "reset.h"
 
 enum {
 	GCC_BASE,
@@ -369,6 +370,13 @@ static void __iomem *virt_dbgbase;
 		[VDD_DIG_##l4] = (f4),          \
 	},					\
 	.num_fmax = VDD_DIG_NUM
+
+static const struct msm_reset_map gcc_msm8936_resets[] = {
+	[GCC_CAMSS_MICRO_BCR] = {0x56008},
+	[GCC_USB_HS_BCR] = {0x41000},
+	[GCC_USB2_HS_PHY_ONLY_BCR] = {0x41034},
+	[GCC_QUSB2_PHY_BCR] = {0x4103C},
+};
 
 enum vdd_dig_levels {
 	VDD_DIG_NONE,
@@ -3161,6 +3169,9 @@ static int msm_gcc_probe(struct platform_device *pdev)
 	ret = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
 	if (ret)
 		return ret;
+
+	msm_reset_controller_register(pdev, gcc_msm8936_resets,
+			ARRAY_SIZE(gcc_msm8936_resets), virt_bases[GCC_BASE]);
 
 	dev_info(&pdev->dev, "Registered GCC clocks\n");
 
