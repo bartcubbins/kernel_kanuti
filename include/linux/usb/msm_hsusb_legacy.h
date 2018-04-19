@@ -30,6 +30,42 @@
 #include <linux/extcon.h>
 #include <linux/regulator/driver.h>
 
+#define USB_CHG_BLOCK_ULPI	1
+#define USB_CHG_BLOCK_QSCRATCH	2
+
+#define USB_REQUEST_5V		1
+#define USB_REQUEST_9V		2
+
+/*
+ * struct msm_usb_chg_info - MSM USB charger block details.
+ * @chg_block_type: The type of charger block. QSCRATCH/ULPI.
+ * @page_offset: USB charger register base may not be aligned to
+ *              PAGE_SIZE.  The kernel driver aligns the base
+ *              address and use it for memory mapping.  This
+ *              page_offset is used by user space to calaculate
+ *              the corret charger register base address.
+ * @length: The length of the charger register address space.
+ */
+struct msm_usb_chg_info {
+	uint32_t chg_block_type;
+	__kernel_off_t page_offset;
+	size_t length;
+};
+
+/* Get the MSM USB charger block information */
+#define MSM_USB_EXT_CHG_INFO _IOW('M', 0, struct msm_usb_chg_info)
+
+/* Vote against USB hardware low power mode */
+#define MSM_USB_EXT_CHG_BLOCK_LPM _IOW('M', 1, int)
+
+/* To tell kernel about voltage being voted */
+#define MSM_USB_EXT_CHG_VOLTAGE_INFO _IOW('M', 2, int)
+
+/* To tell kernel about voltage request result */
+#define MSM_USB_EXT_CHG_RESULT _IOW('M', 3, int)
+
+/* To tell kernel whether charger connected is external charger or not */
+#define MSM_USB_EXT_CHG_TYPE _IOW('M', 4, int)
 
 /*
  * The following are bit fields describing the usb_request.udc_priv word.
@@ -60,6 +96,19 @@ enum usb_noc_mode {
 };
 
 /**
+ * Different states involved in USB charger detection.
+ *
+ * USB_CHG_STATE_UNDEFINED	USB charger is not connected or detection
+ *                              process is not yet started.
+ * USB_CHG_STATE_DETECTED	USB charger type is determined.
+ *
+ */
+enum usb_chg_state {
+	USB_CHG_STATE_UNDEFINED = 0,
+	USB_CHG_STATE_DETECTED,
+};
+
+/**
  * USB charger types
  *
  * USB_INVALID_CHARGER	Invalid USB charger.
@@ -78,7 +127,6 @@ enum usb_chg_type {
 	USB_DCP_CHARGER,
 	USB_CDP_CHARGER,
 	USB_NONCOMPLIANT_CHARGER,
-	USB_FLOATED_CHARGER,
 };
 
 /**
@@ -89,6 +137,7 @@ enum usb_ctrl {
 	CI_CTRL,	/* ChipIdea controller */
 	HSIC_CTRL,	/* HSIC controller */
 	NUM_CTRL,
+	USB_FLOATED_CHARGER
 };
 
 /**
@@ -158,11 +207,13 @@ enum usb_id_state {
  * @async_int: IRQ line on which ASYNC interrupt arrived in LPM.
  * @cur_power: The amount of mA available from downstream port.
  * @otg_wq: Strict order otg workqueue for OTG works (SM/ID/SUSPEND).
+ * @chg_state: The state of charger detection process.
  * @chg_type: The type of charger attached.
  * @bus_perf_client: Bus performance client handle to request BUS bandwidth
  * @host_bus_suspend: indicates host bus suspend or not.
  * @device_bus_suspend: indicates device bus suspend or not.
  * @bus_clks_enabled: indicates pcnoc/snoc/bimc clocks are on or not.
+ * @bc1p2_current_max: Max charging current allowed as per bc1.2 chg detection
  * @is_ext_chg_dcp: To indicate whether charger detected by external entity
 		SMB hardware is DCP charger or not.
  * @ext_id_irq: IRQ for ID interrupt.
@@ -223,6 +274,7 @@ struct msm_otg {
 	unsigned int cur_power;
 	struct workqueue_struct *otg_wq;
 	struct delayed_work id_status_work;
+	enum usb_chg_state chg_state;
 	enum usb_chg_type chg_type;
 	unsigned int dcd_time;
 	unsigned long caps;
@@ -230,6 +282,8 @@ struct msm_otg {
 	bool host_bus_suspend;
 	bool device_bus_suspend;
 	bool bus_clks_enabled;
+	unsigned int bc1p2_current_max;
+	struct completion ext_chg_wait;
 	/*
 	 * Allowing PHY power collpase turns off the HSUSB 3.3v and 1.8v
 	 * analog regulators while going to low power mode.
@@ -279,8 +333,16 @@ struct msm_otg {
 #define PHY_REGULATORS_LPM	BIT(4)
 	int reset_counter;
 	unsigned int online;
-
+	unsigned int host_mode;
+	unsigned int voltage_max;
+	unsigned int current_max;
+	unsigned int typec_current_max;
+	unsigned int usbin_health;
+	unsigned int usb_type;
+	struct power_supply *usb_psy;
+	struct power_supply_desc usb_psy_d;
 	dev_t ext_chg_dev;
+	enum usb_ext_chg_status ext_chg_active;
 	struct pinctrl *phy_pinctrl;
 	bool is_ext_chg_dcp;
 	struct qpnp_vadc_chip	*vadc_dev;
@@ -294,6 +356,10 @@ struct msm_otg {
 	struct notifier_block   id_nb;
 	struct regulator_desc	dpdm_rdesc;
 	struct regulator_dev	*dpdm_rdev;
+	struct cdev ext_chg_cdev;
+	struct class *ext_chg_class;
+	struct device *ext_chg_device;
+	bool ext_chg_opened;
 /* Maximum debug message length */
 #define DEBUG_MSG_LEN   128UL
 /* Maximum number of messages */
