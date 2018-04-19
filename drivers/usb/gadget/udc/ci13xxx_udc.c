@@ -66,7 +66,7 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 #include <linux/usb/otg.h>
-#include <linux/usb/msm_hsusb.h>
+#include <linux/usb/msm_hsusb_legacy.h>
 
 #include "ci13xxx_udc.h"
 
