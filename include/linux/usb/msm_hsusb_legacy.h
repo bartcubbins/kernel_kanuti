@@ -342,4 +342,16 @@ static inline void msm_hw_soft_reset(void)
 }
 #endif
 
+/* CONFIG_PM */
+#ifdef CONFIG_PM
+static inline int get_pm_runtime_counter(struct device *dev)
+{
+	return atomic_read(&dev->power.usage_count);
+}
+#else
+/* !CONFIG_PM */
+static inline int get_pm_runtime_counter(struct device *dev)
+{ return -EOPNOTSUPP; }
+#endif
+
 #endif
