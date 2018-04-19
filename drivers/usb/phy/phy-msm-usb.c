@@ -3649,7 +3649,7 @@ static int msm_otg_setup_ext_chg_cdev(struct msm_otg *motg)
 
 	if (motg->pdata->enable_sec_phy || motg->pdata->mode == USB_HOST ||
 			motg->pdata->otg_control != OTG_PMIC_CONTROL ||
-			psy != &motg->usb_psy) {
+			psy != motg->usb_psy) {
 		pr_debug("usb ext chg is not supported by msm otg\n");
 		return -ENODEV;
 	}
@@ -3915,6 +3915,7 @@ static int msm_otg_probe(struct platform_device *pdev)
 	struct msm_otg_platform_data *pdata;
 	void __iomem *tcsr;
 	int id_irq = 0;
+	struct power_supply_config cfg = { };
 
 	dev_info(&pdev->dev, "msm_otg probe\n");
 
@@ -4544,19 +4545,32 @@ static int msm_otg_probe(struct platform_device *pdev)
 		pm_runtime_use_autosuspend(&pdev->dev);
 	}
 
-	motg->usb_psy.name = "usb";
-	motg->usb_psy.type = POWER_SUPPLY_TYPE_USB;
-	motg->usb_psy.supplied_to = otg_pm_power_supplied_to;
-	motg->usb_psy.num_supplicants = ARRAY_SIZE(otg_pm_power_supplied_to);
-	motg->usb_psy.properties = otg_pm_power_props_usb;
-	motg->usb_psy.num_properties = ARRAY_SIZE(otg_pm_power_props_usb);
-	motg->usb_psy.get_property = otg_power_get_property_usb;
-	motg->usb_psy.set_property = otg_power_set_property_usb;
-	motg->usb_psy.property_is_writeable
+	motg->usb_psy_d.name = "usb";
+	motg->usb_psy_d.type = POWER_SUPPLY_TYPE_USB;
+	//motg->usb_psy_d.supplied_to = otg_pm_power_supplied_to;
+	//motg->usb_psy_d.num_supplicants = ARRAY_SIZE(otg_pm_power_supplied_to);
+	motg->usb_psy_d.properties = otg_pm_power_props_usb;
+	motg->usb_psy_d.num_properties = ARRAY_SIZE(otg_pm_power_props_usb);
+	motg->usb_psy_d.get_property = otg_power_get_property_usb;
+	motg->usb_psy_d.set_property = otg_power_set_property_usb;
+	motg->usb_psy_d.property_is_writeable
 		= otg_power_property_is_writeable_usb;
 
 	//if (!msm_otg_register_power_supply(pdev, motg))
 	//	psy = &motg->usb_psy;
+	cfg.drv_data = motg;
+	cfg.of_node = pdev->dev.of_node;
+	cfg.supplied_to = otg_pm_power_supplied_to;
+	cfg.num_supplicants = ARRAY_SIZE(otg_pm_power_supplied_to);
+
+	motg->usb_psy = power_supply_register(&pdev->dev,
+				&motg->usb_psy_d, &cfg);
+	if (IS_ERR(motg->usb_psy)) {
+		dev_err(motg->phy.dev,
+			"%s:power_supply_register usb failed\n",
+			__func__);
+		goto remove_phy;
+	}
 
 	ret = msm_otg_setup_ext_chg_cdev(motg);
 	if (ret)
@@ -4624,22 +4638,11 @@ otg_remove_devices:
 	if (pdev->dev.of_node)
 		msm_otg_setup_devices(pdev, motg->pdata->mode, false);
 remove_cdev:
-//<<<<<<< HEAD
-//	pm_runtime_disable(&pdev->dev);
-//	device_remove_file(&pdev->dev, &dev_attr_dpdm_pulldown_enable);
-//	msm_otg_debugfs_cleanup();
-//phy_reg_deinit:
-//	devm_regulator_unregister(motg->phy.dev, motg->dpdm_rdev);
-//=======
-	if (!motg->ext_chg_device) {
-		device_destroy(motg->ext_chg_class, motg->ext_chg_dev);
-		cdev_del(&motg->ext_chg_cdev);
-		class_destroy(motg->ext_chg_class);
-		unregister_chrdev_region(motg->ext_chg_dev, 1);
-	}
-	if (psy)
-		power_supply_unregister(psy);
-//>>>>>>> parent of 21f4a74... usb: phy: msm: Remove USB power_supply
+	pm_runtime_disable(&pdev->dev);
+	device_remove_file(&pdev->dev, &dev_attr_dpdm_pulldown_enable);
+	msm_otg_debugfs_cleanup();
+phy_reg_deinit:
+	devm_regulator_unregister(motg->phy.dev, motg->dpdm_rdev);
 remove_phy:
 	usb_remove_phy(&motg->phy);
 destroy_wq:

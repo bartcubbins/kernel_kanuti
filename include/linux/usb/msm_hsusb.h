@@ -22,6 +22,8 @@
 #include <linux/types.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
+#include <linux/cdev.h>
+#include <linux/power_supply.h>
 #include <linux/usb/otg.h>
 #include <linux/pm_qos.h>
 #include <linux/regulator/driver.h>
@@ -272,6 +274,9 @@ struct msm_usb_cable {
 		nominal mode.
  */
 struct msm_otg {
+	struct class *ext_chg_class;
+	struct cdev ext_chg_cdev;
+	struct device *ext_chg_device;
 	struct usb_phy phy;
 	enum usb_ext_chg_status ext_chg_active;
 	struct completion ext_chg_wait;
@@ -373,6 +378,7 @@ struct msm_otg {
 #define PHY_REGULATORS_LPM	BIT(4)
 	int reset_counter;
 	struct power_supply *usb_psy;
+	struct power_supply_desc usb_psy_d;
 	unsigned int online;
 	unsigned int host_mode;
 	unsigned int voltage_max;
