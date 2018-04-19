@@ -3462,10 +3462,12 @@ static int ci13xxx_vbus_session(struct usb_gadget *_gadget, int is_active)
 				CI13XXX_CONTROLLER_CONNECT_EVENT);
 		/* Enable BAM (if needed) before starting controller */
 		if (udc->softconnect) {
+#ifdef USE_BAM2BAM
 			dbg_event(0xFF, "BAM EN2",
 				_gadget->bam2bam_func_enabled);
 			msm_usb_bam_enable(CI_CTRL,
 				_gadget->bam2bam_func_enabled);
+#endif
 			hw_device_state(udc->ep0out.qh.dma);
 		}
 	} else {
@@ -3519,11 +3521,13 @@ static int ci13xxx_pullup(struct usb_gadget *_gadget, int is_active)
 
 	pm_runtime_get_sync(&_gadget->dev);
 
+#ifdef USE_BAM2BAM
 	/* Enable BAM (if needed) before starting controller */
 	if (is_active) {
 		dbg_event(0xFF, "BAM EN1", _gadget->bam2bam_func_enabled);
 		msm_usb_bam_enable(CI_CTRL, _gadget->bam2bam_func_enabled);
 	}
+#endif
 
 	spin_lock_irqsave(udc->lock, flags);
 	if (!udc->vbus_active) {
