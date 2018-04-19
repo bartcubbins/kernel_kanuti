@@ -916,8 +916,8 @@
 		#size-cells = <1>;
 		ranges;
 
-		reg = <0x78d9000 0x400>;
-		reg-names = "core";
+		//reg = <0x78d9000 0x400>;
+		//reg-names = "core";
 		interrupts = <0 134 0>,<0 140 0>;
 		interrupt-names = "core_irq", "async_irq";
 
@@ -950,13 +950,13 @@
 			 <&clock_rpm clk_bimc_usb_a_clk>,
 			 <&clock_rpm clk_snoc_usb_a_clk>,
 			 <&clock_rpm clk_pcnoc_usb_a_clk>,
-			 <&clock_gcc clk_gcc_qusb2_phy_clk>,
-			 <&clock_gcc clk_gcc_usb2_hs_phy_only_clk>,
-			 <&clock_gcc clk_gcc_usb_hs_phy_cfg_ahb_clk>,
+			 //<&clock_gcc clk_gcc_qusb2_phy_clk>,
+			// <&clock_gcc clk_gcc_usb2_hs_phy_only_clk>,
+			 //<&clock_gcc clk_gcc_usb_hs_phy_cfg_ahb_clk>,
 			 <&clock_rpm clk_xo_otg_clk>;
 		clock-names = "iface_clk", "core_clk", "sleep_clk",
 				"bimc_clk", "snoc_clk", "pcnoc_clk",
-				"phy_reset_clk", "phy_por_clk", "phy_csr_clk",
+				//"phy_reset_clk", "phy_por_clk", "phy_csr_clk",
 				"xo";
 		qcom,bus-clk-rate = <331200000 200000000 100000000>;
 
