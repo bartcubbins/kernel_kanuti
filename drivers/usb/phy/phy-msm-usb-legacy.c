@@ -42,7 +42,7 @@
 #include <linux/usb/ulpi.h>
 #include <linux/usb/gadget.h>
 #include <linux/usb/hcd.h>
-#include <linux/usb/msm_hsusb.h>
+#include <linux/usb/msm_hsusb_legacy.h>
 #include <linux/usb/msm_hsusb_hw.h>
 #include <linux/regulator/consumer.h>
 #include <linux/regulator/driver.h>
