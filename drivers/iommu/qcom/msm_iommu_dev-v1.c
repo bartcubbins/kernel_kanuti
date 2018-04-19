@@ -354,7 +354,7 @@ static int msm_iommu_sec_ptbl_init(struct device *dev)
 	size_t psize;
 	unsigned int spare = 0;
 	int ret;
-	u64 version;
+	int version;
 	void *cpu_addr;
 	dma_addr_t paddr;
 	DEFINE_DMA_ATTRS(attrs);
@@ -363,11 +363,7 @@ static int msm_iommu_sec_ptbl_init(struct device *dev)
 	if (allocated)
 		return 0;
 
-	ret = scm_get_feat_version(SCM_SVC_MP, &version);
-	if (ret) {
-		pr_err("ERROR: Cannot get SCM version!\n");
-		return -EINVAL;
-	}
+	version = scm_get_feat_version(SCM_SVC_MP);
 
 	if (version >= MAKE_VERSION(1, 1, 1)) {
 		ret = iommu_scm_set_pool_size();
