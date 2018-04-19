@@ -1350,8 +1350,8 @@ int __init msm_clock_init(struct clock_init_data *data)
 
 static int __init clock_late_init(void)
 {
-	struct handoff_clk *h, *h_temp;
-	struct handoff_vdd *v, *v_temp;
+	//struct handoff_clk *h, *h_temp;
+	//struct handoff_vdd *v, *v_temp;
 	struct clock_init_data *initdata, *initdata_temp;
 	int ret = 0;
 
@@ -1367,6 +1367,7 @@ static int __init clock_late_init(void)
 				initdata);
 	}
 
+/*
 	list_for_each_entry_safe(h, h_temp, &handoff_list, list) {
 		clk_disable_unprepare(h->clk);
 		list_del(&h->list);
@@ -1378,6 +1379,7 @@ static int __init clock_late_init(void)
 		list_del(&v->list);
 		kfree(v);
 	}
+*/
 
 	mutex_unlock(&msm_clock_init_lock);
 
