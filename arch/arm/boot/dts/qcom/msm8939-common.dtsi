@@ -910,6 +910,8 @@
 
 	usb_otg: usb@78d9000 {
 		compatible = "qcom,hsusb-otg";
+		reg = <0x78db000 0x400>, <0x6c000 0x200>;
+		reg-names = "core", "phy_csr";
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
@@ -948,11 +950,20 @@
 			 <&clock_rpm clk_bimc_usb_a_clk>,
 			 <&clock_rpm clk_snoc_usb_a_clk>,
 			 <&clock_rpm clk_pcnoc_usb_a_clk>,
+			 <&clock_gcc clk_gcc_qusb2_phy_clk>,
+			 <&clock_gcc clk_gcc_usb2_hs_phy_only_clk>,
+			 <&clock_gcc clk_gcc_usb_hs_phy_cfg_ahb_clk>,
 			 <&clock_rpm clk_xo_otg_clk>;
 		clock-names = "iface_clk", "core_clk", "sleep_clk",
 				"bimc_clk", "snoc_clk", "pcnoc_clk",
+				"phy_reset_clk", "phy_por_clk", "phy_csr_clk",
 				"xo";
 		qcom,bus-clk-rate = <331200000 200000000 100000000>;
+
+		resets = <&clock_gcc GCC_USB_HS_BCR>,
+			 <&clock_gcc GCC_QUSB2_PHY_BCR>,
+			 <&clock_gcc GCC_USB2_HS_PHY_ONLY_BCR>;
+		reset-names = "core_reset", "phy_reset", "phy_por_reset";
 
 		qcom,usbbam@78c4000 {
 			compatible = "qcom,usb-bam-msm";
