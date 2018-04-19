@@ -22,6 +22,7 @@ obj-$(CONFIG_USB_EHCI_TEGRA)		+= phy-tegra-usb.o
 obj-$(CONFIG_USB_GPIO_VBUS)		+= phy-gpio-vbus-usb.o
 obj-$(CONFIG_USB_ISP1301)		+= phy-isp1301.o
 obj-$(CONFIG_USB_MSM_OTG)		+= phy-msm-usb.o
+obj-$(CONFIG_USB_MSM_OTG_LEGACY)	+= phy-msm-usb-legacy.o
 obj-$(CONFIG_USB_QCOM_8X16_PHY)	+= phy-qcom-8x16-usb.o
 obj-$(CONFIG_USB_MSM_HSPHY)     	+= phy-msm-hsusb.o
 obj-$(CONFIG_USB_MSM_SSPHY)     	+= phy-msm-ssusb.o
