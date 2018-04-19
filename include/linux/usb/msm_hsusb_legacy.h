@@ -27,9 +27,25 @@
 #include <linux/hrtimer.h>
 #include <linux/power_supply.h>
 #include <linux/cdev.h>
-#include <linux/usb_bam.h>
 #include <linux/extcon.h>
 #include <linux/regulator/driver.h>
+
+
+/*
+ * The following are bit fields describing the usb_request.udc_priv word.
+ * These bit fields are set by function drivers that wish to queue
+ * usb_requests with sps/bam parameters.
+ */
+#define MSM_PIPE_ID_MASK		(0x1F)
+#define MSM_TX_PIPE_ID_OFS		(16)
+#define MSM_SPS_MODE			BIT(5)
+#define MSM_IS_FINITE_TRANSFER		BIT(6)
+#define MSM_PRODUCER			BIT(7)
+#define MSM_DISABLE_WB			BIT(8)
+#define MSM_ETD_IOC			BIT(9)
+#define MSM_INTERNAL_MEM		BIT(10)
+#define MSM_VENDOR_ID			BIT(16)
+
 /**
  * Requested USB votes for NOC frequency
  *
@@ -66,6 +82,16 @@ enum usb_chg_type {
 };
 
 /**
+ * Supported USB controllers
+ */
+enum usb_ctrl {
+	DWC3_CTRL = 0,	/* DWC3 controller */
+	CI_CTRL,	/* ChipIdea controller */
+	HSIC_CTRL,	/* HSIC controller */
+	NUM_CTRL,
+};
+
+/**
  * Maintain state for hvdcp external charger status
  * DEFAULT	This is used when DCP is detected
  * ACTIVE	This is used when ioctl is called to block LPM
@@ -87,6 +113,12 @@ enum usb_id_state {
 };
 
 #define USB_NUM_BUS_CLOCKS      3
+
+/**
+ * PHY flags
+ */
+#define ENABLE_DP_MANUAL_PULLUP	BIT(0)
+#define ENABLE_SECONDARY_PHY	BIT(1)
 
 /**
  * struct msm_otg: OTG driver data. Shared by HCD and DCD.
