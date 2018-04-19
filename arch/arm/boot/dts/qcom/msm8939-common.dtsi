@@ -910,13 +910,13 @@
 
 	usb_otg: usb@78d9000 {
 		compatible = "qcom,hsusb-otg";
+		reg = <0x78d9000 0x400>, <0x6c000 0x200>;
+		reg-names = "core", "phy_csr";
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
 
-		reg = <0x78d9000 0x400>;
-		reg-names = "core";
-		interrupts = <0 134 0>,<0 140 0>;
+		interrupts = <0 134 0>, <0 140 0>;
 		interrupt-names = "core_irq", "async_irq";
 
 		hsusb_vdd_dig-supply = <&pm8916_s2_corner>;
@@ -953,6 +953,11 @@
 				"bimc_clk", "snoc_clk", "pcnoc_clk",
 				"xo";
 		qcom,bus-clk-rate = <331200000 200000000 100000000>;
+
+		resets = <&clock_gcc GCC_USB_HS_BCR>,
+			 <&clock_gcc GCC_QUSB2_PHY_BCR>,
+			 <&clock_gcc GCC_USB2_HS_PHY_ONLY_BCR>;
+		reset-names = "core_reset", "phy_reset", "phy_por_reset";
 
 		qcom,usbbam@78c4000 {
 			compatible = "qcom,usb-bam-msm";
