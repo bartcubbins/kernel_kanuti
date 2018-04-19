@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2015 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013-2015, 2018 The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -3376,7 +3376,7 @@ static int smb1360_otg_regulator_is_enable(struct regulator_dev *rdev)
 	return  (reg & CMD_OTG_EN_BIT) ? 1 : 0;
 }
 
-struct regulator_ops smb1360_otg_reg_ops = {
+static struct regulator_ops smb1360_otg_reg_ops = {
 	.enable		= smb1360_otg_regulator_enable,
 	.disable	= smb1360_otg_regulator_disable,
 	.is_enabled	= smb1360_otg_regulator_is_enable,
