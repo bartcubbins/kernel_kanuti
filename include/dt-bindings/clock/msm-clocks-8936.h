@@ -244,4 +244,10 @@
 #define clk_rpm_debug_mux			0x25cd1f3a
 #define clk_wcnss_m_clk				0x709f430b
 
+/* GCC block resets */
+#define GCC_CAMSS_MICRO_BCR			0
+#define GCC_USB_HS_BCR				1
+#define GCC_USB2_HS_PHY_ONLY_BCR		2
+#define GCC_QUSB2_PHY_BCR			3
+
 #endif
