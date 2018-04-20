@@ -310,16 +310,20 @@ int enable_rpm_scaling(void)
 	rc = msm_rpm_send_message_noirq(MSM_RPM_CTX_SLEEP_SET,
 			RPM_MISC_CLK_TYPE, RPM_SCALING_ENABLE_ID, &kvp, 1);
 	if (rc < 0) {
-		if (rc != -EPROBE_DEFER)
+		if (rc != -EPROBE_DEFER) {
 			WARN(1, "RPM clock scaling (sleep set) did not enable!\n");
+pr_info("-------------------------CANNOT ENABLE RPM CLOCK SCALING (SLEEP SET)-------------------------\n");
+		}
 		return rc;
 	}
 
 	rc = msm_rpm_send_message_noirq(MSM_RPM_CTX_ACTIVE_SET,
 			RPM_MISC_CLK_TYPE, RPM_SCALING_ENABLE_ID, &kvp, 1);
 	if (rc < 0) {
-		if (rc != -EPROBE_DEFER)
+		if (rc != -EPROBE_DEFER) {
 			WARN(1, "RPM clock scaling (active set) did not enable!\n");
+pr_info("-------------------------CANNOT ENABLE RPM CLOCK SCALING (ACTIVE SET)-------------------------\n");
+		}
 		return rc;
 	}
 

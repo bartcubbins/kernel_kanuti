@@ -182,9 +182,13 @@ static int msm_rpmcc_8936_probe(struct platform_device *pdev)
 	struct resource *res;
 	int ret;
 
+pr_info("----------------------------START RPM 8936 PROBE----------------------------\n");
+
 	ret = enable_rpm_scaling();
-	if (ret < 0)
+	if (ret < 0) {
+pr_info("----------------------------CANNOT ENABLE RPM SCALING----------------------------\n");
 		return ret;
+	}
 
 	res =  platform_get_resource_byname(pdev, IORESOURCE_MEM, "cc_base");
 	if (!res) {
@@ -197,6 +201,8 @@ static int msm_rpmcc_8936_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Failed to map CC registers\n");
 		return -ENOMEM;
 	}
+
+pr_info("----------------------------RPM SCALING ENABLED----------------------------\n");
 
 	ret = of_msm_clock_register(pdev->dev.of_node, msm_clocks_rpm,
 				ARRAY_SIZE(msm_clocks_rpm));

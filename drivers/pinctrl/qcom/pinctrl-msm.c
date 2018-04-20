@@ -952,6 +952,8 @@ int msm_pinctrl_probe(struct platform_device *pdev,
 	struct resource *res;
 	int ret;
 
+pr_info("%s: Probing MSM PINCTRL.................\n", __func__);
+
 	msm_pinctrl_data = pctrl = devm_kzalloc(&pdev->dev,
 				sizeof(*pctrl), GFP_KERNEL);
 	if (!pctrl) {
