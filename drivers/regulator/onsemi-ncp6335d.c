@@ -623,40 +623,48 @@ static int ncp6335d_regulator_probe(struct i2c_client *client,
 	struct ncp6335d_info *dd;
 	const struct ncp6335d_platform_data *pdata;
 	struct regulator_config config = { };
-
-	if (client->dev.of_node)
+pr_info("----------------------------1----------------------------\n");
+	if (client->dev.of_node) {
 		pdata = ncp6335d_get_of_platform_data(client);
-	else
+		pr_info("----------------------------2----------------------------\n");
+	} else {
 		pdata = client->dev.platform_data;
+		pr_info("----------------------------3----------------------------\n");
+	}
 
 	if (!pdata) {
 		dev_err(&client->dev, "Platform data not specified\n");
+		pr_info("----------------------------4----------------------------\n");
 		return -EINVAL;
 	}
-
+	pr_info("----------------------------5----------------------------\n");
 	dd = devm_kzalloc(&client->dev, sizeof(*dd), GFP_KERNEL);
 	if (!dd)
 		return -ENOMEM;
-
+	pr_info("----------------------------6----------------------------\n");
 	if (client->dev.of_node) {
 		rc = ncp6335d_parse_dt(client, dd);
-		if (rc)
+		if (rc) {
+			pr_info("----------------------------7----------------------------\n");
 			return rc;
+		}
 	} else {
+		pr_info("----------------------------8----------------------------\n");
 		dd->step_size	= NCP6335D_STEP_VOLTAGE_UV;
 		dd->min_voltage	= NCP6335D_MIN_VOLTAGE_UV;
 		dd->min_slew_ns	= NCP6335D_MIN_SLEW_NS;
 		dd->max_slew_ns	= NCP6335D_MAX_SLEW_NS;
 	}
-
+pr_info("----------------------------9----------------------------\n");
 	dd->regmap = devm_regmap_init_i2c(client, &ncp6335d_regmap_config);
 	if (IS_ERR(dd->regmap)) {
 		dev_err(&client->dev, "Error allocating regmap\n");
 		return PTR_ERR(dd->regmap);
 	}
-
+pr_info("----------------------------10----------------------------\n");
 	rc = ncp6335x_read(dd, REG_NCP6335D_PID, &val);
 	if (rc) {
+		pr_info("----------------------------11----------------------------\n");
 		dev_err(&client->dev, "Unable to identify NCP6335D, rc(%d)\n",
 									rc);
 		return rc;
