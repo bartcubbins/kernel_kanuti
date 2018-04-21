@@ -802,7 +802,6 @@ static int msm_iommu_attach_dev(struct iommu_domain *domain, struct device *dev)
 		.pgsize_bitmap	= msm_iommu_ops.pgsize_bitmap,
 		.ias		= MMU_IAS,
 		.oas		= MMU_OAS,
-		.sep		= MMU_SEP,
 		.tlb		= &msm_iommu_gather_ops,
 		.arm_msm_secure_cfg = {
 			.sec_id = iommu_drvdata->sec_id,
