@@ -259,7 +259,18 @@ static struct vb2_v4l2_buffer *msm_vb2_get_buf(int session_id,
 
 	session = msm_get_session(session_id);
 	if (IS_ERR_OR_NULL(session))
+<<<<<<< HEAD
 		return NULL;
+
+	read_lock(&session->stream_rwlock);
+
+	stream = msm_get_stream(session, stream_id);
+	if (IS_ERR_OR_NULL(stream)) {
+		read_unlock(&session->stream_rwlock);
+=======
+>>>>>>> tags/LA.UM.5.7.r1-10100-8x98.0
+		return NULL;
+	}
 
 	read_lock(&session->stream_rwlock);
 
@@ -408,6 +419,7 @@ static int msm_vb2_buf_done(struct vb2_v4l2_buffer *vb, int session_id,
 
 	session = msm_get_session(session_id);
 	if (IS_ERR_OR_NULL(session))
+<<<<<<< HEAD
 		return -EINVAL;
 
 	read_lock(&session->stream_rwlock);
@@ -416,6 +428,16 @@ static int msm_vb2_buf_done(struct vb2_v4l2_buffer *vb, int session_id,
 	if (IS_ERR_OR_NULL(stream)) {
 		read_unlock(&session->stream_rwlock);
 		return -EINVAL;
+=======
+		return -EINVAL;
+
+	read_lock(&session->stream_rwlock);
+
+	stream = msm_get_stream(session, stream_id);
+	if (IS_ERR_OR_NULL(stream)) {
+		read_unlock(&session->stream_rwlock);
+		return -EINVAL;
+>>>>>>> tags/LA.UM.5.7.r1-10100-8x98.0
 	}
 
 	spin_lock_irqsave(&stream->stream_lock, flags);
@@ -515,6 +537,7 @@ static int msm_vb2_flush_buf(int session_id, unsigned int stream_id)
 
 	session = msm_get_session(session_id);
 	if (IS_ERR_OR_NULL(session))
+<<<<<<< HEAD
 		return -EINVAL;
 
 	read_lock(&session->stream_rwlock);
@@ -523,6 +546,16 @@ static int msm_vb2_flush_buf(int session_id, unsigned int stream_id)
 	if (IS_ERR_OR_NULL(stream)) {
 		read_unlock(&session->stream_rwlock);
 		return -EINVAL;
+=======
+		return -EINVAL;
+
+	read_lock(&session->stream_rwlock);
+
+	stream = msm_get_stream(session, stream_id);
+	if (IS_ERR_OR_NULL(stream)) {
+		read_unlock(&session->stream_rwlock);
+		return -EINVAL;
+>>>>>>> tags/LA.UM.5.7.r1-10100-8x98.0
 	}
 
 	spin_lock_irqsave(&stream->stream_lock, flags);

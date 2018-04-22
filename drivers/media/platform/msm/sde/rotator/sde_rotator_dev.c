@@ -1855,6 +1855,7 @@ static long sde_rotator_private_ioctl(struct file *file, void *fh,
 					ctx->session_id);
 				return ret;
 			}
+<<<<<<< HEAD
 
 			/*
 			 * Loose any reference to sync fence once we pass
@@ -1875,6 +1876,9 @@ static long sde_rotator_private_ioctl(struct file *file, void *fh,
 			 * Invalidate descriptor cache.
 			 */
 			vbinfo->fd = -1;
+=======
+			vbinfo->fence = NULL;
+>>>>>>> tags/LA.UM.5.7.r1-10100-8x98.0
 		}
 
 		fence->fd = vbinfo->fd;

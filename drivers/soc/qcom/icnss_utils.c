@@ -17,9 +17,8 @@
 #define ICNSS_MAX_CH_NUM 45
 
 static DEFINE_MUTEX(unsafe_channel_list_lock);
-static DEFINE_SPINLOCK(dfs_nol_info_lock);
+static DEFINE_MUTEX(dfs_nol_info_lock);
 static int driver_load_cnt;
-static enum cnss_cc_src icnss_cc_source = CNSS_SOURCE_CORE;
 
 static struct icnss_unsafe_channel_list {
 	u16 unsafe_ch_count;
@@ -139,16 +138,3 @@ int icnss_get_driver_load_cnt(void)
 	return driver_load_cnt;
 }
 EXPORT_SYMBOL(icnss_get_driver_load_cnt);
-
-
-void icnss_set_cc_source(enum cnss_cc_src cc_source)
-{
-	icnss_cc_source = cc_source;
-}
-EXPORT_SYMBOL(icnss_set_cc_source);
-
-enum cnss_cc_src icnss_get_cc_source(void)
-{
-	return icnss_cc_source;
-}
-EXPORT_SYMBOL(icnss_get_cc_source);
