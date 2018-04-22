@@ -3239,9 +3239,13 @@ static void __exit ipa3_wwan_cleanup(void)
 {
 	int ret;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> tags/LA.UM.5.7.r1-09500-8x98.0
+=======
+
+>>>>>>> tags/LA.UM.5.7.r1-09700-8x98.0
 	ipa3_qmi_cleanup();
 	mutex_destroy(&rmnet_ipa3_ctx->pipe_handle_guard);
 	mutex_destroy(&rmnet_ipa3_ctx->add_mux_channel_lock);

@@ -745,13 +745,14 @@ int apr_deregister(void *handle)
 	if (!handle)
 		return -EINVAL;
 
+	mutex_lock(&svc->m_lock);
 	if (!svc->svc_cnt) {
 		pr_err("%s: svc already deregistered. svc = %pK\n",
 			__func__, svc);
+		mutex_unlock(&svc->m_lock);
 		return -EINVAL;
 	}
 
-	mutex_lock(&svc->m_lock);
 	dest_id = svc->dest_id;
 	client_id = svc->client_id;
 	clnt = &client[dest_id][client_id];
@@ -885,8 +886,10 @@ static int apr_notifier_service_cb(struct notifier_block *this,
 		 * recovery notifications during initial boot
 		 * up since everything is expected to be down.
 		 */
-		if (is_initial_boot)
+		if (is_initial_boot) {
+			is_initial_boot = false;
 			break;
+		}
 		if (cb_data->domain == AUDIO_NOTIFIER_MODEM_DOMAIN)
 			apr_modem_down(opcode);
 		else
