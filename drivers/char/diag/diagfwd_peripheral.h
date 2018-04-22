@@ -80,8 +80,6 @@ struct diagfwd_info {
 	struct diagfwd_buf_t *buf_2;
 	struct diagfwd_buf_t *buf_upd_1_a;
 	struct diagfwd_buf_t *buf_upd_1_b;
-	struct diagfwd_buf_t *buf_upd_2_a;
-	struct diagfwd_buf_t *buf_upd_2_b;
 	struct diagfwd_buf_t *buf_ptr[NUM_WRITE_BUFFERS];
 	int cpd_len_1;
 	int cpd_len_2;

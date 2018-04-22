@@ -175,10 +175,24 @@ int diag_md_write(int id, unsigned char *buf, int len, int ctx)
 	if (!buf || len < 0)
 		return -EINVAL;
 
-	peripheral =
-		diag_md_get_peripheral(ctx);
-	if (peripheral < 0)
-		return -EINVAL;
+	if (driver->pd_logging_mode) {
+		peripheral = GET_PD_CTXT(ctx);
+		switch (peripheral) {
+		case UPD_WLAN:
+			break;
+		case DIAG_ID_MPSS:
+		default:
+			peripheral = GET_BUF_PERIPHERAL(ctx);
+			if (peripheral > NUM_PERIPHERALS)
+				return -EINVAL;
+			break;
+		}
+	} else {
+		/* Account for Apps data as well */
+		peripheral = GET_BUF_PERIPHERAL(ctx);
+		if (peripheral > NUM_PERIPHERALS)
+			return -EINVAL;
+	}
 
 	session_info =
 		diag_md_session_get_peripheral(peripheral);
@@ -254,21 +268,39 @@ int diag_md_copy_to_user(char __user *buf, int *pret, size_t buf_size,
 	struct diag_md_session_t *session_info = NULL;
 	struct pid *pid_struct = NULL;
 
+	mutex_lock(&driver->diagfwd_untag_mutex);
+
 	for (i = 0; i < NUM_DIAG_MD_DEV && !err; i++) {
 		ch = &diag_md[i];
 		for (j = 0; j < ch->num_tbl_entries && !err; j++) {
 			entry = &ch->tbl[j];
 			if (entry->len <= 0)
 				continue;
-
-			peripheral = diag_md_get_peripheral(entry->ctx);
-			if (peripheral < 0)
-				goto drop_data;
+			if (driver->pd_logging_mode) {
+				peripheral = GET_PD_CTXT(entry->ctx);
+				switch (peripheral) {
+				case UPD_WLAN:
+					break;
+				case DIAG_ID_MPSS:
+				default:
+					peripheral =
+						GET_BUF_PERIPHERAL(entry->ctx);
+					if (peripheral > NUM_PERIPHERALS)
+						goto drop_data;
+					break;
+				}
+			} else {
+				/* Account for Apps data as well */
+				peripheral = GET_BUF_PERIPHERAL(entry->ctx);
+				if (peripheral > NUM_PERIPHERALS)
+					goto drop_data;
+			}
 
 			session_info =
 			diag_md_session_get_peripheral(peripheral);
 			if (!session_info) {
-				goto drop_data;
+				mutex_unlock(&driver->diagfwd_untag_mutex);
+				return -EIO;
 			}
 
 			if (session_info && info &&
@@ -363,6 +395,8 @@ drop_data:
 	if (drain_again)
 		chk_logging_wakeup();
 
+	mutex_unlock(&driver->diagfwd_untag_mutex);
+
 	return err;
 }
 
@@ -382,15 +416,9 @@ int diag_md_close_peripheral(int id, uint8_t peripheral)
 	spin_lock_irqsave(&ch->lock, flags);
 	for (i = 0; i < ch->num_tbl_entries && !found; i++) {
 		entry = &ch->tbl[i];
-
-		if (peripheral > NUM_PERIPHERALS) {
-			if (GET_PD_CTXT(entry->ctx) != peripheral)
-				continue;
-		} else {
-			if (GET_BUF_PERIPHERAL(entry->ctx) !=
-					peripheral)
-				continue;
-		}
+		if ((GET_BUF_PERIPHERAL(entry->ctx) != peripheral) ||
+			(GET_PD_CTXT(entry->ctx) != peripheral))
+			continue;
 		found = 1;
 		if (ch->ops && ch->ops->write_done) {
 			ch->ops->write_done(entry->buf, entry->len,

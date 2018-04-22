@@ -134,6 +134,7 @@ static ssize_t panel_debug_base_offset_read(struct file *file,
 
 	*ppos += len;	/* increase offset */
 
+	mutex_unlock(&mdss_debug_lock);
 	return len;
 }
 
@@ -231,11 +232,16 @@ static ssize_t panel_debug_base_reg_read(struct file *file,
 	if (!dbg)
 		return -ENODEV;
 
-	if (!dbg->cnt)
+	mutex_lock(&mdss_debug_lock);
+	if (!dbg->cnt) {
+		mutex_unlock(&mdss_debug_lock);
 		return 0;
+	}
 
-	if (*ppos)
+	if (*ppos) {
+		mutex_unlock(&mdss_debug_lock);
 		return 0;	/* the end */
+	}
 
 	/* '0x' + 2 digit + blank = 5 bytes for each number */
 	reg_buf_len = (dbg->cnt * PANEL_REG_FORMAT_LEN)
@@ -512,6 +518,8 @@ static ssize_t mdss_debug_base_reg_read(struct file *file,
 		return -ENODEV;
 	}
 
+	mutex_lock(&mdss_debug_lock);
+
 	if (!dbg->buf) {
 		char dump_buf[64];
 		char *ptr;
@@ -523,6 +531,7 @@ static ssize_t mdss_debug_base_reg_read(struct file *file,
 
 		if (!dbg->buf) {
 			pr_err("not enough memory to hold reg dump\n");
+			mutex_unlock(&mdss_debug_lock);
 			return -ENOMEM;
 		}
 

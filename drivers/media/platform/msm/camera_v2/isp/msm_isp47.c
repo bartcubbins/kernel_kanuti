@@ -696,6 +696,15 @@ void msm_vfe47_process_epoch_irq(struct vfe_device *vfe_dev,
 	}
 }
 
+void msm_isp47_preprocess_camif_irq(struct vfe_device *vfe_dev,
+	uint32_t irq_status0)
+{
+	if (irq_status0 & BIT(1))
+		vfe_dev->axi_data.src_info[VFE_PIX_0].accept_frame = false;
+	if (irq_status0 & BIT(0))
+		vfe_dev->axi_data.src_info[VFE_PIX_0].accept_frame = true;
+}
+
 void msm_vfe47_reg_update(struct vfe_device *vfe_dev,
 	enum msm_vfe_input_src frame_src)
 {
@@ -1926,7 +1935,7 @@ void msm_vfe47_update_ping_pong_addr(
 	if (buf_size < 0)
 		buf_size = 0;
 
-	paddr32_max = (paddr + buf_size) & 0xFFFFFFC0;
+	paddr32_max = (paddr + buf_size) & 0xFFFFFFE0;
 
 	msm_camera_io_w(paddr32, vfe_base +
 		VFE47_PING_PONG_BASE(wm_idx, pingpong_bit));
@@ -2414,18 +2423,23 @@ void msm_vfe47_stats_enable_module(struct vfe_device *vfe_dev,
 
 void msm_vfe47_stats_update_ping_pong_addr(
 	struct vfe_device *vfe_dev, struct msm_vfe_stats_stream *stream_info,
-	uint32_t pingpong_status, dma_addr_t paddr)
+	uint32_t pingpong_status, dma_addr_t paddr, uint32_t buf_size)
 {
 	void __iomem *vfe_base = vfe_dev->vfe_base;
 	int vfe_idx = msm_isp_get_vfe_idx_for_stats_stream(vfe_dev,
 			stream_info);
 	uint32_t paddr32 = (paddr & 0xFFFFFFFF);
+	uint32_t paddr32_max;
 	int stats_idx;
 
 	stats_idx = STATS_IDX(stream_info->stream_handle[vfe_idx]);
 
 	msm_camera_io_w(paddr32, vfe_base +
 		VFE47_STATS_PING_PONG_BASE(stats_idx, pingpong_status));
+
+	paddr32_max = (paddr + buf_size) & 0xFFFFFFE0;
+	msm_camera_io_w(paddr32_max, vfe_base +
+		VFE47_STATS_PING_PONG_BASE(stats_idx, pingpong_status) + 0x4);
 }
 
 uint32_t msm_vfe47_stats_get_wm_mask(
@@ -2947,6 +2961,7 @@ struct msm_vfe_hardware_info vfe47_hw_info = {
 			.process_epoch_irq = msm_vfe47_process_epoch_irq,
 			.config_irq = msm_vfe47_config_irq,
 			.read_irq_status = msm_vfe47_read_irq_status,
+			.preprocess_camif_irq = msm_isp47_preprocess_camif_irq,
 		},
 		.axi_ops = {
 			.reload_wm = msm_vfe47_axi_reload_wm,

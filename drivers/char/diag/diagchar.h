@@ -76,9 +76,7 @@
 				| DIAG_CON_LPASS | DIAG_CON_WCNSS \
 				| DIAG_CON_SENSORS | DIAG_CON_WDSP \
 				| DIAG_CON_CDSP)
-#define DIAG_CON_UPD_ALL	(DIAG_CON_UPD_WLAN \
-				| DIAG_CON_UPD_AUDIO \
-				| DIAG_CON_UPD_SENSORS)
+#define DIAG_CON_UPD_ALL	(DIAG_CON_UPD_WLAN)
 
 #define DIAG_STM_MODEM	0x01
 #define DIAG_STM_LPASS	0x02
@@ -224,10 +222,6 @@
 #define DIAG_ID_APPS		1
 #define DIAG_ID_MPSS		2
 #define DIAG_ID_WLAN		3
-#define DIAG_ID_LPASS		4
-#define DIAG_ID_CDSP		5
-#define DIAG_ID_AUDIO		6
-#define DIAG_ID_SENSORS		7
 
 /* Number of sessions possible in Memory Device Mode. +1 for Apps data */
 #define NUM_MD_SESSIONS		(NUM_PERIPHERALS \
@@ -514,8 +508,6 @@ struct diagchar_dev {
 	int supports_separate_cmdrsp;
 	int supports_apps_hdlc_encoding;
 	int supports_apps_header_untagging;
-	int supports_pd_buffering;
-	int peripheral_untag[NUM_PERIPHERALS];
 	int supports_sockets;
 	/* The state requested in the STM command */
 	int stm_state_requested[NUM_STM_PROCESSORS];
@@ -547,6 +539,7 @@ struct diagchar_dev {
 	struct mutex cmd_reg_mutex;
 	uint32_t cmd_reg_count;
 	struct mutex diagfwd_channel_mutex[NUM_PERIPHERALS];
+	struct mutex diagfwd_untag_mutex;
 	/* Sizes that reflect memory pool sizes */
 	unsigned int poolsize;
 	unsigned int poolsize_hdlc;
@@ -609,9 +602,10 @@ struct diagchar_dev {
 	int in_busy_dcipktdata;
 	int logging_mode;
 	int logging_mask;
-	int pd_logging_mode[NUM_UPD];
-	int pd_session_clear[NUM_UPD];
+	int pd_logging_mode;
 	int num_pd_session;
+	int cpd_len_1;
+	int cpd_len_2;
 	int mask_check;
 	uint32_t md_session_mask;
 	uint8_t md_session_mode;
