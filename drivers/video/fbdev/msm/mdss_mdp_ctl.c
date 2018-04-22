@@ -4833,7 +4833,7 @@ static void __mdss_mdp_mixer_get_offsets(u32 mixer_num,
 	offsets[2] = MDSS_MDP_REG_CTL_LAYER_EXTN2(mixer_num);
 }
 
-static inline int __mdss_mdp_mixer_get_hw_num(struct mdss_mdp_mixer *mixer)
+int mdss_mdp_mixer_get_hw_num(struct mdss_mdp_mixer *mixer)
 {
 	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
 
@@ -4889,7 +4889,7 @@ static void __mdss_mdp_mixer_write_cfg(struct mdss_mdp_mixer *mixer,
 	if (!mixer)
 		return;
 
-	mixer_num = __mdss_mdp_mixer_get_hw_num(mixer);
+	mixer_num = mdss_mdp_mixer_get_hw_num(mixer);
 
 	if (cfg) {
 		for (i = 0; i < NUM_MIXERCFG_REGS; i++)
@@ -4936,7 +4936,7 @@ bool mdss_mdp_mixer_reg_has_pipe(struct mdss_mdp_mixer *mixer,
 
 	memset(&mixercfg, 0, sizeof(mixercfg));
 
-	mixer_num = __mdss_mdp_mixer_get_hw_num(mixer);
+	mixer_num = mdss_mdp_mixer_get_hw_num(mixer);
 	__mdss_mdp_mixer_get_offsets(mixer_num, offs, NUM_MIXERCFG_REGS);
 
 	for (i = 0; i < NUM_MIXERCFG_REGS; i++)
@@ -5161,7 +5161,7 @@ static void mdss_mdp_mixer_setup(struct mdss_mdp_ctl *master_ctl,
 		mixercfg.cursor_enabled = true;
 
 update_mixer:
-	mixer_num = __mdss_mdp_mixer_get_hw_num(mixer_hw);
+	mixer_num = mdss_mdp_mixer_get_hw_num(mixer_hw);
 	ctl_hw->flush_bits |= BIT(mixer_num < 5 ? 6 + mixer_num : 20);
 
 	/* Read GC enable/disable status on LM */
