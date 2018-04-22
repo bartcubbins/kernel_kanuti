@@ -20,9 +20,13 @@
 
 #include <linux/pmic-voter.h>
 
+<<<<<<< HEAD
 #ifndef CONFIG_QPNP_SMBFG_NEWGEN_EXTENSION
 #define NUM_MAX_CLIENTS	8
 #endif
+=======
+#define NUM_MAX_CLIENTS		16
+>>>>>>> tags/LA.UM.5.7.r1-09100-8x98.0
 #define DEBUG_FORCE_CLIENT	"DEBUG_FORCE_CLIENT"
 
 static DEFINE_SPINLOCK(votable_list_slock);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -30,6 +30,7 @@ static struct ufs_card_fix ufs_fixups[] = {
 		UFS_DEVICE_QUIRK_HOST_PA_TACTIVATE),
 	UFS_FIX(UFS_VENDOR_HYNIX, UFS_ANY_MODEL,
 		UFS_DEVICE_QUIRK_HOST_PA_SAVECONFIGTIME),
+<<<<<<< HEAD
 #ifdef CONFIG_ARCH_SONY_YOSHINO
 	UFS_FIX_REVISION(UFS_VENDOR_HYNIX, UFS_MODEL_HYNIX_32GB,
 		UFS_REVISION_HYNIX, UFS_DEVICE_QUIRK_NO_PURGE),
@@ -40,6 +41,23 @@ static struct ufs_card_fix ufs_fixups[] = {
 	UFS_FIX(UFS_VENDOR_HYNIX, UFS_ANY_MODEL,
 		UFS_DEVICE_QUIRK_EXTEND_SYNC_LENGTH),
 #endif
+=======
+	UFS_FIX(UFS_VENDOR_HYNIX, "hB8aL1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+	UFS_FIX(UFS_VENDOR_HYNIX, "hC8aL1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+	UFS_FIX(UFS_VENDOR_HYNIX, "hD8aL1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+	UFS_FIX(UFS_VENDOR_HYNIX, "hC8aM1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+	UFS_FIX(UFS_VENDOR_HYNIX, "h08aM1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+	UFS_FIX(UFS_VENDOR_HYNIX, "hC8GL1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+	UFS_FIX(UFS_VENDOR_HYNIX, "hC8HL1",
+		UFS_DEVICE_QUIRK_HS_G1_TO_HS_G3_SWITCH),
+
+>>>>>>> tags/LA.UM.5.7.r1-09100-8x98.0
 	END_FIX
 };
 

@@ -1458,6 +1458,7 @@ mtp_function_unbind(struct usb_configuration *c, struct usb_function *f)
 	int i;
 
 	mtp_string_defs[INTERFACE_STRING_INDEX].id = 0;
+	mutex_lock(&dev->read_mutex);
 	while ((req = mtp_req_get(dev, &dev->tx_idle)))
 		mtp_request_free(req, dev->ep_in);
 	for (i = 0; i < RX_REQ_MAX; i++)
