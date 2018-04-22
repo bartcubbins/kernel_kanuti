@@ -124,12 +124,26 @@ void diag_notify_md_client(uint8_t peripheral, int data)
 	info.si_code = SI_QUEUE;
 	info.si_int = (PERIPHERAL_MASK(peripheral) | data);
 	info.si_signo = SIGCONT;
-	if (driver->md_session_map[peripheral] &&
-		driver->md_session_map[peripheral]->task) {
-		if (driver->md_session_map[peripheral]->
-			md_client_thread_info->task != NULL
-			&& driver->md_session_map[peripheral]->pid ==
-			driver->md_session_map[peripheral]->task->tgid) {
+
+	if (!driver->md_session_map[peripheral] ||
+		driver->md_session_map[peripheral]->pid <= 0) {
+		pr_err("diag: md_session_map[%d] is invalid\n", peripheral);
+		mutex_unlock(&driver->md_session_lock);
+		return;
+	}
+
+	pid_struct = find_get_pid(
+			driver->md_session_map[peripheral]->pid);
+	DIAG_LOG(DIAG_DEBUG_PERIPHERALS,
+		"md_session_map[%d] pid = %d task = %pK\n",
+		peripheral,
+		driver->md_session_map[peripheral]->pid,
+		driver->md_session_map[peripheral]->task);
+
+	if (pid_struct) {
+		result = get_pid_task(pid_struct, PIDTYPE_PID);
+
+		if (!result) {
 			DIAG_LOG(DIAG_DEBUG_PERIPHERALS,
 				"diag: md_session_map[%d] with pid = %d Exited..\n",
 				peripheral,

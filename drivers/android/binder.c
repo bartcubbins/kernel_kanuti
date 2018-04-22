@@ -2405,9 +2405,16 @@ static void binder_transaction(struct binder_proc *proc,
 				return_error_line = __LINE__;
 				goto err_bad_offset;
 			}
+<<<<<<< HEAD
 			if (copy_from_user(sg_bufp,
 					  (const void __user *)(uintptr_t)
 					  bp->buffer, bp->length)) {
+=======
+			if (copy_from_user_preempt_disabled(
+					sg_bufp,
+					(const void __user *)(uintptr_t)
+					bp->buffer, bp->length)) {
+>>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
 				binder_user_error("%d:%d got transaction with invalid offsets ptr\n",
 						  proc->pid, thread->pid);
 				return_error = BR_FAILED_REPLY;
@@ -2761,8 +2768,13 @@ static int binder_thread_write(struct binder_proc *proc,
 		case BC_REPLY_SG: {
 			struct binder_transaction_data_sg tr;
 
+<<<<<<< HEAD
 			if (copy_from_user(&tr, ptr,
 					   sizeof(tr)))
+=======
+			if (copy_from_user_preempt_disabled(&tr, ptr,
+							    sizeof(tr)))
+>>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
 				return -EFAULT;
 			ptr += sizeof(tr);
 			binder_transaction(proc, thread, &tr.transaction_data,

@@ -146,7 +146,15 @@ int diag_mux_write(int proc, unsigned char *buf, int len, int ctx)
 		case DIAG_ID_MPSS:
 			upd = PERIPHERAL_MODEM;
 			break;
+		case DIAG_ID_LPASS:
+			upd = PERIPHERAL_LPASS;
+			break;
+		case DIAG_ID_CDSP:
+			upd = PERIPHERAL_CDSP;
+			break;
 		case UPD_WLAN:
+		case UPD_AUDIO:
+		case UPD_SENSORS:
 			break;
 		default:
 			pr_err("diag: invalid pd ctxt= %d\n", upd);

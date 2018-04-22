@@ -110,8 +110,12 @@ int btfm_slim_chrk_enable_port(struct btfmslim *btfmslim, uint8_t port_num,
 	if (!enable)
 		goto enable_disable_txport;
 
+<<<<<<< HEAD
 	/* txport */
 	/* Multiple Channel Setting */
+=======
+	/* Multiple Channel Setting - only for FM Tx */
+>>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
 	if (is_fm_port(port_num)) {
 		reg_val = (0x1 << CHRK_SB_PGD_PORT_TX1_FM) |
 				(0x1 << CHRK_SB_PGD_PORT_TX2_FM);
@@ -151,6 +155,7 @@ enable_disable_txport:
 	reg = CHRK_SB_PGD_PORT_TX_CFGN(port_num);
 
 enable_disable_rxport:
+<<<<<<< HEAD
 	if (enable)
 		en = CHRK_SB_PGD_PORT_ENABLE;
 	else
@@ -164,6 +169,17 @@ enable_disable_rxport:
 	if (enable && port_num == CHRK_SB_PGD_PORT_TX_SCO)
 		BTFMSLIM_INFO("programming SCO Tx with reg_val %d to reg 0x%x",
 				reg_val, reg);
+=======
+	if (enable) {
+		if (is_fm_port(port_num))
+			reg_val = CHRK_SB_PGD_PORT_ENABLE |
+					CHRK_SB_PGD_PORT_WM_L3;
+		else
+			reg_val = CHRK_SB_PGD_PORT_ENABLE |
+					CHRK_SB_PGD_PORT_WM_LB;
+	} else
+		reg_val = CHRK_SB_PGD_PORT_DISABLE;
+>>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
 
 	ret = btfm_slim_write(btfmslim, reg, 1, &reg_val, IFD);
 	if (ret)

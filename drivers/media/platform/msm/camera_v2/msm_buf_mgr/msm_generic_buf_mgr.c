@@ -559,7 +559,11 @@ static long msm_buf_mngr_subdev_ioctl(struct v4l2_subdev *sd,
 				}
 				k_ioctl.ioctl_ptr = (uintptr_t)&buf_info;
 			}
+<<<<<<< HEAD
 #endif
+=======
+			k_ioctl.ioctl_ptr = (uintptr_t)&buf_info;
+>>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
 			argp = &k_ioctl;
 			rc = msm_cam_buf_mgr_ops(cmd, argp);
 			}

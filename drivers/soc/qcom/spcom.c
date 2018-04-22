@@ -1753,6 +1753,8 @@ static int spcom_handle_lock_ion_buf_command(struct spcom_channel *ch,
 	/* decrement back the ref count */
 	ion_free(spcom_dev->ion_client, ion_handle);
 
+	mutex_unlock(&ch->lock);
+
 	return -EFAULT;
 }
 
