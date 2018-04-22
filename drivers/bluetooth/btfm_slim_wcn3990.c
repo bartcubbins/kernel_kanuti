@@ -82,7 +82,11 @@ int btfm_slim_chrk_enable_port(struct btfmslim *btfmslim, uint8_t port_num,
 	uint8_t rxport, uint8_t enable)
 {
 	int ret = 0;
+<<<<<<< HEAD
 	uint8_t reg_val = 0, en;
+=======
+	uint8_t reg_val = 0;
+>>>>>>> tags/LA.UM.5.7.r1-09500-8x98.0
 	uint8_t port_bit = 0;
 	uint16_t reg;
 
@@ -111,15 +115,32 @@ int btfm_slim_chrk_enable_port(struct btfmslim *btfmslim, uint8_t port_num,
 		goto enable_disable_txport;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	/* txport */
 	/* Multiple Channel Setting */
 =======
 	/* Multiple Channel Setting - only for FM Tx */
 >>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
+=======
+	/* txport */
+	/* Multiple Channel Setting */
+>>>>>>> tags/LA.UM.5.7.r1-09500-8x98.0
 	if (is_fm_port(port_num)) {
 		reg_val = (0x1 << CHRK_SB_PGD_PORT_TX1_FM) |
 				(0x1 << CHRK_SB_PGD_PORT_TX2_FM);
 		reg = CHRK_SB_PGD_TX_PORTn_MULTI_CHNL_0(port_num);
+		ret = btfm_slim_write(btfmslim, reg, 1, &reg_val, IFD);
+		if (ret) {
+			BTFMSLIM_ERR("failed to write (%d) reg 0x%x",
+					ret, reg);
+			goto error;
+		}
+	} else if (port_num == CHRK_SB_PGD_PORT_TX_SCO) {
+		/* SCO Tx */
+		reg_val = 0x1 << CHRK_SB_PGD_PORT_TX_SCO;
+		reg = CHRK_SB_PGD_TX_PORTn_MULTI_CHNL_0(port_num);
+		BTFMSLIM_DBG("writing reg_val (%d) to reg(%x)",
+				reg_val, reg);
 		ret = btfm_slim_write(btfmslim, reg, 1, &reg_val, IFD);
 		if (ret) {
 			BTFMSLIM_ERR("failed to write (%d) reg 0x%x",
