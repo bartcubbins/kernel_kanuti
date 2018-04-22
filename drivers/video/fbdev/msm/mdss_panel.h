@@ -539,6 +539,10 @@ struct mipi_panel_info {
 	u32  post_init_delay;
 	u32  num_of_sublinks;
 	u32  lanes_per_sublink;
+#ifdef CONFIG_FB_MSM_MDSS_SPECIFIC_PANEL
+	int input_fpks;
+	bool switch_mode_pending;
+#endif
 };
 
 struct edp_panel_info {
