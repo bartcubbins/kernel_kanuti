@@ -2574,15 +2574,11 @@ void mdss_dsi_cmd_mdp_busy(struct mdss_dsi_ctrl_pdata *ctrl)
 				MDSS_XLOG_TOUT_HANDLER("mdp", "dsi0_ctrl",
 					"dsi0_phy", "dsi1_ctrl", "dsi1_phy",
 					"vbif", "vbif_nrt", "dbg_bus",
-<<<<<<< HEAD
 #ifdef CONFIG_FB_MSM_MDSS_SPECIFIC_PANEL
 					"vbif_dbg_bus");
 #else
 					"vbif_dbg_bus", "panic");
 #endif
-=======
-					"vbif_dbg_bus", "dsi_dbg_bus", "panic");
->>>>>>> tags/LA.UM.5.7.r1-09300-8x98.0
 			}
 		}
 	}
