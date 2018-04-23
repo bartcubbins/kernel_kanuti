@@ -1007,7 +1007,7 @@ void of_mpm_init(void)
 {
 	struct device_node *node;
 	int i;
-	int ret;
+	int ret = 0;
 
 	node = of_find_matching_node(NULL, msm_mpm_match_table);
 	WARN_ON(!node);

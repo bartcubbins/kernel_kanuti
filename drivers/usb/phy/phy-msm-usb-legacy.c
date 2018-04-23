@@ -1865,10 +1865,10 @@ static void msm_otg_notify_chg_current(struct msm_otg *motg, unsigned int mA)
 	if (power_supply_set_property(psy, POWER_SUPPLY_PROP_ONLINE, &pval))
 		goto psy_error;
 
-	pval.intval = limit;
-	if (power_supply_set_property(psy, POWER_SUPPLY_PROP_SDP_CURRENT_MAX,
-									&pval))
-		goto psy_error;
+//	pval.intval = limit;
+//	if (power_supply_set_property(psy, POWER_SUPPLY_PROP_SDP_CURRENT_MAX,
+//									&pval))
+//		goto psy_error;
 
 psy_error:
 	dev_dbg(motg->phy.dev, "power supply error when setting property\n");

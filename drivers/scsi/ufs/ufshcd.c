@@ -554,18 +554,6 @@ static void ufshcd_print_cmd_log(struct ufs_hba *hba)
 		}
 	}
 }
-#else
-static void ufshcd_cmd_log_init(struct ufs_hba *hba)
-{
-}
-
-static void ufshcd_dme_cmd_log(struct ufs_hba *hba, char *str, u8 cmd_id)
-{
-}
-
-static void ufshcd_print_cmd_log(struct ufs_hba *hba)
-{
-}
 #endif
 
 #ifdef CONFIG_TRACEPOINTS
