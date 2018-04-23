@@ -984,7 +984,6 @@ static int memshare_child_probe(struct platform_device *pdev)
 			return rc;
 		}
 		memblock[num_clients].alloted = 1;
-		shared_hyp_mapping(num_clients);
 	}
 
 	/*
