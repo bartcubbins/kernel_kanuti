@@ -202,7 +202,7 @@ static int __maybe_unused cpu_psci_cpu_suspend(unsigned long state_id)
 	return ret;
 }
 
-const struct cpu_operations cpu_psci_ops = {
+static struct cpu_operations cpu_psci_ops = {
 	.name		= "psci",
 #ifdef CONFIG_CPU_IDLE
 	.cpu_init_idle	= cpu_psci_cpu_init_idle,

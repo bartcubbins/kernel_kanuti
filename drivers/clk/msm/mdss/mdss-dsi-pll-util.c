@@ -469,18 +469,18 @@ static void pll_28nm_vco_config(void __iomem *pll_base,
 
 int vco_set_rate(struct dsi_pll_vco_clk *vco, unsigned long rate)
 {
-	struct mdss_dsi_vco_calc vco_calc;
+	struct mdss_dsi_vco_calc *vco_calc;
 	struct mdss_pll_resources *dsi_pll_res = vco->priv;
 	int rc = 0;
 
-	rc = pll_28nm_vco_rate_calc(vco, &vco_calc, rate);
+	rc = pll_28nm_vco_rate_calc(vco, vco_calc, rate);
 	if (rc) {
 		pr_err("vco rate calculation failed\n");
 		return rc;
 	}
 
-	pll_28nm_ssc_param_calc(vco, &vco_calc);
-	pll_28nm_vco_config(dsi_pll_res->pll_base, &vco_calc,
+	pll_28nm_ssc_param_calc(vco, vco_calc);
+	pll_28nm_vco_config(dsi_pll_res->pll_base, vco_calc,
 		dsi_pll_res->vco_delay, dsi_pll_res->ssc_en);
 
 	return 0;
