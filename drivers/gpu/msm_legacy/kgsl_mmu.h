@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2007-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002, 2007-2015, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -334,7 +334,7 @@ kgsl_mmu_pagetable_get_contextidr(struct kgsl_pagetable *pagetable)
 	return 0;
 }
 
-#ifdef CONFIG_MSM_IOMMU
+#ifdef CONFIG_QCOM_IOMMU
 #include <linux/qcom_iommu.h>
 static inline bool kgsl_mmu_bus_secured(struct device *dev)
 {

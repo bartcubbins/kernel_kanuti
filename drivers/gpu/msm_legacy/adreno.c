@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2007-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002, 2007-2016, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -16,7 +16,6 @@
 #include <linux/of.h>
 #include <linux/of_device.h>
 #include <linux/delay.h>
-#include <linux/of_coresight.h>
 #include <linux/input.h>
 #include <soc/qcom/scm.h>
 
@@ -1019,7 +1018,7 @@ static int adreno_of_get_power(struct adreno_device *adreno_dev,
 	return 0;
 }
 
-#ifdef CONFIG_MSM_OCMEM
+#ifdef CONFIG_QCOM_OCMEM
 static int
 adreno_ocmem_malloc(struct adreno_device *adreno_dev)
 {
@@ -1130,7 +1129,7 @@ static int adreno_probe(struct platform_device *pdev)
 
 	adreno_sysfs_init(adreno_dev);
 
-	kgsl_pwrscale_init(&pdev->dev, CONFIG_MSM_ADRENO_DEFAULT_GOVERNOR);
+	kgsl_pwrscale_init(&pdev->dev, CONFIG_QCOM_ADRENO_DEFAULT_GOVERNOR);
 
 	/* Initialize coresight for the target */
 	adreno_coresight_init(adreno_dev);
