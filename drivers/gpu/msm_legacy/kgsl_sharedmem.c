@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2007-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002, 2007-2016, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -752,10 +752,10 @@ kgsl_sharedmem_page_alloc_user(struct kgsl_memdesc *memdesc,
 		 * Don't do some of the more aggressive memory recovery
 		 * techniques for large order allocations
 		 */
-		if (page_size != PAGE_SIZE)
-			gfp_mask |= __GFP_COMP | __GFP_NORETRY |
-				__GFP_NO_KSWAPD | __GFP_NOWARN;
-		else
+		if (page_size != PAGE_SIZE) {
+			gfp_mask |= __GFP_COMP | __GFP_NORETRY | __GFP_NOWARN;
+			gfp_mask &= ~__GFP_RECLAIM;
+		} else
 			gfp_mask |= GFP_KERNEL;
 
 		if (sharedmem_noretry_flag == true)
