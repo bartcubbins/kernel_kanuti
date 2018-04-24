@@ -373,9 +373,6 @@ static int adreno_iommu_pdev_probe(struct platform_device *pdev)
 				&iommu->micro_mmu_ctrl))
 		iommu->micro_mmu_ctrl = UINT_MAX;
 
-	if (of_property_read_bool(pdev->dev.of_node, "qcom,coherent-htw"))
-		device_3d0.dev.mmu.features |= KGSL_MMU_COHERENT_HTW;
-
 	if (of_property_read_u32(pdev->dev.of_node, "qcom,secure_align_mask",
 		&device_3d0.dev.mmu.secure_align_mask))
 		device_3d0.dev.mmu.secure_align_mask = 0xfff;
