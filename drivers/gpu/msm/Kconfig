@@ -11,7 +11,7 @@ endchoice
 source drivers/gpu/msm_legacy/Kconfig
 
 menu "Qualcomm Adreno proprietary stack"
-	depends on MSM_KGSL_CURRENT
+	depends on QCOM_KGSL_CURRENT
 
 config QCOM_KGSL
 	tristate "Qualcomm 3D Graphics driver"
