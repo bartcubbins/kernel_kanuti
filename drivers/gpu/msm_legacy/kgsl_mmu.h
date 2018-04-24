@@ -109,8 +109,6 @@ struct kgsl_mmu_pt_ops {
 #define KGSL_MMU_FORCE_32BIT BIT(5)
 /* 64 bit address is live */
 #define KGSL_MMU_64BIT BIT(6)
-/* MMU can do coherent hardware table walks */
-#define KGSL_MMU_COHERENT_HTW BIT(7)
 
 struct kgsl_mmu {
 	uint32_t      flags;
