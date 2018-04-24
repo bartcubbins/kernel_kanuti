@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2014, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -13,7 +13,7 @@
 #ifndef __KGSL_SYNC_H
 #define __KGSL_SYNC_H
 
-#include <linux/sync.h>
+#include "sync.h"
 #include "kgsl_device.h"
 
 struct kgsl_sync_timeline {
