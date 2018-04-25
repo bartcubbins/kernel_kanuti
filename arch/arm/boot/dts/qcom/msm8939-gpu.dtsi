@@ -189,13 +189,12 @@
 			<&clock_gcc clk_gcc_gfx_tbu_clk>;
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
-/*		qcom,secure_align_mask = <0xfff>;
+		//qcom,secure_align_mask = <0xfff>;
 		qcom,retention;
-*/
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";
-			label = "gfx3d_user";
-			iommus = <&kgsl_smmu 0>;
+			//label = "gfx3d_user";
+			//iommus = <&kgsl_smmu 0>;
 			qcom,gpu-offset = <0x48000>;
 		};
 	};
