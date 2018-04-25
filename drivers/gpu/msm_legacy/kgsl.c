@@ -473,13 +473,18 @@ err_put_proc_priv:
 static void kgsl_mem_entry_detach_process(struct kgsl_mem_entry *entry)
 {
 	unsigned int type;
+	int ret;
 	if (entry == NULL)
 		return;
 
-	/* Unmap here so that below we can call kgsl_mmu_put_gpuaddr */
-	kgsl_mmu_unmap(entry->memdesc.pagetable, &entry->memdesc);
-
-	kgsl_mem_entry_untrack_gpuaddr(entry->priv, entry);
+	ret = kgsl_mmu_unmap(entry->memdesc.pagetable, &entry->memdesc);
+	/*
+	 * Do not free the gpuaddr/size if unmap fails. Because if we try
+	 * to map this range in future, the iommu driver will throw
+	 * a BUG_ON() because it feels we are overwriting a mapping.
+	 */
+	if (ret == 0)
+		kgsl_mem_entry_untrack_gpuaddr(entry->priv, entry);
 
 	spin_lock(&entry->priv->mem_lock);
 	if (entry->id != 0)
