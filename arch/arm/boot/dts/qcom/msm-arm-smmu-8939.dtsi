@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2018, Pavel Dubrova <pashadubrova@gmail.com>.
+ * All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	kgsl_smmu: qcom,iommu@1f00000 {
+		status = "ok";
+		compatible = "qcom,smmu-v2";
+		qcom,tz-device-id = "GPU";
+		reg = <0x1f00000 0x10000>;
+		#iommu-cells = <1>;
+		#global-interrupts = <0>;
+		interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>,
+				<GIC_SPI 42 IRQ_TYPE_LEVEL_HIGH>;
+		qcom,dynamic;
+		qcom,use-3-lvl-tables;
+		qcom,enable-smmu-halt;
+		qcom,skip-init;
+		vdd-supply = <&gdsc_oxili_cx>;
+		clocks = <&clock_gcc clk_gcc_oxili_ahb_clk>,
+			     <&clock_gcc clk_gcc_bimc_gfx_clk>;
+		clock-names = "gpu_ahb_clk", "gcc_bimc_gfx_clk";
+	};
+
+	apps_iommu: qcom,iommu@1e00000 {
+		status = "ok";
+		compatible = "qcom,qsmmu-v500";
+		reg = <0x1e00000 0x40000>,
+			<0x1ee2000 0x20>;
+		reg-names = "base", "tcu-base";
+		#iommu-cells = <2>;
+		qcom,tz-device-id = "APPS";
+		qcom,skip-init;
+		qcom,enable-static-cb;
+		qcom,use-3-lvl-tables;
+		qcom,disable-atos;
+		#global-interrupts = <0>;
+		#size-cells = <1>;
+		#address-cells = <1>;
+		ranges;
+		interrupts = <GIC_SPI 53 IRQ_TYPE_LEVEL_HIGH>,     /* jpeg_enc0 */
+				<GIC_SPI 54 IRQ_TYPE_LEVEL_HIGH>,  /* vfe */
+				<GIC_SPI 58 IRQ_TYPE_LEVEL_HIGH>,  /* mdp_0 */
+				<GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>,  /* venus_ns */
+				<GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>,  /* cpp */
+				<GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>,  /* mDSP */
+				<GIC_SPI 77 IRQ_TYPE_LEVEL_HIGH>,  /* gss */
+				<GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,  /* a2 */
+				<GIC_SPI 110 IRQ_TYPE_LEVEL_HIGH>, /* mdp_1 */
+				<GIC_SPI 111 IRQ_TYPE_LEVEL_HIGH>, /* venus_sec_pixel */
+				<GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>, /* venus_sec_bitstream */
+				<GIC_SPI 113 IRQ_TYPE_LEVEL_HIGH>, /* venus_sec_non_pixel */
+				<GIC_SPI 114 IRQ_TYPE_LEVEL_HIGH>, /* venus_fw */
+				<GIC_SPI 115 IRQ_TYPE_LEVEL_HIGH>, /* periph_rpm */
+				<GIC_SPI 116 IRQ_TYPE_LEVEL_HIGH>, /* periph_CE */
+				<GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>, /* periph_BLSP */
+				<GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>, /* periph_SDC1 */
+				<GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>, /* periph_SDC2 */
+				<GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>, /* periph_audio */
+				<GIC_SPI 121 IRQ_TYPE_LEVEL_HIGH>; /* periph_USB_HS1 */
+
+		clocks = <&clock_gcc clk_gcc_smmu_cfg_clk>,
+			     <&clock_gcc clk_gcc_apss_tcu_clk>;
+		clock-names = "iface_clk", "core_clk";
+	};
+};

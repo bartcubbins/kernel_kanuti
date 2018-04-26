@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2015, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -224,7 +224,7 @@
 		compatible = "qcom,msm-cam-smmu";
 		msm_cam_smmu_cb1: msm_cam_smmu_cb1 {
 			compatible = "qcom,qsmmu-cam-cb";
-			iommus = <&apps_iommu 0x400>;
+			iommus = <&apps_iommu 0x400 0x00>;
 			label = "vfe";
 		};
 
@@ -236,13 +236,13 @@
 
 		msm_cam_smmu_cb3: msm_cam_smmu_cb3 {
 			compatible = "qcom,qsmmu-cam-cb";
-			iommus = <&apps_iommu 0x402>;
+			iommus = <&apps_iommu 0x402 0x00>;
 			label = "cpp";
 		};
 
 		msm_cam_smmu_cb4: msm_cam_smmu_cb4 {
 			compatible = "qcom,qsmmu-cam-cb";
-			iommus = <&apps_iommu 0x2000>;
+			iommus = <&apps_iommu 0x2000 0x00>;
 			label = "jpeg_enc0";
 		};
 	};
