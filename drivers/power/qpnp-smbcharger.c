@@ -951,7 +951,8 @@ static const int usb_current_table[] = {
 	2300,
 	2400,
 	2500,
-	3000
+	3000,
+        3200,
 };
 
 static const int dc_current_table[] = {
@@ -981,6 +982,7 @@ static const int dc_current_table[] = {
 	1950,
 	1970,
 	2000,
+        2400,
 };
 
 static const int fcc_comp_table[] = {
@@ -988,6 +990,8 @@ static const int fcc_comp_table[] = {
 	700,
 	900,
 	1200,
+        1500,
+        1800,
 };
 
 static int calc_thermal_limited_current(struct smbchg_chip *chip,
