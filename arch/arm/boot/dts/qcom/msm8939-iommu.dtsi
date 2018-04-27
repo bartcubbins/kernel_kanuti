@@ -33,6 +33,7 @@
 			reg = <0x1f09000 0x1000>;
 			interrupts = <0 241 0>;
 			qcom,iommu-ctx-sids = <0>;
+			qcom,iommu-sid-mask = <0x401>;
 			label = "gfx3d_user";
 		};
 
@@ -40,6 +41,7 @@
 			compatible = "qcom,msm-smmu-v2-ctx";
 			reg = <0x1f0a000 0x1000>;
 			interrupts = <0 242 0>;
+			qcom,ctx-num = <1>;
 			qcom,iommu-ctx-sids = <1>;
 			label = "gfx3d_priv";
 		};
