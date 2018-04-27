@@ -124,6 +124,9 @@
 		/* GDSC oxili regulators */
 		vdd-supply = <&gdsc_oxili_gx>;
 
+		/* IOMMU Data */
+		iommu = <&kgsl_smmu>;
+
 		/* Trace bus */
 		coresight-id = <67>;
 		coresight-name = "coresight-gfx";
@@ -189,9 +192,9 @@
 			<&clock_gcc clk_gcc_gfx_tbu_clk>;
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
-/*		qcom,secure_align_mask = <0xfff>;
+		qcom,secure_align_mask = <0xfff>;
 		qcom,retention;
-*/
+
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";
 			label = "gfx3d_user";
