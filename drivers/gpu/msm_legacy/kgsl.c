@@ -361,7 +361,7 @@ kgsl_mem_entry_track_gpuaddr(struct kgsl_process_private *process,
 			return 0;
 	} else if (entry->memdesc.gpuaddr) {
 		WARN_ONCE(1, "gpuaddr assigned w/o holding memory lock\n");
-		//return -EINVAL;
+		return -EINVAL;
 	}
 	if (kgsl_memdesc_is_secured(&entry->memdesc))
 		pagetable = pagetable->mmu->securepagetable;
