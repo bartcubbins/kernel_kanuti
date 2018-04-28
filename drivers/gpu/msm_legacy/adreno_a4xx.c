@@ -341,7 +341,7 @@ static void a4xx_regulator_disable(struct adreno_device *adreno_dev)
 {
 	struct kgsl_device *device = KGSL_DEVICE(adreno_dev);
 
-	if (!(adreno_is_a430(adreno_dev) || adreno_is_a418(adreno_dev)))
+	if (!(adreno_is_a405(adreno_dev) || adreno_is_a418(adreno_dev)))
 		return;
 
 	/* Set the default register values; set SW_COLLAPSE to 1 */
