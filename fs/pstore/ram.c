@@ -396,16 +396,7 @@ static int ramoops_init_przs(struct device *dev, struct ramoops_context *cxt,
 		if (IS_ERR(cxt->przs[i])) {
 			err = PTR_ERR(cxt->przs[i]);
 			dev_err(dev, "failed to request mem region (0x%zx@0x%llx): %d\n",
-<<<<<<< HEAD
-				cxt->record_size, (unsigned long long)*paddr, err);
-
-			while (i > 0) {
-				i--;
-				persistent_ram_free(cxt->przs[i]);
-			}
-=======
 				sz, (unsigned long long)*paddr, err);
->>>>>>> 94398a2... pstore from 3.18
 			goto fail_prz;
 		}
 		*paddr += sz;
@@ -660,13 +651,9 @@ static int __exit ramoops_remove(struct platform_device *pdev)
 	 */
 	struct ramoops_context *cxt = &oops_cxt;
 
-<<<<<<< HEAD
-	pstore_unregister(&cxt->pstore);
-=======
 	iounmap(cxt->virt_addr);
 	release_mem_region(cxt->phys_addr, cxt->size);
 	cxt->max_dump_cnt = 0;
->>>>>>> 94398a2... pstore from 3.18
 
 	/* TODO(kees): When pstore supports unregistering, call it here. */
 	kfree(cxt->pstore.buf);
