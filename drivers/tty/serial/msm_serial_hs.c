@@ -3508,6 +3508,7 @@ static int msm_hs_probe(struct platform_device *pdev)
 	}
 
 	memset(name, 0, sizeof(name));
+#ifdef CONFIG_IPC_LOGGING
 	scnprintf(name, sizeof(name), "%s%s", dev_name(msm_uport->uport.dev),
 									"_state");
 	msm_uport->ipc_msm_hs_log_ctxt =
@@ -3523,6 +3524,7 @@ static int msm_hs_probe(struct platform_device *pdev)
 		if (unlikely(ret))
 			MSM_HS_WARN("%s: Failed to create dev. attr", __func__);
 	}
+#endif
 
 	uport->irq = core_irqres;
 	msm_uport->bam_irq = bam_irqres;
@@ -3598,6 +3600,7 @@ static int msm_hs_probe(struct platform_device *pdev)
 	msm_uport->rx.flush = FLUSH_SHUTDOWN;
 
 	memset(name, 0, sizeof(name));
+#ifdef CONFIG_IPC_LOGGING
 	scnprintf(name, sizeof(name), "%s%s", dev_name(msm_uport->uport.dev),
 									"_tx");
 	msm_uport->tx.ipc_tx_ctxt =
@@ -3605,8 +3608,10 @@ static int msm_hs_probe(struct platform_device *pdev)
 	if (!msm_uport->tx.ipc_tx_ctxt)
 		dev_err(&pdev->dev, "%s: error creating tx logging context",
 								__func__);
+#endif
 
 	memset(name, 0, sizeof(name));
+#ifdef CONFIG_IPC_LOGGING
 	scnprintf(name, sizeof(name), "%s%s", dev_name(msm_uport->uport.dev),
 									"_rx");
 	msm_uport->rx.ipc_rx_ctxt = ipc_log_context_create(
@@ -3614,8 +3619,10 @@ static int msm_hs_probe(struct platform_device *pdev)
 	if (!msm_uport->rx.ipc_rx_ctxt)
 		dev_err(&pdev->dev, "%s: error creating rx logging context",
 								__func__);
+#endif
 
 	memset(name, 0, sizeof(name));
+#ifdef CONFIG_IPC_LOGGING
 	scnprintf(name, sizeof(name), "%s%s", dev_name(msm_uport->uport.dev),
 									"_pwr");
 	msm_uport->ipc_msm_hs_pwr_ctxt = ipc_log_context_create(
@@ -3623,6 +3630,7 @@ static int msm_hs_probe(struct platform_device *pdev)
 	if (!msm_uport->ipc_msm_hs_pwr_ctxt)
 		dev_err(&pdev->dev, "%s: error creating usr logging context",
 								__func__);
+#endif
 
 	uport->irq = core_irqres;
 	msm_uport->bam_irq = bam_irqres;

@@ -1610,9 +1610,11 @@ static int functionfs_init(void)
 	else
 		pr_err("failed registering file system (%d)\n", ret);
 
+#ifdef CONFIG_IPC_LOGGING
 	ffs_ipc_log = ipc_log_context_create(NUM_PAGES, "f_fs", 0);
 	if (IS_ERR_OR_NULL(ffs_ipc_log))
 		ffs_ipc_log =  NULL;
+#endif
 
 	return ret;
 }
