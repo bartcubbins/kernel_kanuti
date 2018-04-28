@@ -140,11 +140,6 @@
 		qcom,pm-qos-active-latency = <401>;
 		qcom,pm-qos-wakeup-latency = <401>;
 
-		/* Quirks */
-		qcom,gpu-quirk-two-pass-use-wfi;
-		qcom,gpu-quirk-dp2clockgating-disable;
-		qcom,gpu-quirk-lmloadkill-disable;
-
 		/* GPU Mempools */
 		qcom,gpu-mempools {
 			#address-cells= <1>;
@@ -212,8 +207,6 @@
 		* at this fixed offset.
 		*/
 		qcom,protect = <0x48000 0x1000>;
-//qcom,protect = <0xa000 0x1000>;
-qcom,micro-mmu-control = <0x48000>;
 		clocks = <&clock_gcc clk_gcc_smmu_cfg_clk>,
 			<&clock_gcc clk_gcc_gfx_tcu_clk>,
 			<&clock_gcc clk_gcc_gtcu_ahb_clk>,
@@ -221,7 +214,7 @@ qcom,micro-mmu-control = <0x48000>;
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
 		//qcom,secure_align_mask = <0xfff>;
-		qcom,retention;
+//		qcom,retention;
 
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";
