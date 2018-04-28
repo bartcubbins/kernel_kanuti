@@ -332,13 +332,12 @@ kgsl_mmu_pagetable_get_contextidr(struct kgsl_pagetable *pagetable)
 	return 0;
 }
 
-#ifdef CONFIG_QCOM_IOMMU
+#if defined (CONFIG_QCOM_IOMMU) || defined(CONFIG_QCOM_IOMMU_V1)
 #include <linux/qcom_iommu.h>
 static inline bool kgsl_mmu_bus_secured(struct device *dev)
 {
-	struct bus_type *bus = msm_iommu_get_bus(dev);
-
-	return (bus == &msm_iommu_sec_bus_type) ? true : false;
+	/* ARM driver contains all context banks on single bus */
+	return true;
 }
 static inline struct bus_type *kgsl_mmu_get_bus(struct device *dev)
 {
@@ -353,15 +352,13 @@ static inline bool kgsl_mmu_bus_secured(struct device *dev)
 {
 	return false;
 }
-#include <linux/qcom_iommu.h>
 static inline struct bus_type *kgsl_mmu_get_bus(struct device *dev)
 {
 	return &platform_bus_type;
 }
 static inline struct device *kgsl_mmu_get_ctx(const char *name)
 {
-	//return ERR_PTR(-ENODEV);
-	return msm_iommu_get_ctx(name);
+	return ERR_PTR(-ENODEV);
 }
 #endif
 
