@@ -378,14 +378,15 @@ static inline bool kgsl_mmu_bus_secured(struct device *dev)
 {
 	return false;
 }
-
+#include <linux/qcom_iommu.h>
 static inline struct bus_type *kgsl_mmu_get_bus(struct device *dev)
 {
 	return &platform_bus_type;
 }
 static inline struct device *kgsl_mmu_get_ctx(const char *name)
 {
-	return ERR_PTR(-ENODEV);
+	//return ERR_PTR(-ENODEV);
+	return msm_iommu_get_ctx(name);
 }
 #endif
 
