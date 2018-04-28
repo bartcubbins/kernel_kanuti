@@ -68,13 +68,13 @@
 		 * Timeout to enter deeper power saving state
 		 * from NAP.
 		 */
-		//qcom,deep-nap-timeout = <20>; //msecs
+		qcom,deep-nap-timeout = <20>; //msecs
 		qcom,strtstp-sleepwake;
 
 		/* Clocks = KGSL_CLK_CORE | KGSL_CLK_IFACE | KGSL_CLK_MEM |
 		KGSL_CLK_MEM_IFACE | KGSL_CLK_ALT_MEM_IFACE |
 		KGSL_CLK_RBBMTIMER */
-		//qcom,clk-map = <0x000003DE>;
+		qcom,clk-map = <0x000003DE>;
 
 		qcom,highest-bank-bit = <14>;
 
@@ -126,7 +126,7 @@
 		vdd-supply = <&gdsc_oxili_gx>;
 
 		/* IOMMU Data */
-		//iommu = <&kgsl_smmu>;
+		iommu = <&kgsl_smmu>;
 
 		/* Trace bus */
 		coresight-id = <67>;
@@ -213,8 +213,8 @@
 			<&clock_gcc clk_gcc_gfx_tbu_clk>;
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
-		//qcom,secure_align_mask = <0xfff>;
-//		qcom,retention;
+		qcom,secure_align_mask = <0xfff>;
+		qcom,retention;
 
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";
