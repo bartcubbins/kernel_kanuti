@@ -2668,8 +2668,8 @@ static int _kgsl_gpumem_sync_cache(struct kgsl_mem_entry *entry,
 	if (mode != KGSL_CACHEMODE_UNCACHED
 		&& mode != KGSL_CACHEMODE_WRITECOMBINE) {
 		trace_kgsl_mem_sync_cache(entry, offset, length, op);
-		//ret = kgsl_cache_range_op(&entry->memdesc, offset,
-		//			length, cacheop);
+		ret = kgsl_cache_range_op(&entry->memdesc, offset,
+					length, cacheop);
 	}
 
 done:
