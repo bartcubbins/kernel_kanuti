@@ -804,6 +804,30 @@ static ssize_t faultcount_store(struct kgsl_device *device, const char *buf,
 	return count;
 }
 
+/* Show the force_panic request status */
+static ssize_t force_panic_show(struct kgsl_device *device, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", device->force_panic);
+}
+
+/* Store the panic request value to force_panic */
+static ssize_t force_panic_store(struct kgsl_device *device, const char *buf,
+	size_t count)
+{
+	unsigned int val = 0;
+	int ret;
+
+	if (device && count > 0)
+		device->force_panic = 0;
+
+	ret = kgsl_sysfs_store(buf, &val);
+
+	if (!ret && device)
+		device->force_panic = (bool)val;
+
+	return (ssize_t) ret < 0 ? ret : count;
+}
+
 /* Show the timestamp of the last collected snapshot */
 static ssize_t timestamp_show(struct kgsl_device *device, char *buf)
 {
@@ -829,6 +853,7 @@ struct kgsl_snapshot_attribute attr_##_name = { \
 
 static SNAPSHOT_ATTR(timestamp, 0444, timestamp_show, NULL);
 static SNAPSHOT_ATTR(faultcount, 0644, faultcount_show, faultcount_store);
+static SNAPSHOT_ATTR(force_panic, 0644, force_panic_show, force_panic_store);
 
 static ssize_t snapshot_sysfs_show(struct kobject *kobj,
 	struct attribute *attr, char *buf)
@@ -908,6 +933,7 @@ int kgsl_device_snapshot_init(struct kgsl_device *device)
 
 	device->snapshot = NULL;
 	device->snapshot_faultcount = 0;
+	device->force_panic = 0;
 
 	ret = kobject_init_and_add(&device->snapshot_kobj, &ktype_snapshot,
 		&device->dev->kobj, "snapshot");
@@ -923,6 +949,11 @@ int kgsl_device_snapshot_init(struct kgsl_device *device)
 		goto done;
 
 	ret  = sysfs_create_file(&device->snapshot_kobj, &attr_faultcount.attr);
+	if (ret)
+		goto done;
+
+	ret  = sysfs_create_file(&device->snapshot_kobj,
+			&attr_force_panic.attr);
 
 done:
 	return ret;
@@ -948,6 +979,7 @@ void kgsl_device_snapshot_close(struct kgsl_device *device)
 	device->snapshot_memory.ptr = NULL;
 	device->snapshot_memory.size = 0;
 	device->snapshot_faultcount = 0;
+	device->force_panic = 0;
 }
 EXPORT_SYMBOL(kgsl_device_snapshot_close);
 
@@ -1017,6 +1049,7 @@ void kgsl_snapshot_save_frozen_objs(struct work_struct *work)
 {
 	struct kgsl_snapshot *snapshot = container_of(work,
 				struct kgsl_snapshot, work);
+	struct kgsl_device *device = kgsl_get_device(KGSL_DEVICE_3D0);
 	struct kgsl_snapshot_object *obj, *tmp;
 	size_t size = 0;
 	void *ptr;
@@ -1058,5 +1091,6 @@ done:
 	snapshot->process = NULL;
 
 	complete_all(&snapshot->dump_gate);
+	BUG_ON(device->force_panic);
 	return;
 }

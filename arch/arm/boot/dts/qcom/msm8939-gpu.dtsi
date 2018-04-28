@@ -212,6 +212,8 @@
 		* at this fixed offset.
 		*/
 		qcom,protect = <0x48000 0x1000>;
+//qcom,protect = <0xa000 0x1000>;
+qcom,micro-mmu-control = <0x48000>;
 		clocks = <&clock_gcc clk_gcc_smmu_cfg_clk>,
 			<&clock_gcc clk_gcc_gfx_tcu_clk>,
 			<&clock_gcc clk_gcc_gtcu_ahb_clk>,
@@ -219,7 +221,7 @@
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
 		//qcom,secure_align_mask = <0xfff>;
-	//	qcom,retention;
+		qcom,retention;
 
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";

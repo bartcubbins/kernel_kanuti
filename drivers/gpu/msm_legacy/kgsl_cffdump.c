@@ -449,8 +449,8 @@ void kgsl_cffdump_syncmem(struct kgsl_device *device,
 		/* Makes sure that the region is freshly fetched */
 		mb();
 
-		kgsl_cache_range_op(entry->memdesc,
-			offset, sizebytes, KGSL_CACHE_OP_INV);
+		//kgsl_cache_range_op(entry->memdesc,
+		//	offset, sizebytes, KGSL_CACHE_OP_INV);
 	}
 
 	kgsl_cffdump_memcpy(device, entry->memdesc.gpuaddr + offset,
