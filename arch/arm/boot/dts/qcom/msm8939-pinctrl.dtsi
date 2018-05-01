@@ -1182,36 +1182,6 @@
 					bias-disable; /* No PULL */
 				};
 			};
-
-			cci1_active: cci1_active {
-				/* cci1 active state */
-				mux {
-					/* CLK, DATA */
-					pins = "gpio31", "gpio32";
-					function = "cci_i2c";
-				};
-
-				config {
-					pins = "gpio31", "gpio32";
-					drive-strength = <2>; /* 2 MA */
-					bias-disable; /* No PULL */
-				};
-			};
-
-			cci1_suspend: cci1_suspend {
-				/* cci1 suspended state */
-				mux {
-					/* CLK, DATA */
-					pins = "gpio31", "gpio32";
-					function = "cci_i2c";
-				};
-
-				config {
-					pins = "gpio31", "gpio32";
-					drive-strength = <2>; /* 2 MA */
-					bias-disable; /* No PULL */
-				};
-			};
 		};
 
 		/*sensors */
