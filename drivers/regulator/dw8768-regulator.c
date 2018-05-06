@@ -320,7 +320,7 @@ static int dw8768_parse_dt(struct dw8768_regulator *reg_data,
 		return -EINVAL;
 	}
 
-	rc = of_regulator_match(client->dev, node, dw8768_reg_matches,
+	rc = of_regulator_match(&client->dev, node, dw8768_reg_matches,
 					ARRAY_SIZE(dw8768_reg_matches));
 	if (IS_ERR_VALUE(rc)) {
 		pr_err("Can't match regulator. rc=%d\n", rc);
