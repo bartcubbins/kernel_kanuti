@@ -1327,8 +1327,8 @@
 				<86 512 0 0>,
 				<86 512 500 800>;
 		pinctrl-names = "default", "sleep";
-		pinctrl-0 = <&hsuart_active>;
-		pinctrl-1 = <&hsuart_sleep>;
+		pinctrl-0 = <&blsp1_uart1_active>;
+		pinctrl-1 = <&blsp1_uart1_sleep>;
 	};
 
 	qcom,venus@1de0000 {
