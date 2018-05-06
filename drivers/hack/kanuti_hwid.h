@@ -20,6 +20,6 @@ struct smem_oem_info {
 	int hwid;
 };
 
-struct gpio HWID_GPIO[7] = {
+struct gpio HWID_GPIO[8] = {
 	{ -1, GPIOF_DIR_IN, NULL }
 };
