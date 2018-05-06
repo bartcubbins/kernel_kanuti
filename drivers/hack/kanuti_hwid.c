@@ -29,8 +29,13 @@ static int hwid_band(struct platform_device *pdev)
 	/* Parse gpio */
 	for (i = 0; i < ARRAY_SIZE(HWID_GPIO); i++) {
 		HWID_GPIO[i].gpio = of_get_named_gpio(np, "gpios", i);
-		pr_info("Use GPIO: %d\n", HWID_GPIO[i].gpio);
-		gpio += (gpio_get_value(HWID_GPIO[i].gpio) << i);
+		if (HWID_GPIO[i].gpio < 0) {
+			pr_info("Invalid gpio: %d", HWID_GPIO[i].gpio);
+			return -EINVAL;
+		} else {
+			pr_info("Use GPIO: %d\n", HWID_GPIO[i].gpio);
+			gpio += (gpio_get_value(HWID_GPIO[i].gpio) << i);
+		}
 	}
 
 	/*
