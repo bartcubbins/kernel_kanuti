@@ -45,21 +45,32 @@ static int hwid_band(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	/* Parse band variant */
-	for (i = 0; HW_ID[i].GPIO_LOGIC != 0xff; i++) {
-		if (gpio == HW_ID[i].GPIO_LOGIC) {
-			band = HW_ID[i].NAME;
-			band_id = HW_ID[i].BAND_ID;
-		}
-	}
-
-	/*
-	 * If band variant is not valid then
-	 * return invalid argument
-	 */
-	if (!band) {
-		pr_err("Parsing band variant failed\n");
-		return -EINVAL;
+	switch (gpio) {
+		case 0x00 ... 0x1d:
+			band = "RITA";
+			band_id = 0x01;
+			break;
+		case 0x20 ... 0x3d:
+		case 0xaa:
+			band = "GINA";
+			band_id = 0x02;
+			break;
+		case 0x40 ... 0x51:
+			band = "REX";
+			band_id = 0x03;
+			break;
+		case 0x52 ... 0x6d:
+			band = "APAC";
+			band_id= 0x04;
+			break;
+		case 0x72 ... 0x7c:
+			band = "VIV";
+			band_id = 0x05;
+			break;
+		default:
+			band = "UNKNOWN";
+			band_id = 0xff;
+			break;
 	}
 
 	return 0;
