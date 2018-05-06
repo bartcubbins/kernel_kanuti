@@ -30,7 +30,7 @@ static int hwid_band(struct platform_device *pdev)
 	for (i = 0; i < ARRAY_SIZE(HWID_GPIO); i++) {
 		HWID_GPIO[i].gpio = of_get_named_gpio(np, "gpios", i);
 		if (gpio < 0) {
-			pr_err("Invalid gpio: %d", gpio);
+			pr_info("Invalid gpio: %d", gpio);
 			return -EINVAL;
 		}
 		gpio += (gpio_get_value(HWID_GPIO[i].gpio) << i);
