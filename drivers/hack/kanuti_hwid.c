@@ -46,16 +46,19 @@ static int hwid_band(struct platform_device *pdev)
 	}
 
 	switch (gpio) {
-		case 0x00 ... 0x1d:
+		case 0x00 ... 0x0b:
+		case 0x10 ... 0x1d:
 			band = "RITA";
 			band_id = 0x01;
 			break;
-		case 0x20 ... 0x3d:
-		case 0xaa:
+		case 0x20 ... 0x2e:
+		case 0x30 ... 0x3d:
+		case 0xa9 ... 0xaa:
 			band = "GINA";
 			band_id = 0x02;
 			break;
-		case 0x40 ... 0x51:
+		case 0x40 ... 0x4d:
+		case 0x51:
 			band = "REX";
 			band_id = 0x03;
 			break;
@@ -63,7 +66,8 @@ static int hwid_band(struct platform_device *pdev)
 			band = "APAC";
 			band_id= 0x04;
 			break;
-		case 0x72 ... 0x7c:
+		case 0x72 ... 0x76:
+		case 0x78 ... 0x7c:
 			band = "VIV";
 			band_id = 0x05;
 			break;
