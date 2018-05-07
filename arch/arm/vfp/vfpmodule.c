@@ -805,7 +805,6 @@ static int __init vfp_init(void)
 #endif
 		}
 	}
-
 	return 0;
 }
 
@@ -819,7 +818,6 @@ static int __init vfp_rootfs_init(void)
 	if (!procfs_entry)
 		pr_err("Failed to create procfs node for VFP bounce reporting\n");
 #endif
-
 	return 0;
 }
 
