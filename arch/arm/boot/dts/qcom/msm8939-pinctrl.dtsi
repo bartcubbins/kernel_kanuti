@@ -19,7 +19,6 @@
 		gpio-controller;
 		#gpio-cells = <2>;
 		interrupt-controller;
-		#interrupt-cells = <2>;
 
 		/* General purpose pins */
 		pmx-uartconsole {
