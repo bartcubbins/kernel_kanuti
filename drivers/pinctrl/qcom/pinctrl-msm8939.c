@@ -422,7 +422,7 @@ static const char * const blsp_uart1_groups[] = {
 	"gpio0", "gpio1", "gpio2", "gpio3"
 };
 static const char * const blsp_uart2_groups[] = {
-	"gpio4", "gpio5", "gpio6", "gpio7"
+	"gpio4", "gpio5"
 };
 static const char * const cam_mclk0_groups[] = {
 	"gpio26"
@@ -443,7 +443,7 @@ static const char * const smb_int_groups[] = {
 	"gpio62"
 };
 static const char * const uim2_groups[] = {
-	"gpio53", "gpio54", "gpio55", "gpio56"
+	"gpio53", "gpio54"
 };
 static const char * const wcss_wlan_groups[] = {
 	"gpio40", "gpio41", "gpio42", "gpio43", "gpio44"
@@ -474,8 +474,8 @@ static const struct msm_pingroup msm8939_groups[] = {
 	PINGROUP(3, NA, blsp_uart1, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(4, NA, blsp_uart2, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(5, NA, blsp_uart2, NA, NA, NA, NA, NA, NA, NA),
-	PINGROUP(6, NA, blsp_uart2, blsp_i2c2, NA, NA, NA, NA, NA, NA),
-	PINGROUP(7, NA, blsp_uart2, blsp_i2c2, NA, NA, NA, NA, NA, NA),
+	PINGROUP(6, NA, NA, blsp_i2c2, NA, NA, NA, NA, NA, NA),
+	PINGROUP(7, NA, NA, blsp_i2c2, NA, NA, NA, NA, NA, NA),
 	PINGROUP(8, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(9, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(10, NA, NA, NA, NA, NA, NA, NA, NA, NA),
@@ -523,8 +523,8 @@ static const struct msm_pingroup msm8939_groups[] = {
 	PINGROUP(52, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(53, uim2, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(54, uim2, NA, NA, NA, NA, NA, NA, NA, NA),
-	PINGROUP(55, uim2, NA, NA, NA, NA, NA, NA, NA, NA),
-	PINGROUP(56, uim2, NA, NA, NA, NA, NA, NA, NA, NA),
+	PINGROUP(55, NA, NA, NA, NA, NA, NA, NA, NA, NA),
+	PINGROUP(56, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(57, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(58, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(59, NA, NA, NA, NA, NA, NA, NA, NA, NA),
