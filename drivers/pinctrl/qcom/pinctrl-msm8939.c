@@ -437,7 +437,7 @@ static const char * const cdc_pdm0_groups[] = {
 	"gpio63", "gpio64", "gpio65", "gpio66", "gpio67", "gpio68"
 };
 static const char * const mdp_vsync_groups[] = {
-	"gpio24", "gpio25"
+	"gpio24"
 };
 static const char * const smb_int_groups[] = {
 	"gpio62"
@@ -493,7 +493,7 @@ static const struct msm_pingroup msm8939_groups[] = {
 	PINGROUP(22, NA, blsp_i2c6, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(23, NA, blsp_i2c6, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(24, mdp_vsync, NA, NA, NA, NA, NA, NA, NA, NA),
-	PINGROUP(25, mdp_vsync, NA, NA, NA, NA, NA, NA, NA, NA),
+	PINGROUP(25, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(26, cam_mclk0, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(27, cam_mclk1, NA, NA, NA, NA, NA, NA, NA, NA),
 	PINGROUP(28, NA, NA, NA, NA, NA, NA, NA, NA, NA),
