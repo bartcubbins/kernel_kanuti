@@ -13,6 +13,7 @@
 
 #define pr_fmt(fmt) "kanuti_hwid: " fmt
 
+#include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/of_gpio.h>
 
