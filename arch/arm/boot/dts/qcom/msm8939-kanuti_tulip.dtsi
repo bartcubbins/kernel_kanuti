@@ -69,6 +69,18 @@
 		};
 	};
 
+	/* Kanuti HW ID */
+	kanuti_hwid {
+		compatible = "kanuti,hwid";
+		/* The gpios order must be from 0-7 */
+		gpios = <&msm_gpio 0 0>, <&msm_gpio 1 0>,
+			<&msm_gpio 2 0>, <&msm_gpio 3 0>,
+			<&msm_gpio 8 0>, <&msm_gpio 9 0>,
+			<&msm_gpio 107 0>, <&msm_gpio 35 0>;
+		pinctrl-names = "init";
+		pinctrl-0 = <&kanuti_hwid>;
+	};
+
 	i2c@78b9000 { /* BLSP1 QUP5 */
 		tsc@24 {
 			compatible = "cy,cyttsp4_i2c_adapter";
@@ -433,6 +445,19 @@
 
 /* Pinctrl */
 &tlmm_pinmux {
+	/* Kanuti HW ID */
+	kanuti_hwid {
+		qcom,pins = <&gp 0>, <&gp 1>, <&gp 2>, <&gp 3>,
+				<&gp 8>, <&gp 9>, <&gp 107>, <&gp 35>;
+		qcom,num-grp-pins = <8>;
+		qcom,pin-func = <0>;
+		label = "kanuti_hwid";
+		kanuti_hwid: init {
+			drive-strength = <2>; /* 2 MA */
+			bias-disable; /* No PULL */
+		};
+	};
+
 	bma2x2_int1_pin {
 		qcom,pins = <&gp 69>;
 		qcom,pin-func = <0>;
