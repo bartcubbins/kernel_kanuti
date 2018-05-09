@@ -712,6 +712,13 @@ config TOF_SENSOR
           To compile this driver as a module, choose M here: the
           module will be called tof_sensor.
 
+config KANUTI_HWID
+	bool "Kanuti hardware version detection driver"
+	default y
+	help
+	  This driver allows you to detect band version and set
+	  it using smem_alloc().
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
