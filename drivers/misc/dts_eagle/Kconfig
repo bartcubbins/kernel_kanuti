@@ -1,0 +1,8 @@
+config DTS_EAGLE
+	tristate "DTS Eagle driver"
+	depends on ARCH_MSM
+	default n
+	help
+	  Eagle is a DTS pre/post processing
+	  package that includes HeadphoneX. The configuration
+	  includes sending tuning parameters of various modules.

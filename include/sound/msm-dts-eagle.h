@@ -38,30 +38,6 @@ enum {
 };
 #endif
 
-#ifdef CONFIG_DTS_EAGLE
-void msm_dts_ion_memmap(struct param_outband *po_);
-int msm_dts_eagle_enable_asm(struct audio_client *ac, u32 enable, int module);
-int msm_dts_eagle_enable_adm(int port_id, int copp_idx, u32 enable);
-void msm_dts_eagle_add_controls(struct snd_soc_platform *platform);
-int msm_dts_eagle_set_stream_gain(struct audio_client *ac,
-				  int lgain, int rgain);
-int msm_dts_eagle_handle_asm(struct dts_eagle_param_desc *depd, char *buf,
-			     bool for_pre, bool get, struct audio_client *ac,
-			     struct param_outband *po);
-int msm_dts_eagle_handle_adm(struct dts_eagle_param_desc *depd, char *buf,
-			     bool for_pre, bool get);
-int msm_dts_eagle_ioctl(unsigned int cmd, unsigned long arg);
-int msm_dts_eagle_is_hpx_on(void);
-int msm_dts_eagle_init_pre(struct audio_client *ac);
-int msm_dts_eagle_deinit_pre(struct audio_client *ac);
-int msm_dts_eagle_init_post(int port_id, int copp_id);
-int msm_dts_eagle_deinit_post(int port_id, int topology);
-int msm_dts_eagle_init_master_module(struct audio_client *ac);
-int msm_dts_eagle_deinit_master_module(struct audio_client *ac);
-int msm_dts_eagle_pcm_new(struct snd_soc_pcm_runtime *runtime);
-void msm_dts_eagle_pcm_free(struct snd_pcm *pcm);
-int msm_dts_eagle_compat_ioctl(unsigned int cmd, unsigned long arg);
-#else
 static inline void msm_dts_ion_memmap(struct param_outband *po_)
 {
 	pr_debug("%s\n", __func__);
@@ -143,6 +119,5 @@ static inline int msm_dts_eagle_compat_ioctl(unsigned int cmd,
 {
 	return 0;
 }
-#endif
 
 #endif

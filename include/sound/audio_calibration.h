@@ -17,6 +17,7 @@
 
 /* Used by driver in buffer_number field to notify client
  * To update all blocks, for example: freeing all memory */
+
 #define ALL_CAL_BLOCKS		-1
 
 
@@ -32,6 +33,11 @@ struct audio_cal_callbacks {
 struct audio_cal_reg {
 	int32_t				cal_type;
 	struct audio_cal_callbacks	callbacks;
+};
+
+struct headset_imp_val {
+	uint32_t	ZL;
+	uint32_t	ZR;
 };
 
 int audio_cal_register(int num_cal_types, struct audio_cal_reg *reg_data);

@@ -63,12 +63,14 @@ static int msm_pcm_routing_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
 	case DTS_EAGLE_IOCTL_SET_LICENSE:
 	case DTS_EAGLE_IOCTL_SEND_LICENSE:
 	case DTS_EAGLE_IOCTL_SET_VOLUME_COMMANDS:
+		msm_pcm_routing_acquire_lock();
 		ret = msm_dts_eagle_ioctl(cmd, arg);
 		if (ret == -EPERM) {
 			pr_err("%s called with invalid control 0x%X\n",
 				__func__, cmd);
 			ret = -EINVAL;
 		}
+		msm_pcm_routing_release_lock();
 		break;
 	default:
 		pr_err("%s called with invalid control 0x%X\n", __func__, cmd);
@@ -115,12 +117,14 @@ static int msm_pcm_routing_hwdep_compat_ioctl(struct snd_hwdep *hw,
 	case DTS_EAGLE_IOCTL_SET_LICENSE32:
 	case DTS_EAGLE_IOCTL_SEND_LICENSE32:
 	case DTS_EAGLE_IOCTL_SET_VOLUME_COMMANDS32:
+		msm_pcm_routing_acquire_lock();
 		ret = msm_dts_eagle_compat_ioctl(cmd, arg);
 		if (ret == -EPERM) {
 			pr_err("%s called with invalid control 0x%X\n",
 				__func__, cmd);
 			ret = -EINVAL;
 		}
+		msm_pcm_routing_release_lock();
 		break;
 	default:
 		pr_err("%s called with invalid control 0x%X\n", __func__, cmd);
