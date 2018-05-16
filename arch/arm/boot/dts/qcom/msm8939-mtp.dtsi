@@ -15,6 +15,18 @@
 #include "dsi-panel-somc-tulip.dtsi"
 
 &soc {
+	/* Kanuti HW ID */
+	kanuti_hwid {
+		compatible = "kanuti,hwid";
+		/* The gpios order must be from 0-7 */
+		gpios = <&msm_gpio 0 0>, <&msm_gpio 1 0>,
+			<&msm_gpio 2 0>, <&msm_gpio 3 0>,
+			<&msm_gpio 8 0>, <&msm_gpio 9 0>,
+			<&msm_gpio 107 0>, <&msm_gpio 35 0>;
+		pinctrl-names = "init";
+		pinctrl-0 = <&kanuti_hwid>;
+	};
+
 	i2c@78b9000 { /* BLSP1 QUP5 */
 		tsc@24 {
 			compatible = "cy,cyttsp4_i2c_adapter";
