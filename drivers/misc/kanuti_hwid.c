@@ -21,7 +21,6 @@
 
 static int gpio = 0;
 static int band_id = 0;
-static int hwid = 0;
 static char *band;
 
 static struct gpio HWID_GPIO[8] = {
@@ -96,6 +95,7 @@ static int hwid_band(struct platform_device *pdev)
 
 static void hwid_set(void)
 {
+	unsigned int hwid = 0;
 	struct smem_oem_info *oem_info = smem_alloc(SMEM_ID_VENDOR0,
 						sizeof(*oem_info), 0,
 						SMEM_ANY_HOST_FLAG);
@@ -195,7 +195,7 @@ static void __exit hw_id_exit(void)
 	pr_info(KERN_INFO "Kanuti_HWID_exit enter\n");
 }
 
-core_initcall(hw_id_init);
+subsys_initcall(hw_id_init);
 module_exit(hw_id_exit);
 
 MODULE_DESCRIPTION("Kanuti hardware version detection driver");
