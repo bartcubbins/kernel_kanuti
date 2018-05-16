@@ -144,7 +144,7 @@ static void wcd_program_hs_vref(const struct wcd_mbhc *mbhc)
 
 	dev_dbg(card->dev, "%s: reg_val  = %x\n", __func__, reg_val);
 	snd_soc_update_bits(codec, MSM8X16_WCD_A_ANALOG_MBHC_BTN3_CTL,
-			0x03, reg_val);
+			0x3, reg_val);
 }
 
 static void wcd_program_btn_threshold(const struct wcd_mbhc *mbhc, bool micbias)
@@ -646,6 +646,9 @@ exit:
 	pr_debug("%s: RL %d ohm, RR %d ohm\n", __func__, *zl, *zr);
 	pr_debug("%s: Impedance detection completed\n", __func__);
 }
+
+uint32_t g_ZL = 0;
+uint32_t g_ZR = 0;
 
 int wcd_mbhc_get_impedance(struct wcd_mbhc *mbhc, uint32_t *zl,
 			uint32_t *zr)

@@ -255,6 +255,8 @@ struct wcd_mbhc {
 	(cfg_ptr->_n_rload * \
 	(sizeof(cfg_ptr->_rload[0]) + sizeof(cfg_ptr->_alpha[0]))))
 
+void wcd_mbhc_plug_detect_for_debug_mode(struct wcd_mbhc *mbhc, int debug_mode);
+
 int wcd_mbhc_set_keycode(struct wcd_mbhc *mbhc);
 int wcd_mbhc_start(struct wcd_mbhc *mbhc,
 		       struct wcd_mbhc_config *mbhc_cfg);

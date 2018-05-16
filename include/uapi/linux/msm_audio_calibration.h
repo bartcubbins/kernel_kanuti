@@ -44,6 +44,15 @@
 							217, void *)
 #define AUDIO_SET_RTAC_AFE_CAL		_IOWR(CAL_IOCTL_MAGIC, \
 							218, void *)
+#define AUDIO_SET_AUDIOWIZARD_FORCE_PRESET	_IOWR(CAL_IOCTL_MAGIC, \
+ 							221, void *)
+#define AUDIO_GET_HS_IMP		_IOWR(CAL_IOCTL_MAGIC, \
+ 							230, void *)
+#define AUDIO_SET_MODE			_IOWR(CAL_IOCTL_MAGIC, 225, void *)
+extern int get_audiomode(void);
+#define AUDIO_SET_FORMAT		_IOWR(CAL_IOCTL_MAGIC, 231, void *)
+extern int get_audioformat(void);
+
 enum {
 	CVP_VOC_RX_TOPOLOGY_CAL_TYPE = 0,
 	CVP_VOC_TX_TOPOLOGY_CAL_TYPE,
@@ -94,6 +103,12 @@ enum {
 
 	ADM_RTAC_AUDVOL_CAL_TYPE,
 	MAX_CAL_TYPES,
+
+ 	AUDIOWIZARD_FORCE_PRESET_TYPE,
+ 	SKYPE_STATE_TYPE,
+ 	SET_MODE_TYPE,
+ 	SET_FORMAT_TYPE,
+ 	GET_IMP_TYPE,
 };
 
 enum {

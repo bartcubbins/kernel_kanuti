@@ -186,4 +186,6 @@ source "drivers/soc/Kconfig"
 
 source "drivers/firmware/Kconfig"
 
+source "drivers/dts_eagle/Kconfig"
+
 endmenu

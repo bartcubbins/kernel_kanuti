@@ -28,6 +28,9 @@
 #include <linux/mfd/wcd9xxx/wcd9330_registers.h>
 #include <linux/mfd/wcd9xxx/pdata.h>
 #include <linux/regulator/consumer.h>
+#include <linux/proc_fs.h>
+#include <../drivers/base/regmap/internal.h>
+#include <linux/switch.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
@@ -100,6 +103,8 @@ enum {
 
 #define SLIM_BW_CLK_GEAR_9 6200000
 #define SLIM_BW_UNVOTE 0
+
+#define AUDIO_DEBUG_GPIO 25
 
 static int cpe_debug_mode;
 module_param(cpe_debug_mode, int,
@@ -9313,6 +9318,12 @@ static struct snd_soc_codec_driver soc_codec_dev_tomtom = {
 	.dapm_routes = audio_map,
 	.num_dapm_routes = ARRAY_SIZE(audio_map),
 };
+
+struct tomtom_priv *g_tasha;
+int g_DebugMode = 1;
+struct switch_dev *g_audiowizard_force_preset_sdev = NULL;
+//extern int g_ftm_mode;
+struct snd_soc_codec *registered_codec;
 
 #ifdef CONFIG_PM
 static int tomtom_suspend(struct device *dev)
