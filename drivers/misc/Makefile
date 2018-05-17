@@ -69,6 +69,6 @@ obj-$(CONFIG_QCOM_LIQUID_DOCK)	+= qcom_liquid_dock.o
 obj-$(CONFIG_PN544_I2C_NFC)	+= pn544.o
 obj-y				+= qcom/
 obj-$(CONFIG_UID_CPUTIME) 	+= uid_cputime.o
-ifdef CONFIG_ARCH_SONY_KANUTI
+#ifdef CONFIG_ARCH_SONY_KANUTI
 obj-$(CONFIG_KANUTI_HWID)	+= kanuti_hwid.o
-endif
+#endif
