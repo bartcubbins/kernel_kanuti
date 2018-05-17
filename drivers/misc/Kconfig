@@ -590,6 +590,13 @@ config NFC_PN547_PMC_CLK_REQ
 	  Communication controller support.
 	  This option enables d1 clock for NFC.
 
+config KANUTI_HWID
+	bool "Kanuti hardware version detection driver"
+	default y
+	help
+	  This driver allows you to detect band version and set
+	  it using smem_alloc().
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
