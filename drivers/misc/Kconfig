@@ -665,6 +665,14 @@ config UID_SYS_STATS
 	  Per UID based cpu time statistics exported to /proc/uid_cputime
 	  Per UID based io statistics exported to /proc/uid_io
 
+config KANUTI_HWID
+	tristate "Kanuti hardware version detection driver"
+	depends on ARCH_SONY_KANUTI
+	default y
+	help
+	  This driver allows you to detect band version and set
+	  it using smem_alloc().
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
