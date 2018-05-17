@@ -632,13 +632,6 @@ config PN544_I2C_NFC
 	  This module adds support for the NXP pn544 i2c interface.
 	  Select this if your platform is using the i2c bus.
 
-config KANUTI_HWID
-	bool "Kanuti hardware version detection driver"
-	default y
-	help
-	  This driver allows you to detect band version and set
-	  it using smem_alloc().
-
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
