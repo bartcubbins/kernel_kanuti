@@ -223,6 +223,8 @@ static int pil_subsys_init(struct modem_data *drv,
 	drv->subsys_desc.wdog_bite_handler = modem_wdog_bite_intr_handler;
 
 	drv->q6->desc.modem_ssr = false;
+
+#ifdef CONFIG_MAILBOX
 	drv->q6->desc.signal_aop = of_property_read_bool(pdev->dev.of_node,
 						"qcom,signal-aop");
 	if (drv->q6->desc.signal_aop) {
@@ -238,7 +240,7 @@ static int pil_subsys_init(struct modem_data *drv,
 			goto err_subsys;
 		}
 	}
-
+#endif
 	drv->subsys = subsys_register(&drv->subsys_desc);
 	if (IS_ERR(drv->subsys)) {
 		ret = PTR_ERR(drv->subsys);
