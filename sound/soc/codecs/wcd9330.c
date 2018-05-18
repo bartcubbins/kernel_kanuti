@@ -9320,7 +9320,6 @@ static struct snd_soc_codec_driver soc_codec_dev_tomtom = {
 };
 
 struct tomtom_priv *g_tasha;
-int g_DebugMode = 1;
 struct switch_dev *g_audiowizard_force_preset_sdev = NULL;
 //extern int g_ftm_mode;
 struct snd_soc_codec *registered_codec;

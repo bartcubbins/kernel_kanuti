@@ -429,10 +429,47 @@ static long audio_cal_shared_ioctl(struct file *file, unsigned int cmd,
  		mutex_unlock(&audio_cal.cal_mutex[AUDIOWIZARD_FORCE_PRESET_TYPE]);
  		goto done;
  	case AUDIO_GET_HS_IMP:
- 		printk("AUDIO_GET_HS_IMP : start\n");
- 		printk("AUDIO_GET_HS_IMP : done\n");
- 		goto done;
- 	case AUDIO_SET_MODE:
+		printk("AUDIO_GET_HS_IMP : start\n");
+		mutex_lock(&audio_cal.cal_mutex[GET_IMP_TYPE]);
+		imp_val = kmalloc(sizeof(struct headset_imp_val), GFP_KERNEL);
+		if (imp_val == NULL) {
+			//pr_err("%s: could not allocated codec_reg!\n", __func__);
+			printk("%s: could not allocated codec_reg!\n", __func__);
+			ret = -ENOMEM;
+			mutex_unlock(&audio_cal.cal_mutex[GET_IMP_TYPE]);
+			goto done;
+		}
+		if (copy_from_user(imp_val, (void *)arg,
+				sizeof(struct headset_imp_val))) {
+			//pr_err("%s: Could not copy codec_reg from user\n", __func__);
+			printk("%s: Could not copy codec_reg from user\n", __func__);
+			ret = -EFAULT;
+			mutex_unlock(&audio_cal.cal_mutex[GET_IMP_TYPE]);
+			goto done;
+		}
+/*
+		if ( g_tasha->mbhc.current_plug == MBHC_PLUG_TYPE_NONE ||
+			g_tasha->mbhc.current_plug  == MBHC_PLUG_TYPE_INVALID ) {
+			//pr_err("%s: headset not plugin or invalid plug\n", __func__);
+			printk("%s: headset not plugin or invalid plug\n", __func__);
+			ret = -EINVAL;
+			mutex_unlock(&audio_cal.cal_mutex[GET_IMP_TYPE]);
+			goto done;
+		}
+*/
+		imp_val->ZL = g_ZL;
+		imp_val->ZR = g_ZR;
+		printk("%s: RR = %d , LL = %d\n", __func__, imp_val->ZR ,imp_val->ZL);
+		if (copy_to_user((void *)arg, imp_val,
+				sizeof(struct headset_imp_val))) {
+			//pr_err("%s: Could not copy imp_val to user\n", __func__);
+			printk("%s: Could not copy imp_val to user\n", __func__);
+			ret = -EFAULT;
+		}
+		mutex_unlock(&audio_cal.cal_mutex[GET_IMP_TYPE]);
+		printk("AUDIO_GET_HS_IMP : done\n");
+		goto done;
+	case AUDIO_SET_MODE:
  		mutex_lock(&audio_cal.cal_mutex[SET_MODE_TYPE]);
  		if (copy_from_user(&mode, (void *)arg, sizeof(mode))) {
  			pr_err("%s: Could not copy lmode to user\n", __func__);
