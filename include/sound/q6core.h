@@ -155,6 +155,12 @@ struct avcs_cmd_deregister_topologies {
 int32_t core_set_license(uint32_t key, uint32_t module_id);
 int32_t core_get_license_status(uint32_t module_id);
 
+#define AVCS_GET_VERSIONS 0x00012905
+struct avcs_cmd_get_version_result {
+	struct apr_hdr hdr;
+	uint32_t id;
+};
+
 #define ADSP_MEMORY_MAP_HLOS_PHYSPOOL 4
 #define AVCS_CMD_ADD_POOL_PAGES 0x0001292E
 #define AVCS_CMD_REMOVE_POOL_PAGES 0x0001292F
@@ -167,4 +173,12 @@ struct avs_mem_assign_region {
 	u32                  addr_msw;
 } __packed;
 
+enum q6_subsys_image {
+	Q6_SUBSYS_AVS2_6 = 1,
+	Q6_SUBSYS_AVS2_7,
+	Q6_SUBSYS_AVS2_8,
+	Q6_SUBSYS_INVALID,
+};
+enum q6_subsys_image q6core_get_avs_version(void);
+int core_get_adsp_ver(void);
 #endif /* __Q6CORE_H__ */

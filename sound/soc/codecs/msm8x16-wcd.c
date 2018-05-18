@@ -9,6 +9,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/firmware.h>
@@ -24,7 +25,7 @@
 #include <linux/pm_runtime.h>
 #include <linux/kernel.h>
 #include <linux/gpio.h>
-#include <linux/spmi.h>
+#include <linux/platform_device.h>
 #include <linux/of_gpio.h>
 #include <linux/regulator/consumer.h>
 #include <linux/mfd/wcd9xxx/core.h>
@@ -40,6 +41,7 @@
 #include <sound/tlv.h>
 #include <sound/q6core.h>
 #include <soc/qcom/subsystem_notif.h>
+
 #include "msm8x16-wcd.h"
 #include "wcd-mbhc-v2.h"
 #include "msm8916-wcd-irq.h"
@@ -59,8 +61,6 @@
 #define MSM8X16_DIGITAL_CODEC_BASE_ADDR		0x771C000
 #define TOMBAK_CORE_0_SPMI_ADDR			0xf000
 #define TOMBAK_CORE_1_SPMI_ADDR			0xf100
-#define PMIC_SLAVE_ID_0		0
-#define PMIC_SLAVE_ID_1		1
 
 #define PMIC_MBG_OK		0x2C08
 #define PMIC_LDO7_EN_CTL	0x4646
@@ -260,7 +260,8 @@ static struct wcd_mbhc_register
 };
 
 struct msm8x16_wcd_spmi {
-	struct spmi_device *spmi;
+	struct platform_device *pdev;
+	struct regmap *regmap;
 	int base;
 };
 
@@ -288,8 +289,8 @@ static int msm8x16_wcd_dt_parse_vreg_info(struct device *dev,
 	const char *vreg_name, bool ondemand);
 static struct msm8x16_wcd_pdata *msm8x16_wcd_populate_dt_pdata(
 	struct device *dev);
-static int msm8x16_wcd_enable_ext_mb_source(struct snd_soc_codec *codec,
-					    bool turn_on);
+//static int msm8x16_wcd_enable_ext_mb_source(struct snd_soc_codec *codec,
+//					    bool turn_on);
 static void msm8x16_trim_btn_reg(struct snd_soc_codec *codec);
 static void msm8x16_wcd_set_micb_v(struct snd_soc_codec *codec);
 static void msm8x16_wcd_set_boost_v(struct snd_soc_codec *codec);
@@ -501,6 +502,7 @@ static void msm8x16_wcd_compute_impedance(struct snd_soc_codec *codec, s16 l,
 	*zr = rr;
 }
 
+#if 0
 static struct firmware_cal *msm8x16_wcd_get_hwdep_fw_cal(
 		struct snd_soc_codec *codec,
 		enum wcd_cal_type type)
@@ -521,6 +523,7 @@ static struct firmware_cal *msm8x16_wcd_get_hwdep_fw_cal(
 	}
 	return hwdep_cal;
 }
+#endif
 
 static void wcd9xxx_spmi_irq_control(struct snd_soc_codec *codec,
 				     int irq, bool enable)
@@ -939,6 +942,7 @@ skip_imped_detect:
 	pr_debug("%s: Impedance detection completed\n", __func__);
 }
 
+#if 0
 static int msm8x16_register_notifier(struct snd_soc_codec *codec,
 				     struct notifier_block *nblock,
 				     bool enable)
@@ -953,6 +957,7 @@ static int msm8x16_register_notifier(struct snd_soc_codec *codec,
 						&msm8x16_wcd->notifier,
 						nblock);
 }
+#endif
 
 static int msm8x16_wcd_request_irq(struct snd_soc_codec *codec,
 				   int irq, irq_handler_t handler,
@@ -968,14 +973,14 @@ static int msm8x16_wcd_free_irq(struct snd_soc_codec *codec,
 }
 
 static const struct wcd_mbhc_cb mbhc_cb = {
-	.enable_mb_source = msm8x16_wcd_enable_ext_mb_source,
+	//.enable_mb_source = msm8x16_wcd_enable_ext_mb_source,
 	.trim_btn_reg = msm8x16_trim_btn_reg,
 	.compute_impedance = msm8x16_wcd_mbhc_calc_impedance,
 	.set_micbias_value = msm8x16_wcd_set_micb_v,
 	.set_auto_zeroing = msm8x16_wcd_set_auto_zeroing,
-	.get_hwdep_fw_cal = msm8x16_wcd_get_hwdep_fw_cal,
+	//.get_hwdep_fw_cal = msm8x16_wcd_get_hwdep_fw_cal,
 	.set_cap_mode = msm8x16_wcd_configure_cap,
-	.register_notifier = msm8x16_register_notifier,
+	//.register_notifier = msm8x16_register_notifier,
 	.request_irq = msm8x16_wcd_request_irq,
 	.irq_control = wcd9xxx_spmi_irq_control,
 	.free_irq = msm8x16_wcd_free_irq,
@@ -1078,15 +1083,13 @@ static int msm8x16_wcd_spmi_write_device(u16 reg, u8 *value, u32 bytes)
 		pr_err("%s: Failed to get device info\n", __func__);
 		return -ENODEV;
 	}
-	ret = spmi_ext_register_writel(wcd->spmi->ctrl, wcd->spmi->sid,
-						wcd->base + reg, value, bytes);
+	ret = regmap_bulk_write(wcd->regmap, wcd->base + reg, value, bytes);
 	if (ret)
 		pr_err("Unable to write to addr=%x, ret(%d)\n", reg, ret);
 	/* Try again if the write fails */
 	if (ret != 0) {
-		usleep(10);
-		ret = spmi_ext_register_writel(wcd->spmi->ctrl, wcd->spmi->sid,
-						wcd->base + reg, value, 1);
+		//usleep(10);
+		ret = regmap_bulk_write(wcd->regmap, wcd->base + reg, value, 1);
 		if (ret != 0) {
 			pr_err("failed to write the device\n");
 			return ret;
@@ -1113,8 +1116,7 @@ int msm8x16_wcd_spmi_read_device(u16 reg, u32 bytes, u8 *dest)
 		return -ENODEV;
 	}
 
-	ret = spmi_ext_register_readl(wcd->spmi->ctrl, wcd->spmi->sid,
-						wcd->base + reg, dest, bytes);
+	ret = regmap_bulk_read(wcd->regmap, wcd->base + reg, dest, bytes);
 	if (ret != 0) {
 		pr_err("failed to read the device\n");
 		return ret;
@@ -1143,7 +1145,7 @@ static int __msm8x16_wcd_reg_read(struct snd_soc_codec *codec,
 
 	pr_debug("%s reg = %x\n", __func__, reg);
 	mutex_lock(&msm8x16_wcd->io_lock);
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	if (MSM8X16_WCD_IS_TOMBAK_REG(reg))
 		ret = msm8x16_wcd_spmi_read(reg, 1, &temp);
 	else if (MSM8X16_WCD_IS_DIGITAL_REG(reg)) {
@@ -1215,7 +1217,7 @@ static int __msm8x16_wcd_reg_write(struct snd_soc_codec *codec,
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
 	mutex_lock(&msm8x16_wcd->io_lock);
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	if (MSM8X16_WCD_IS_TOMBAK_REG(reg))
 		ret = msm8x16_wcd_spmi_write(reg, 1, &val);
 	else if (MSM8X16_WCD_IS_DIGITAL_REG(reg)) {
@@ -1265,6 +1267,7 @@ err:
 	return ret;
 }
 
+#if 0
 static int msm8x16_wcd_volatile(struct snd_soc_codec *codec, unsigned int reg)
 {
 	dev_dbg(codec->dev, "%s: reg 0x%x\n", __func__, reg);
@@ -1276,11 +1279,12 @@ static int msm8x16_wcd_readable(struct snd_soc_codec *ssc, unsigned int reg)
 {
 	return msm8x16_wcd_reg_readable[reg];
 }
+#endif
 
 static int msm8x16_wcd_write(struct snd_soc_codec *codec, unsigned int reg,
 			     unsigned int value)
 {
-	int ret;
+	//int ret;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	dev_dbg(codec->dev, "%s: Write from reg 0x%x val 0x%x\n",
@@ -1289,12 +1293,12 @@ static int msm8x16_wcd_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 
 	BUG_ON(reg > MSM8X16_WCD_MAX_REGISTER);
-	if (!msm8x16_wcd_volatile(codec, reg)) {
-		ret = snd_soc_cache_write(codec, reg, value);
-		if (ret != 0)
-			dev_err(codec->dev, "Cache write to %x failed: %d\n",
-				reg, ret);
-	}
+	//if (!msm8x16_wcd_volatile(codec, reg)) {
+	//	ret = snd_soc_cache_write(codec, reg, value);
+	//	if (ret != 0)
+	//		dev_err(codec->dev, "Cache write to %x failed: %d\n",
+	//			reg, ret);
+	//}
 	if (unlikely(test_bit(BUS_DOWN, &msm8x16_wcd->status_mask))) {
 		printk_ratelimited(KERN_ERR "write 0x%02x while offline\n",
 				reg);
@@ -1307,7 +1311,7 @@ static unsigned int msm8x16_wcd_read(struct snd_soc_codec *codec,
 				unsigned int reg)
 {
 	unsigned int val;
-	int ret;
+	//int ret;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	if (reg == SND_SOC_NOPM)
@@ -1315,16 +1319,16 @@ static unsigned int msm8x16_wcd_read(struct snd_soc_codec *codec,
 
 	BUG_ON(reg > MSM8X16_WCD_MAX_REGISTER);
 
-	if (!msm8x16_wcd_volatile(codec, reg) &&
-	    msm8x16_wcd_readable(codec, reg) &&
-		reg < codec->driver->reg_cache_size) {
-		ret = snd_soc_cache_read(codec, reg, &val);
-		if (ret >= 0) {
-			return val;
-		} else
-			dev_err(codec->dev, "Cache read from %x failed: %d\n",
-				reg, ret);
-	}
+	//if (!msm8x16_wcd_volatile(codec, reg) &&
+	//    msm8x16_wcd_readable(codec, reg) &&
+	//	reg < codec->driver->reg_cache_size) {
+	//	ret = snd_soc_cache_read(codec, reg, &val);
+	//	if (ret >= 0) {
+	//		return val;
+	//	} else
+	//		dev_err(codec->dev, "Cache read from %x failed: %d\n",
+	//			reg, ret);
+	//}
 	if (unlikely(test_bit(BUS_DOWN, &msm8x16_wcd->status_mask))) {
 		printk_ratelimited(KERN_ERR "write 0x%02x while offline\n",
 				reg);
@@ -1351,8 +1355,7 @@ static void msm8x16_wcd_boost_on(struct snd_soc_codec *codec)
 	struct msm8x16_wcd_spmi *wcd = &msm8x16_wcd_modules[0];
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
-	ret = spmi_ext_register_readl(wcd->spmi->ctrl, PMIC_SLAVE_ID_1,
-					PMIC_LDO7_EN_CTL, &dest, 1);
+	ret = regmap_bulk_read(wcd->regmap, PMIC_LDO7_EN_CTL, &dest, 1);
 	if (ret != 0) {
 		pr_err("%s: failed to read the device:%d\n", __func__, ret);
 		return;
@@ -1363,8 +1366,7 @@ static void msm8x16_wcd_boost_on(struct snd_soc_codec *codec)
 		pr_err("LDO7 not enabled return!\n");
 		return;
 	}
-	ret = spmi_ext_register_readl(wcd->spmi->ctrl, PMIC_SLAVE_ID_0,
-						PMIC_MBG_OK, &dest, 1);
+	ret = regmap_bulk_read(wcd->regmap, PMIC_MBG_OK, &dest, 1);
 	if (ret != 0) {
 		pr_err("%s: failed to read the device:%d\n", __func__, ret);
 		return;
@@ -1377,8 +1379,7 @@ static void msm8x16_wcd_boost_on(struct snd_soc_codec *codec)
 		MSM8X16_WCD_A_ANALOG_MASTER_BIAS_CTL, 0x30);
 		/* Allow 1ms for PMIC MBG state to be updated */
 		usleep_range(CODEC_DELAY_1_MS, CODEC_DELAY_1_1_MS);
-		ret = spmi_ext_register_readl(wcd->spmi->ctrl, PMIC_SLAVE_ID_0,
-						PMIC_MBG_OK, &dest, 1);
+		ret = regmap_bulk_read(wcd->regmap, PMIC_MBG_OK, &dest, 1);
 		if (ret != 0) {
 			pr_err("%s: failed to read the device:%d\n",
 						__func__, ret);
@@ -1832,7 +1833,7 @@ static int msm8x16_wcd_codec_enable_on_demand_supply(
 		struct snd_kcontrol *kcontrol, int event)
 {
 	int ret = 0;
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 	struct on_demand_supply *supply;
 
@@ -1888,7 +1889,7 @@ static int msm8x16_wcd_codec_enable_clock_block(struct snd_soc_codec *codec,
 {
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	if (enable) {
 		snd_soc_update_bits(codec,
 			MSM8X16_WCD_A_CDC_CLK_MCLK_CTL, 0x01, 0x01);
@@ -1919,7 +1920,7 @@ static int msm8x16_wcd_codec_enable_clock_block(struct snd_soc_codec *codec,
 static int msm8x16_wcd_codec_enable_charge_pump(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	dev_dbg(codec->dev, "%s: event = %d\n", __func__, event);
@@ -2032,7 +2033,7 @@ static int msm8x16_wcd_loopback_mode_get(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	dev_dbg(codec->dev, "%s: ucontrol->value.integer.value[0] = %ld\n",
 		__func__, ucontrol->value.integer.value[0]);
 
@@ -2045,7 +2046,7 @@ static int msm8x16_wcd_loopback_mode_put(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	dev_dbg(codec->dev, "%s: ucontrol->value.integer.value[0] = %ld\n",
 		__func__, ucontrol->value.integer.value[0]);
 
@@ -2815,7 +2816,7 @@ static const struct soc_enum iir2_inp1_mux_enum =
 		0, 6, iir_inp1_text);
 
 static const struct snd_kcontrol_new ext_spk_mux =
-	SOC_DAPM_ENUM_VIRT("Ext Spk Switch Mux", ext_spk_enum);
+	SOC_DAPM_ENUM("Ext Spk Switch Mux", ext_spk_enum);
 
 static const struct snd_kcontrol_new rx_mix1_inp1_mux =
 	SOC_DAPM_ENUM("RX1 MIX1 INP1 Mux", rx_mix1_inp1_chain_enum);
@@ -2851,14 +2852,14 @@ static const struct snd_kcontrol_new rx2_mix2_inp1_mux =
 	SOC_DAPM_ENUM("RX2 MIX2 INP1 Mux", rx2_mix2_inp1_chain_enum);
 
 static const struct snd_kcontrol_new tx_adc2_mux =
-	SOC_DAPM_ENUM_VIRT("ADC2 MUX Mux", adc2_enum);
+	SOC_DAPM_ENUM("ADC2 MUX Mux", adc2_enum);
 
 static int msm8x16_wcd_put_dec_enum(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_dapm_widget_list *wlist = snd_kcontrol_chip(kcontrol);
 	struct snd_soc_dapm_widget *w = wlist->widgets[0];
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 	unsigned int dec_mux, decimator;
 	char *dec_name = NULL;
@@ -2869,7 +2870,7 @@ static int msm8x16_wcd_put_dec_enum(struct snd_kcontrol *kcontrol,
 	int ret = 0;
 	char *dec_num;
 
-	if (ucontrol->value.enumerated.item[0] > e->max - 1) {
+	if (ucontrol->value.enumerated.item[0] > e->items) {
 		dev_err(codec->dev, "%s: Invalid enum value: %d\n",
 			__func__, ucontrol->value.enumerated.item[0]);
 		return -EINVAL;
@@ -2971,11 +2972,11 @@ static const struct soc_enum ear_enum =
 	SOC_ENUM_SINGLE(0, 0, ARRAY_SIZE(ear_text), ear_text);
 
 static const struct snd_kcontrol_new ear_pa_mux[] = {
-	SOC_DAPM_ENUM_VIRT("EAR_S", ear_enum)
+	SOC_DAPM_ENUM("EAR_S", ear_enum)
 };
 
 static const struct snd_kcontrol_new wsa_spk_mux[] = {
-	SOC_DAPM_ENUM_VIRT("WSA Spk Switch", wsa_spk_enum)
+	SOC_DAPM_ENUM("WSA Spk Switch", wsa_spk_enum)
 };
 
 static const struct snd_kcontrol_new iir2_inp1_mux =
@@ -2989,15 +2990,15 @@ static const struct soc_enum hph_enum =
 	SOC_ENUM_SINGLE(0, 0, ARRAY_SIZE(hph_text), hph_text);
 
 static const struct snd_kcontrol_new hphl_mux[] = {
-	SOC_DAPM_ENUM_VIRT("HPHL", hph_enum)
+	SOC_DAPM_ENUM("HPHL", hph_enum)
 };
 
 static const struct snd_kcontrol_new hphr_mux[] = {
-	SOC_DAPM_ENUM_VIRT("HPHR", hph_enum)
+	SOC_DAPM_ENUM("HPHR", hph_enum)
 };
 
 static const struct snd_kcontrol_new spkr_mux[] = {
-	SOC_DAPM_ENUM_VIRT("SPK", hph_enum)
+	SOC_DAPM_ENUM("SPK", hph_enum)
 };
 
 static void msm8x16_wcd_codec_enable_adc_block(struct snd_soc_codec *codec,
@@ -3031,7 +3032,7 @@ static void msm8x16_wcd_codec_enable_adc_block(struct snd_soc_codec *codec,
 static int msm8x16_wcd_codec_enable_adc(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	u16 adc_reg;
 	u8 init_bit_shift;
 
@@ -3107,10 +3108,10 @@ static int msm8x16_wcd_codec_enable_adc(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_spk_pa(struct snd_soc_dapm_widget *w,
 				     struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
-	dev_dbg(w->codec->dev, "%s %d %s\n", __func__, event, w->name);
+	dev_dbg(codec->dev, "%s %d %s\n", __func__, event, w->name);
 	switch (event) {
 	case SND_SOC_DAPM_PRE_PMU:
 		snd_soc_update_bits(codec,
@@ -3233,13 +3234,13 @@ static int msm8x16_wcd_codec_enable_spk_pa(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_dig_clk(struct snd_soc_dapm_widget *w,
 				     struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 
-	dev_dbg(w->codec->dev, "%s event %d w->name %s\n", __func__,
+	dev_dbg(codec->dev, "%s event %d w->name %s\n", __func__,
 			event, w->name);
 	switch (event) {
 	case SND_SOC_DAPM_PRE_PMU:
@@ -3259,7 +3260,7 @@ static int msm8x16_wcd_codec_enable_dig_clk(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_dmic(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 	u8  dmic_clk_en;
 	u16 dmic_clk_reg;
@@ -3388,28 +3389,29 @@ static void msm8x16_trim_btn_reg(struct snd_soc_codec *codec)
 		pr_debug("%s: This device is trimmed at ATE\n", __func__);
 	}
 }
+
+#if 0
 static int msm8x16_wcd_enable_ext_mb_source(struct snd_soc_codec *codec,
 					    bool turn_on)
 {
 	int ret = 0;
 	static int count;
+	struct snd_soc_dapm_context *dapm = snd_soc_codec_get_dapm(codec);
 
 	dev_dbg(codec->dev, "%s turn_on: %d count: %d\n", __func__, turn_on,
 			count);
 	if (turn_on) {
 		if (!count) {
-			ret = snd_soc_dapm_force_enable_pin(&codec->dapm,
-				"MICBIAS_REGULATOR");
-			snd_soc_dapm_sync(&codec->dapm);
+			ret = snd_soc_dapm_force_enable_pin(dapm, "MICBIAS_REGULATOR");
+			snd_soc_dapm_sync(dapm);
 		}
 		count++;
 	} else {
 		if (count > 0)
 			count--;
 		if (!count) {
-			ret = snd_soc_dapm_disable_pin(&codec->dapm,
-				"MICBIAS_REGULATOR");
-			snd_soc_dapm_sync(&codec->dapm);
+			ret = snd_soc_dapm_disable_pin(dapm, "MICBIAS_REGULATOR");
+			snd_soc_dapm_sync(dapm);
 		}
 	}
 
@@ -3422,11 +3424,12 @@ static int msm8x16_wcd_enable_ext_mb_source(struct snd_soc_codec *codec,
 
 	return ret;
 }
+#endif
 
 static int msm8x16_wcd_codec_enable_micbias(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd =
 				snd_soc_codec_get_drvdata(codec);
 	u16 micb_int_reg;
@@ -3546,7 +3549,7 @@ static void tx_hpf_corner_freq_callback(struct work_struct *work)
 static int msm8x16_wcd_codec_set_iir_gain(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	int value = 0, reg;
 
 	switch (event) {
@@ -3567,7 +3570,7 @@ static int msm8x16_wcd_codec_set_iir_gain(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_dec(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8916_asoc_mach_data *pdata = NULL;
 	unsigned int decimator;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
@@ -3580,7 +3583,7 @@ static int msm8x16_wcd_codec_enable_dec(struct snd_soc_dapm_widget *w,
 	int offset;
 	char *dec_num;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	dev_dbg(codec->dev, "%s %d\n", __func__, event);
 
 	widget_name = kstrndup(w->name, 15, GFP_KERNEL);
@@ -3730,7 +3733,7 @@ out:
 static int msm89xx_wcd_codec_enable_vdd_spkr(struct snd_soc_dapm_widget *w,
 				       struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 	int ret = 0;
 
@@ -3767,7 +3770,7 @@ static int msm8x16_wcd_codec_enable_interpolator(struct snd_soc_dapm_widget *w,
 						 struct snd_kcontrol *kcontrol,
 						 int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	dev_dbg(codec->dev, "%s %d %s\n", __func__, event, w->name);
@@ -3834,7 +3837,7 @@ static int msm8x16_wcd_codec_enable_interpolator(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_rx_bias(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	dev_dbg(codec->dev, "%s %d\n", __func__, event);
@@ -3963,7 +3966,7 @@ static int msm8x16_wcd_hphl_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
 	uint32_t impedl, impedr;
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 	int ret;
 
@@ -4019,7 +4022,7 @@ static int msm8x16_wcd_hphl_dac_event(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_hphr_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 
 	dev_dbg(codec->dev, "%s %s %d\n", __func__, w->name, event);
 
@@ -4049,7 +4052,7 @@ static int msm8x16_wcd_hphr_dac_event(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_hph_pa_event(struct snd_soc_dapm_widget *w,
 			      struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	dev_dbg(codec->dev, "%s: %s event = %d\n", __func__, w->name, event);
@@ -4585,14 +4588,14 @@ static struct snd_soc_dai_driver msm8x16_wcd_i2s_dai[] = {
 static int msm8x16_wcd_codec_enable_rx_chain(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		dev_dbg(w->codec->dev, "%s: [PMU]\n", __func__);
+		dev_dbg(codec->dev, "%s: [PMU]\n", __func__);
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-		dev_dbg(w->codec->dev, "%s: [PMD]\n", __func__);
+		dev_dbg(codec->dev, "%s: [PMD]\n", __func__);
 		snd_soc_update_bits(codec, w->reg,
 			    1 << w->shift, 0x00);
 		break;
@@ -4603,19 +4606,19 @@ static int msm8x16_wcd_codec_enable_rx_chain(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_spk_ext_pa(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	dev_dbg(codec->dev, "%s: %s event = %d\n", __func__, w->name, event);
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		dev_dbg(w->codec->dev,
+		dev_dbg(codec->dev,
 			"%s: enable external speaker PA\n", __func__);
 		if (msm8x16_wcd->codec_spk_ext_pa_cb)
 			msm8x16_wcd->codec_spk_ext_pa_cb(codec, 1);
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
-		dev_dbg(w->codec->dev,
+		dev_dbg(codec->dev,
 			"%s: enable external speaker PA\n", __func__);
 		if (msm8x16_wcd->codec_spk_ext_pa_cb)
 			msm8x16_wcd->codec_spk_ext_pa_cb(codec, 0);
@@ -4627,12 +4630,12 @@ static int msm8x16_wcd_codec_enable_spk_ext_pa(struct snd_soc_dapm_widget *w,
 static int msm8x16_wcd_codec_enable_ear_pa(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_codec *codec = w->codec;
+	struct snd_soc_codec *codec = codec;
 	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
 
 	switch (event) {
 	case SND_SOC_DAPM_PRE_PMU:
-		dev_dbg(w->codec->dev,
+		dev_dbg(codec->dev,
 			"%s: Sleeping 20ms after select EAR PA\n",
 			__func__);
 		snd_soc_update_bits(codec, MSM8X16_WCD_A_ANALOG_RX_EAR_CTL,
@@ -4642,7 +4645,7 @@ static int msm8x16_wcd_codec_enable_ear_pa(struct snd_soc_dapm_widget *w,
 			MSM8X16_WCD_A_ANALOG_RX_HPH_CNP_WG_TIME, 0xFF, 0x2A);
 		break;
 	case SND_SOC_DAPM_POST_PMU:
-		dev_dbg(w->codec->dev,
+		dev_dbg(codec->dev,
 			"%s: Sleeping 20ms after enabling EAR PA\n",
 			__func__);
 		snd_soc_update_bits(codec, MSM8X16_WCD_A_ANALOG_RX_EAR_CTL,
@@ -4657,14 +4660,14 @@ static int msm8x16_wcd_codec_enable_ear_pa(struct snd_soc_dapm_widget *w,
 		msleep(20);
 		msm8x16_wcd->mute_mask |= EAR_PA_DISABLE;
 		if (msm8x16_wcd->boost_option == BOOST_ALWAYS) {
-			dev_dbg(w->codec->dev,
+			dev_dbg(codec->dev,
 				"%s: boost_option:%d, tear down ear\n",
 				__func__, msm8x16_wcd->boost_option);
 			msm8x16_wcd_boost_mode_sequence(codec, EAR_PMD);
 		}
 		break;
 	case SND_SOC_DAPM_POST_PMD:
-		dev_dbg(w->codec->dev,
+		dev_dbg(codec->dev,
 			"%s: Sleeping 7ms after disabling EAR PA\n",
 			__func__);
 		snd_soc_update_bits(codec, MSM8X16_WCD_A_ANALOG_RX_EAR_CTL,
@@ -4687,10 +4690,10 @@ static const struct snd_soc_dapm_widget msm8x16_wcd_dapm_widgets[] = {
 			0, 0, NULL, 0, msm8x16_wcd_codec_enable_ear_pa,
 			SND_SOC_DAPM_PRE_PMU | SND_SOC_DAPM_POST_PMU |
 			SND_SOC_DAPM_PRE_PMD | SND_SOC_DAPM_POST_PMD),
-	SND_SOC_DAPM_VIRT_MUX("EAR_S", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("EAR_S", SND_SOC_NOPM, 0, 0,
 		ear_pa_mux),
 
-	SND_SOC_DAPM_VIRT_MUX("WSA Spk Switch", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("WSA Spk Switch", SND_SOC_NOPM, 0, 0,
 		wsa_spk_mux),
 
 	SND_SOC_DAPM_AIF_IN("I2S RX1", "AIF1 Playback", 0, SND_SOC_NOPM, 0, 0),
@@ -4710,7 +4713,7 @@ static const struct snd_soc_dapm_widget msm8x16_wcd_dapm_widgets[] = {
 		SND_SOC_DAPM_POST_PMU | SND_SOC_DAPM_PRE_PMD |
 		SND_SOC_DAPM_POST_PMD),
 
-	SND_SOC_DAPM_VIRT_MUX("HPHL", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("HPHL", SND_SOC_NOPM, 0, 0,
 		hphl_mux),
 
 	SND_SOC_DAPM_MIXER_E("HPHL DAC",
@@ -4725,7 +4728,7 @@ static const struct snd_soc_dapm_widget msm8x16_wcd_dapm_widgets[] = {
 		SND_SOC_DAPM_POST_PMU | SND_SOC_DAPM_PRE_PMD |
 		SND_SOC_DAPM_POST_PMD),
 
-	SND_SOC_DAPM_VIRT_MUX("HPHR", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("HPHR", SND_SOC_NOPM, 0, 0,
 		hphr_mux),
 
 	SND_SOC_DAPM_MIXER_E("HPHR DAC",
@@ -4734,7 +4737,7 @@ static const struct snd_soc_dapm_widget msm8x16_wcd_dapm_widgets[] = {
 		SND_SOC_DAPM_PRE_PMU | SND_SOC_DAPM_POST_PMU |
 		SND_SOC_DAPM_POST_PMD),
 
-	SND_SOC_DAPM_VIRT_MUX("SPK", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("SPK", SND_SOC_NOPM, 0, 0,
 		spkr_mux),
 
 	SND_SOC_DAPM_DAC("SPK DAC", NULL,
@@ -4752,7 +4755,7 @@ static const struct snd_soc_dapm_widget msm8x16_wcd_dapm_widgets[] = {
 			    msm89xx_wcd_codec_enable_vdd_spkr,
 			    SND_SOC_DAPM_PRE_PMU | SND_SOC_DAPM_POST_PMD),
 
-	SND_SOC_DAPM_VIRT_MUX("Ext Spk Switch", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("Ext Spk Switch", SND_SOC_NOPM, 0, 0,
 		&ext_spk_mux),
 
 	SND_SOC_DAPM_MIXER("RX1 MIX1", SND_SOC_NOPM, 0, 0, NULL, 0),
@@ -4873,7 +4876,7 @@ static const struct snd_soc_dapm_widget msm8x16_wcd_dapm_widgets[] = {
 	SND_SOC_DAPM_MIXER("ADC2", SND_SOC_NOPM, 0, 0, NULL, 0),
 	SND_SOC_DAPM_MIXER("ADC3", SND_SOC_NOPM, 0, 0, NULL, 0),
 
-	SND_SOC_DAPM_VIRT_MUX("ADC2 MUX", SND_SOC_NOPM, 0, 0,
+	SND_SOC_DAPM_MUX("ADC2 MUX", SND_SOC_NOPM, 0, 0,
 		&tx_adc2_mux),
 
 	SND_SOC_DAPM_MICBIAS_E("MIC BIAS External",
@@ -5137,7 +5140,7 @@ static int msm8x16_wcd_device_down(struct snd_soc_codec *codec)
 	struct msm8x16_wcd_priv *msm8x16_wcd_priv =
 		snd_soc_codec_get_drvdata(codec);
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	dev_dbg(codec->dev, "%s: device down!\n", __func__);
 	msm8x16_wcd_write(codec,
 		MSM8X16_WCD_A_ANALOG_TX_1_EN, 0x3);
@@ -5201,7 +5204,7 @@ static int msm8x16_wcd_device_down(struct snd_soc_codec *codec)
 	msm8x16_wcd_bringup(codec);
 	atomic_set(&pdata->mclk_enabled, false);
 	set_bit(BUS_DOWN, &msm8x16_wcd_priv->status_mask);
-	snd_soc_card_change_online_state(codec->card, 0);
+	snd_soc_card_change_online_state(codec->component.card, 0);
 	return 0;
 }
 
@@ -5212,19 +5215,19 @@ static int msm8x16_wcd_device_up(struct snd_soc_codec *codec)
 	int ret = 0;
 	dev_dbg(codec->dev, "%s: device up!\n", __func__);
 
-	mutex_lock(&codec->mutex);
+	//mutex_lock(&codec->mutex);
 
 	clear_bit(BUS_DOWN, &msm8x16_wcd_priv->status_mask);
-	snd_soc_card_change_online_state(codec->card, 1);
+	snd_soc_card_change_online_state(codec->component.card, 1);
 	/* delay is required to make sure sound card state updated */
 	usleep_range(5000, 5100);
 
 	msm8x16_wcd_codec_init_reg(codec);
 	msm8x16_wcd_update_reg_defaults(codec);
 
-	codec->cache_sync = true;
-	snd_soc_cache_sync(codec);
-	codec->cache_sync = false;
+	//codec->cache_sync = true;
+	//snd_soc_cache_sync(codec);
+	//codec->cache_sync = false;
 
 	msm8x16_wcd_write(codec, MSM8X16_WCD_A_DIGITAL_INT_EN_SET,
 				MSM8X16_WCD_A_DIGITAL_INT_EN_SET__POR);
@@ -5251,7 +5254,7 @@ static int msm8x16_wcd_device_up(struct snd_soc_codec *codec)
 		wcd_mbhc_start(&msm8x16_wcd_priv->mbhc,
 			msm8x16_wcd_priv->mbhc.mbhc_cfg);
 
-	mutex_unlock(&codec->mutex);
+	//mutex_unlock(&codec->mutex);
 
 	return 0;
 }
@@ -5348,7 +5351,7 @@ static void msm8x16_wcd_configure_cap(struct snd_soc_codec *codec,
 
 	struct msm8916_asoc_mach_data *pdata = NULL;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 
 	pr_debug("\n %s: micbias1 %x micbias2 = %d\n", __func__, micbias1,
 			micbias2);
@@ -5382,7 +5385,7 @@ static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 	struct msm8x16_wcd *msm8x16_wcd;
 	struct msm8x16_wcd_pdata *pdata;
 	const char *adsp_type;
-	const char *adsp_err = "invalid";
+	//const char *adsp_err = "invalid";
 	int i, ret;
 
 	dev_dbg(codec->dev, "%s()\n", __func__);
@@ -5501,11 +5504,11 @@ static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 	/* Set initial cap mode */
 	msm8x16_wcd_configure_cap(codec, false, false);
 	registered_codec = codec;
-	adsp_type = apr_get_adsp_subsys_name();
-	if (strcmp(adsp_type, adsp_err) == 0) {
-		pr_err("%s: adsp subsys location not known\n", __func__);
-		return -EPROBE_DEFER;
-	}
+	//adsp_type = apr_get_adsp_subsys_name();
+	//if (strcmp(adsp_type, adsp_err) == 0) {
+	//	pr_err("%s: adsp subsys location not known\n", __func__);
+	//	return -EPROBE_DEFER;
+	//}
 	adsp_state_notifier =
 	    subsys_notif_register_notifier(adsp_type,
 					   &adsp_state_notifier_block);
@@ -5561,9 +5564,9 @@ static int msm8x16_wcd_enable_static_supplies_to_optimum(
 				msm8x16->supplies[i].supply, ret);
 		}
 
-		ret = regulator_set_optimum_mode(msm8x16->supplies[i].consumer,
+		ret = regulator_set_load(msm8x16->supplies[i].consumer,
 			pdata->regulator[i].optimum_ua);
-		dev_dbg(msm8x16->dev, "Regulator %s set optimum mode\n",
+		dev_dbg(msm8x16->dev, "Regulator %s set load\n",
 			 msm8x16->supplies[i].supply);
 	}
 
@@ -5585,8 +5588,8 @@ static int msm8x16_wcd_disable_static_supplies_to_optimum(
 			continue;
 		regulator_set_voltage(msm8x16->supplies[i].consumer, 0,
 			pdata->regulator[i].max_uv);
-		regulator_set_optimum_mode(msm8x16->supplies[i].consumer, 0);
-		dev_dbg(msm8x16->dev, "Regulator %s set optimum mode\n",
+		regulator_set_load(msm8x16->supplies[i].consumer, 0);
+		dev_dbg(msm8x16->dev, "Regulator %s set load\n",
 				 msm8x16->supplies[i].supply);
 	}
 
@@ -5600,7 +5603,7 @@ int msm8x16_wcd_suspend(struct snd_soc_codec *codec)
 	struct msm8x16_wcd *msm8x16 = codec->control_data;
 	struct msm8x16_wcd_pdata *msm8x16_pdata = msm8x16->dev->platform_data;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	pr_debug("%s: mclk cnt = %d, mclk_enabled = %d\n",
 			__func__, atomic_read(&pdata->mclk_rsc_ref),
 			atomic_read(&pdata->mclk_enabled));
@@ -5641,7 +5644,7 @@ int msm8x16_wcd_resume(struct snd_soc_codec *codec)
 	struct msm8x16_wcd *msm8x16 = codec->control_data;
 	struct msm8x16_wcd_pdata *msm8x16_pdata = msm8x16->dev->platform_data;
 
-	pdata = snd_soc_card_get_drvdata(codec->card);
+	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	msm8x16_wcd_enable_static_supplies_to_optimum(msm8x16, msm8x16_pdata);
 	return 0;
 }
@@ -5656,8 +5659,8 @@ static struct snd_soc_codec_driver soc_codec_dev_msm8x16_wcd = {
 	.suspend = msm8x16_wcd_suspend,
 	.resume = msm8x16_wcd_resume,
 
-	.readable_register = msm8x16_wcd_readable,
-	.volatile_register = msm8x16_wcd_volatile,
+	//.readable_register = msm8x16_wcd_readable,
+	//.volatile_register = msm8x16_wcd_volatile,
 
 	.reg_cache_size = MSM8X16_WCD_CACHE_SIZE,
 	.reg_cache_default = msm8x16_wcd_reset_reg_defaults,
@@ -5723,10 +5726,10 @@ static int msm8x16_wcd_init_supplies(struct msm8x16_wcd *msm8x16,
 			goto err_get;
 		}
 
-		ret = regulator_set_optimum_mode(msm8x16->supplies[i].consumer,
+		ret = regulator_set_load(msm8x16->supplies[i].consumer,
 			pdata->regulator[i].optimum_ua);
 		if (ret < 0) {
-			dev_err(msm8x16->dev, "Setting regulator optimum mode failed for regulator %s err = %d\n",
+			dev_err(msm8x16->dev, "Setting regulator set load failed for regulator %s err = %d\n",
 				msm8x16->supplies[i].supply, ret);
 			goto err_get;
 		} else {
@@ -5786,7 +5789,7 @@ static void msm8x16_wcd_disable_supplies(struct msm8x16_wcd *msm8x16,
 			continue;
 		regulator_set_voltage(msm8x16->supplies[i].consumer, 0,
 			pdata->regulator[i].max_uv);
-		regulator_set_optimum_mode(msm8x16->supplies[i].consumer, 0);
+		regulator_set_load(msm8x16->supplies[i].consumer, 0);
 	}
 	regulator_bulk_free(msm8x16->num_of_supplies, msm8x16->supplies);
 	kfree(msm8x16->supplies);
@@ -5798,57 +5801,58 @@ static int msm8x16_wcd_device_init(struct msm8x16_wcd *msm8x16)
 	return 0;
 }
 
-static int msm8x16_wcd_spmi_probe(struct spmi_device *spmi)
+static int msm8x16_wcd_spmi_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	struct msm8x16_wcd *msm8x16 = NULL;
 	struct msm8x16_wcd_pdata *pdata;
-	struct resource *wcd_resource;
-	int adsp_state;
+	struct resource *wcd_resource = NULL; // !!!
+	//int adsp_state;
 	static int spmi_dev_registered_cnt;
-	int adsp_ver = 0;
+	//int adsp_ver = 0;
 
-	dev_dbg(&spmi->dev, "%s(%d):slave ID = 0x%x\n",
-		__func__, __LINE__,  spmi->sid);
+	dev_dbg(&pdev->dev, "%s(%d):slave ID = 0x%x\n",
+		__func__, __LINE__, to_spmi_device(pdev->dev.parent)->usid);
 
-	adsp_state = apr_get_adsp_state();
-	if (adsp_state != APR_SUBSYS_LOADED) {
-		dev_dbg(&spmi->dev, "Adsp is not loaded yet %d\n",
-				adsp_state);
-		return -EPROBE_DEFER;
-	}
+	//adsp_state = apr_get_adsp_state();
+	//if (adsp_state != APR_SUBSYS_LOADED) {
+	//	dev_dbg(&pdev->dev, "Adsp is not loaded yet %d\n",
+	//			adsp_state);
+	//	return -EPROBE_DEFER;
+	//}
 
-	adsp_ver = core_get_adsp_ver();
-	if (adsp_ver < 0) {
-		dev_err(&spmi->dev, "%s: Get adsp version failed %d\n",
-			__func__, adsp_ver);
-		ret = -EPROBE_DEFER;
-		goto rtn;
-	}
-	wcd_resource = spmi_get_resource(spmi, NULL, IORESOURCE_MEM, 0);
-	if (!wcd_resource) {
-		dev_err(&spmi->dev, "Unable to get Tombak base address\n");
-		return -ENXIO;
-	}
+	//adsp_ver = core_get_adsp_ver();
+	//if (adsp_ver < 0) {
+	//	dev_err(&pdev->dev, "%s: Get adsp version failed %d\n",
+	//		__func__, adsp_ver);
+	//	ret = -EPROBE_DEFER;
+	//	goto rtn;
+	//}
+
+	//regmap = dev_get_regmap(pdev->dev.parent, NULL);
+	//if (!regmap) {
+	//	dev_err(&pdev->dev, "Couldn't get Tombak parent's regmap\n");
+	//	return -ENXIO;
+	//}
 
 	switch (wcd_resource->start) {
 	case TOMBAK_CORE_0_SPMI_ADDR:
-		msm8x16_wcd_modules[0].spmi = spmi;
-		msm8x16_wcd_modules[0].base = (spmi->sid << 16) +
+		msm8x16_wcd_modules[0].pdev = pdev;
+		msm8x16_wcd_modules[0].base = (to_spmi_device(pdev->dev.parent)->usid << 16) +
 						wcd_resource->start;
-		wcd9xxx_spmi_set_dev(msm8x16_wcd_modules[0].spmi, 0);
-		device_init_wakeup(&spmi->dev, true);
+		wcd9xxx_spmi_set_dev(msm8x16_wcd_modules[0].pdev, 0);
+		device_init_wakeup(&pdev->dev, true);
 		break;
 	case TOMBAK_CORE_1_SPMI_ADDR:
-		msm8x16_wcd_modules[1].spmi = spmi;
-		msm8x16_wcd_modules[1].base = (spmi->sid << 16) +
+		msm8x16_wcd_modules[1].pdev = pdev;
+		msm8x16_wcd_modules[1].base = (to_spmi_device(pdev->dev.parent)->usid << 16) +
 						wcd_resource->start;
-		wcd9xxx_spmi_set_dev(msm8x16_wcd_modules[1].spmi, 1);
+		wcd9xxx_spmi_set_dev(msm8x16_wcd_modules[1].pdev, 1);
 	if (wcd9xxx_spmi_irq_init()) {
-		dev_err(&spmi->dev,
+		dev_err(&pdev->dev,
 				"%s: irq initialization failed\n", __func__);
 	} else {
-		dev_dbg(&spmi->dev,
+		dev_dbg(&pdev->dev,
 				"%s: irq initialization passed\n", __func__);
 	}
 		spmi_dev_registered_cnt++;
@@ -5859,49 +5863,49 @@ static int msm8x16_wcd_spmi_probe(struct spmi_device *spmi)
 	}
 
 
-	dev_dbg(&spmi->dev, "%s(%d):start addr = 0x%pK\n",
+	dev_dbg(&pdev->dev, "%s(%d):start addr = 0x%pK\n",
 		__func__, __LINE__,  &wcd_resource->start);
 
 	if (wcd_resource->start != TOMBAK_CORE_0_SPMI_ADDR)
 		goto rtn;
 
-	if (spmi->dev.of_node) {
-		dev_dbg(&spmi->dev, "%s:Platform data from device tree\n",
+	if (pdev->dev.of_node) {
+		dev_dbg(&pdev->dev, "%s:Platform data from device tree\n",
 			__func__);
-		pdata = msm8x16_wcd_populate_dt_pdata(&spmi->dev);
-		spmi->dev.platform_data = pdata;
+		pdata = msm8x16_wcd_populate_dt_pdata(&pdev->dev);
+		pdev->dev.platform_data = pdata;
 	} else {
-		dev_dbg(&spmi->dev, "%s:Platform data from board file\n",
+		dev_dbg(&pdev->dev, "%s:Platform data from board file\n",
 			__func__);
-		pdata = spmi->dev.platform_data;
+		pdata = pdev->dev.platform_data;
 	}
 	if (pdata == NULL) {
-		dev_err(&spmi->dev, "%s:Platform data failed to populate\n",
+		dev_err(&pdev->dev, "%s:Platform data failed to populate\n",
 			__func__);
 		goto rtn;
 	}
 
 	msm8x16 = kzalloc(sizeof(struct msm8x16_wcd), GFP_KERNEL);
 	if (msm8x16 == NULL) {
-		dev_err(&spmi->dev,
+		dev_err(&pdev->dev,
 			"%s: error, allocation failed\n", __func__);
 		ret = -ENOMEM;
 		goto rtn;
 	}
 
-	msm8x16->dev = &spmi->dev;
+	msm8x16->dev = &pdev->dev;
 	msm8x16->read_dev = __msm8x16_wcd_reg_read;
 	msm8x16->write_dev = __msm8x16_wcd_reg_write;
 	ret = msm8x16_wcd_init_supplies(msm8x16, pdata);
 	if (ret) {
-		dev_err(&spmi->dev, "%s: Fail to enable Codec supplies\n",
+		dev_err(&pdev->dev, "%s: Fail to enable Codec supplies\n",
 			__func__);
 		goto err_codec;
 	}
 
 	ret = msm8x16_wcd_enable_static_supplies(msm8x16, pdata);
 	if (ret) {
-		dev_err(&spmi->dev,
+		dev_err(&pdev->dev,
 			"%s: Fail to enable Codec pre-reset supplies\n",
 			   __func__);
 		goto err_codec;
@@ -5910,23 +5914,23 @@ static int msm8x16_wcd_spmi_probe(struct spmi_device *spmi)
 
 	ret = msm8x16_wcd_device_init(msm8x16);
 	if (ret) {
-		dev_err(&spmi->dev,
+		dev_err(&pdev->dev,
 			"%s:msm8x16_wcd_device_init failed with error %d\n",
 			__func__, ret);
 		goto err_supplies;
 	}
-	dev_set_drvdata(&spmi->dev, msm8x16);
+	dev_set_drvdata(&pdev->dev, msm8x16);
 	spmi_dev_registered_cnt++;
 register_codec:
 	if ((spmi_dev_registered_cnt == MAX_MSM8X16_WCD_DEVICE) && (!ret)) {
-		if (msm8x16_wcd_modules[0].spmi) {
+		if (msm8x16_wcd_modules[0].pdev) {
 			ret = snd_soc_register_codec(
-					&msm8x16_wcd_modules[0].spmi->dev,
+					&msm8x16_wcd_modules[0].pdev->dev,
 					&soc_codec_dev_msm8x16_wcd,
 					msm8x16_wcd_i2s_dai,
 					ARRAY_SIZE(msm8x16_wcd_i2s_dai));
 			if (ret) {
-				dev_err(&spmi->dev,
+				dev_err(&pdev->dev,
 				"%s:snd_soc_register_codec failed with error %d\n",
 				__func__, ret);
 				goto err_supplies;
@@ -5948,22 +5952,23 @@ static void msm8x16_wcd_device_exit(struct msm8x16_wcd *msm8x16)
 	kfree(msm8x16);
 }
 
-static int msm8x16_wcd_spmi_remove(struct spmi_device *spmi)
+static int msm8x16_wcd_spmi_remove(struct platform_device *pdev)
 {
-	struct msm8x16_wcd *msm8x16 = dev_get_drvdata(&spmi->dev);
+	struct msm8x16_wcd *msm8x16 = dev_get_drvdata(&pdev->dev);
 
 	msm8x16_wcd_device_exit(msm8x16);
 	return 0;
 }
 
 #ifdef CONFIG_PM
-static int msm8x16_wcd_spmi_resume(struct spmi_device *spmi)
+static int msm8x16_wcd_spmi_resume(struct platform_device *pdev)
 {
+	struct regmap *regmap;
 	struct resource *wcd_resource;
 
-	wcd_resource = spmi_get_resource(spmi, NULL, IORESOURCE_MEM, 0);
-	if (!wcd_resource) {
-		dev_err(&spmi->dev, "Unable to get CDC SPMI resource\n");
+	regmap = dev_get_regmap(pdev->dev.parent, NULL);
+	if (!regmap) {
+		dev_err(&pdev->dev, "Couldn't get CDC SPMI parent's regmap\n");
 		return -ENXIO;
 	}
 
@@ -5972,14 +5977,15 @@ static int msm8x16_wcd_spmi_resume(struct spmi_device *spmi)
 	return 0;
 }
 
-static int msm8x16_wcd_spmi_suspend(struct spmi_device *spmi,
+static int msm8x16_wcd_spmi_suspend(struct platform_device *pdev,
 				    pm_message_t pmesg)
 {
 	struct resource *wcd_resource;
+	struct regmap *regmap;
 
-	wcd_resource = spmi_get_resource(spmi, NULL, IORESOURCE_MEM, 0);
-	if (!wcd_resource) {
-		dev_err(&spmi->dev, "Unable to get CDC SPMI resource\n");
+	regmap = dev_get_regmap(pdev->dev.parent, NULL);
+	if (!regmap) {
+		dev_err(&pdev->dev, "Couldn't get CDC SPMI parent's regmap\n");
 		return -ENXIO;
 	}
 
@@ -5989,7 +5995,7 @@ static int msm8x16_wcd_spmi_suspend(struct spmi_device *spmi,
 }
 #endif
 
-static struct spmi_device_id msm8x16_wcd_spmi_id_table[] = {
+static struct platform_device_id msm8x16_wcd_spmi_id_table[] = {
 	{"wcd-spmi", MSM8X16_WCD_SPMI_DIGITAL},
 	{"wcd-spmi", MSM8X16_WCD_SPMI_ANALOG},
 	{}
@@ -6000,7 +6006,7 @@ static struct of_device_id msm8x16_wcd_spmi_of_match[] = {
 	{ },
 };
 
-static struct spmi_driver wcd_spmi_driver = {
+static struct platform_driver wcd_spmi_driver = {
 	.driver                 = {
 		.owner          = THIS_MODULE,
 		.name           = "wcd-spmi-core",
@@ -6017,14 +6023,14 @@ static struct spmi_driver wcd_spmi_driver = {
 
 static int __init msm8x16_wcd_codec_init(void)
 {
-	spmi_driver_register(&wcd_spmi_driver);
+	platform_driver_register(&wcd_spmi_driver);
 	return 0;
 }
 module_init(msm8x16_wcd_codec_init);
 
 static void __exit msm8x16_wcd_codec_exit(void)
 {
-	spmi_driver_unregister(&wcd_spmi_driver);
+	platform_driver_unregister(&wcd_spmi_driver);
 }
 module_exit(msm8x16_wcd_codec_exit);
 
