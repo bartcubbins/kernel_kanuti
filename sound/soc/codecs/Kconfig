@@ -759,17 +759,20 @@ config SND_SOC_WCD9XXX_V2
 	tristate
 	default y if SND_SOC_WCD9335=y
 
+config SND_SOC_MSM8X16_WCD
+	tristate
+
 config SND_SOC_WCD_CPE
 	tristate
 	default y if SND_SOC_WCD9330=y || SND_SOC_WCD9335=y
 
 config AUDIO_EXT_CLK
 	tristate
-	default y if SND_SOC_WCD9335=y || SND_SOC_WCD9330=y || SND_SOC_SDM660_CDC=y
+	default y if SND_SOC_WCD9335=y || SND_SOC_WCD9330=y || SND_SOC_MSM8X16_WCD=y || SND_SOC_SDM660_CDC=y
 
 config SND_SOC_WCD_MBHC
 	tristate
-	default y if (SND_SOC_MSM8909_WCD=y || SND_SOC_SDM660_CDC=y || SND_SOC_WCD9335=y) && SND_SOC_MDMCALIFORNIUM!=y
+	default y if (SND_SOC_MSM8909_WCD=y || SND_SOC_MSM8X16_WCD=y || SND_SOC_SDM660_CDC=y || SND_SOC_WCD9335=y) && SND_SOC_MDMCALIFORNIUM!=y
 
 config SND_SOC_WCD_DSP_MGR
 	tristate
