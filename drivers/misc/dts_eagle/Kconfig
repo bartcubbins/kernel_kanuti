@@ -1,8 +1,0 @@
-config DTS_EAGLE
-	tristate "DTS Eagle driver"
-	depends on ARM
-	default y if ARM
-	help
-	  Eagle is a DTS pre/post processing
-	  package that includes HeadphoneX. The configuration
-	  includes sending tuning parameters of various modules.

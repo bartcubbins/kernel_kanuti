@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -30,19 +30,18 @@ static struct ion_client *ion_client;
 static struct ion_handle *ion_handle;
 static struct param_outband po;
 static atomic_t ref_cnt;
-static int adm_port_index;
 #define ION_MEM_SIZE	(8 * 1024)
 
 static int set_port_id(int port_id, int copp_idx)
 {
-	adm_port_index = adm_validate_and_get_port_index(port_id);
-	if (adm_port_index < 0) {
-		pr_err("%s: Invalid port idx %d port_id %#x\n", __func__, adm_port_index,
+	int index = adm_validate_and_get_port_index(port_id);
+	if (index < 0) {
+		pr_err("%s: Invalid port idx %d port_id %#x\n", __func__, index,
 			port_id);
 		return -EINVAL;
 	}
-	srs_port_id[adm_port_index] = port_id;
-	srs_copp_idx[adm_port_index] = copp_idx;
+	srs_port_id[index] = port_id;
+	srs_copp_idx[index] = copp_idx;
 	return 0;
 }
 
@@ -140,7 +139,46 @@ static int msm_dts_srs_trumedia_control_set(struct snd_kcontrol *kcontrol,
 
 	pr_debug("SRS control normal called\n");
 	msm_pcm_routing_acquire_lock();
-	port_id = srs_port_id[adm_port_index];
+	port_id = SLIMBUS_0_RX;
+	ret = msm_dts_srs_trumedia_control_set_(port_id, kcontrol, ucontrol);
+	msm_pcm_routing_release_lock();
+	return ret;
+}
+
+static int msm_dts_srs_trumedia_control_i2s_set(struct snd_kcontrol *kcontrol,
+					  struct snd_ctl_elem_value *ucontrol)
+{
+	int ret, port_id;
+
+	pr_debug("SRS control I2S called\n");
+	msm_pcm_routing_acquire_lock();
+	port_id = PRIMARY_I2S_RX;
+	ret = msm_dts_srs_trumedia_control_set_(port_id, kcontrol, ucontrol);
+	msm_pcm_routing_release_lock();
+	return ret;
+}
+
+static int msm_dts_srs_trumedia_control_mi2s_set(struct snd_kcontrol *kcontrol,
+					  struct snd_ctl_elem_value *ucontrol)
+{
+	int ret, port_id;
+
+	pr_debug("SRS control MI2S called\n");
+	msm_pcm_routing_acquire_lock();
+	port_id = AFE_PORT_ID_PRIMARY_MI2S_RX;
+	ret = msm_dts_srs_trumedia_control_set_(port_id, kcontrol, ucontrol);
+	msm_pcm_routing_release_lock();
+	return ret;
+}
+
+static int msm_dts_srs_trumedia_control_hdmi_set(struct snd_kcontrol *kcontrol,
+					   struct snd_ctl_elem_value *ucontrol)
+{
+	int ret, port_id;
+
+	pr_debug("SRS control HDMI called\n");
+	msm_pcm_routing_acquire_lock();
+	port_id = HDMI_RX;
 	ret = msm_dts_srs_trumedia_control_set_(port_id, kcontrol, ucontrol);
 	msm_pcm_routing_release_lock();
 	return ret;
@@ -166,11 +204,84 @@ static const struct snd_kcontrol_new lpa_srs_trumedia_controls[] = {
 	}
 };
 
+static const struct snd_kcontrol_new lpa_srs_trumedia_controls_hdmi[] = {
+	{.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
+	.name = "SRS TruMedia HDMI",
+	.access = SNDRV_CTL_ELEM_ACCESS_TLV_READ |
+			SNDRV_CTL_ELEM_ACCESS_READWRITE,
+	.info = snd_soc_info_volsw,
+	.get = msm_dts_srs_trumedia_control_get,
+	.put = msm_dts_srs_trumedia_control_hdmi_set,
+	.private_value = ((unsigned long)&(struct soc_mixer_control)
+	{.reg = SND_SOC_NOPM,
+	.rreg = SND_SOC_NOPM,
+	.shift = 0,
+	.rshift = 0,
+	.max = 0xFFFFFFFF,
+	.platform_max = 0xFFFFFFFF,
+	.invert = 0
+	})
+	}
+};
+
+static const struct snd_kcontrol_new lpa_srs_trumedia_controls_i2s[] = {
+	{.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
+	.name = "SRS TruMedia I2S",
+	.access = SNDRV_CTL_ELEM_ACCESS_TLV_READ |
+		SNDRV_CTL_ELEM_ACCESS_READWRITE,
+	.info = snd_soc_info_volsw,
+	.get = msm_dts_srs_trumedia_control_get,
+	.put = msm_dts_srs_trumedia_control_i2s_set,
+	.private_value = ((unsigned long)&(struct soc_mixer_control)
+	{.reg = SND_SOC_NOPM,
+	.rreg = SND_SOC_NOPM,
+	.shift = 0,
+	.rshift = 0,
+	.max = 0xFFFFFFFF,
+	.platform_max = 0xFFFFFFFF,
+	.invert = 0
+	})
+	}
+};
+
+static const struct snd_kcontrol_new lpa_srs_trumedia_controls_mi2s[] = {
+	{
+		.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
+		.name = "SRS TruMedia MI2S",
+		.access = SNDRV_CTL_ELEM_ACCESS_TLV_READ |
+			SNDRV_CTL_ELEM_ACCESS_READWRITE,
+		.info = snd_soc_info_volsw,
+		.get = msm_dts_srs_trumedia_control_get,
+		.put = msm_dts_srs_trumedia_control_mi2s_set,
+		.private_value = ((unsigned long)&(struct soc_mixer_control)
+		{
+			.reg = SND_SOC_NOPM,
+			.rreg = SND_SOC_NOPM,
+			.shift = 0,
+			.rshift = 0,
+			.max = 0xFFFFFFFF,
+			.platform_max = 0xFFFFFFFF,
+			.invert = 0
+		})
+	}
+};
+
 void msm_dts_srs_tm_add_controls(struct snd_soc_platform *platform)
 {
 	snd_soc_add_platform_controls(platform,
 				lpa_srs_trumedia_controls,
 			ARRAY_SIZE(lpa_srs_trumedia_controls));
+
+	snd_soc_add_platform_controls(platform,
+				lpa_srs_trumedia_controls_hdmi,
+			ARRAY_SIZE(lpa_srs_trumedia_controls_hdmi));
+
+	snd_soc_add_platform_controls(platform,
+				lpa_srs_trumedia_controls_i2s,
+			ARRAY_SIZE(lpa_srs_trumedia_controls_i2s));
+	snd_soc_add_platform_controls(platform,
+				lpa_srs_trumedia_controls_mi2s,
+			ARRAY_SIZE(lpa_srs_trumedia_controls_mi2s));
 }
 
 static int reg_ion_mem(void)
