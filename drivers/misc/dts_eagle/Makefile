@@ -2,7 +2,7 @@
 
 #PWD := $(shell pwd)
 
-obj-$(CONFIG_DTS_EAGLE) += dts_eagle_drv.o
+obj-y += dts_eagle_drv.o
 #build:
 #   make -C $(KERNELSRC) M=$(PWD) modules
 #clean:

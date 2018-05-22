@@ -376,7 +376,6 @@ config SND_SOC_MSM8X10_WCD
 
 config SND_SOC_MSM8X16_WCD
 	tristate
-	default y if DTS_EAGLE=y
 
 config SND_SOC_WCD_CPE
 	tristate
