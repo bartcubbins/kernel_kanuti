@@ -502,13 +502,13 @@ static void msm8x16_wcd_compute_impedance(struct snd_soc_codec *codec, s16 l,
 	*zr = rr;
 }
 
-#if 0
 static struct firmware_cal *msm8x16_wcd_get_hwdep_fw_cal(
-		struct snd_soc_codec *codec,
+		struct wcd_mbhc *mbhc,
 		enum wcd_cal_type type)
 {
 	struct msm8x16_wcd_priv *msm8x16_wcd;
 	struct firmware_cal *hwdep_cal;
+	struct snd_soc_codec *codec = mbhc->codec;
 
 	if (!codec) {
 		pr_err("%s: NULL codec pointer\n", __func__);
@@ -523,7 +523,6 @@ static struct firmware_cal *msm8x16_wcd_get_hwdep_fw_cal(
 	}
 	return hwdep_cal;
 }
-#endif
 
 static void wcd9xxx_spmi_irq_control(struct snd_soc_codec *codec,
 				     int irq, bool enable)
@@ -978,7 +977,7 @@ static const struct wcd_mbhc_cb mbhc_cb = {
 	.compute_impedance = msm8x16_wcd_mbhc_calc_impedance,
 	.set_micbias_value = msm8x16_wcd_set_micb_v,
 	.set_auto_zeroing = msm8x16_wcd_set_auto_zeroing,
-	//.get_hwdep_fw_cal = msm8x16_wcd_get_hwdep_fw_cal,
+	.get_hwdep_fw_cal = msm8x16_wcd_get_hwdep_fw_cal,
 	.set_cap_mode = msm8x16_wcd_configure_cap,
 	//.register_notifier = msm8x16_register_notifier,
 	.request_irq = msm8x16_wcd_request_irq,
