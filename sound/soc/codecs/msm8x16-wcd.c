@@ -941,12 +941,11 @@ skip_imped_detect:
 	pr_debug("%s: Impedance detection completed\n", __func__);
 }
 
-#if 0
-static int msm8x16_register_notifier(struct snd_soc_codec *codec,
+static int msm8x16_register_notifier(struct wcd_mbhc *mbhc,
 				     struct notifier_block *nblock,
 				     bool enable)
 {
-	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(codec);
+	struct msm8x16_wcd_priv *msm8x16_wcd = snd_soc_codec_get_drvdata(mbhc->codec);
 
 	if (enable)
 		return blocking_notifier_chain_register(&msm8x16_wcd->notifier,
@@ -956,7 +955,6 @@ static int msm8x16_register_notifier(struct snd_soc_codec *codec,
 						&msm8x16_wcd->notifier,
 						nblock);
 }
-#endif
 
 static int msm8x16_wcd_request_irq(struct snd_soc_codec *codec,
 				   int irq, irq_handler_t handler,
@@ -979,7 +977,7 @@ static const struct wcd_mbhc_cb mbhc_cb = {
 	.set_auto_zeroing = msm8x16_wcd_set_auto_zeroing,
 	.get_hwdep_fw_cal = msm8x16_wcd_get_hwdep_fw_cal,
 	.set_cap_mode = msm8x16_wcd_configure_cap,
-	//.register_notifier = msm8x16_register_notifier,
+	.register_notifier = msm8x16_register_notifier,
 	.request_irq = msm8x16_wcd_request_irq,
 	.irq_control = wcd9xxx_spmi_irq_control,
 	.free_irq = msm8x16_wcd_free_irq,
