@@ -363,7 +363,7 @@ struct kgsl_context {
 	struct kgsl_device *device;
 	unsigned int reset_status;
 	bool wait_on_invalid_ts;
-	struct sync_timeline *timeline;
+	struct kgsl_sync_timeline *ktimeline;
 	struct kgsl_event_group events;
 	unsigned int pagefault_ts;
 	unsigned int flags;
