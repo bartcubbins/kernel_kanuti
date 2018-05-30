@@ -30,6 +30,8 @@
 #define MT_PARAM_FUZZ(md, sig_ost) PARAM_FUZZ(md->pdata->frmwrk, sig_ost)
 #define MT_PARAM_FLAT(md, sig_ost) PARAM_FLAT(md->pdata->frmwrk, sig_ost)
 
+#define INPUT_PROP_NO_DUMMY_RELEASE	0x06	/* no dummy event */
+
 static void cyttsp5_mt_lift_all(struct cyttsp5_mt_data *md)
 {
 	int max = md->si->tch_abs[CY_TCH_T].max;
