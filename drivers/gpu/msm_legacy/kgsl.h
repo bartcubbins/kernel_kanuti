@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2016, 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -140,6 +140,8 @@ struct kgsl_memdesc_ops {
 #define KGSL_MEMDESC_PRIVILEGED BIT(6)
 /* The memdesc is TZ locked content protection */
 #define KGSL_MEMDESC_TZ_LOCKED BIT(7)
+/* The memdesc is allocated through contiguous memory */
+#define KGSL_MEMDESC_CONTIG BIT(8)
 
 /**
  * struct kgsl_memdesc - GPU memory object descriptor
