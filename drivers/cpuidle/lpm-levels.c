@@ -1772,7 +1772,7 @@ late_initcall(lpm_levels_module_init);
 void lpm_cpu_hotplug_enter(unsigned int cpu)
 {
 	enum msm_pm_sleep_mode mode = MSM_PM_SLEEP_MODE_NR;
-	struct lpm_cluster *cluster = per_cpu(cpu_cluster, cpu);
+	struct lpm_cluster *cluster = per_cpu(cpu_lpm, cpu)->parent;
 	int i;
 	int idx = -1;
 
@@ -1799,7 +1799,7 @@ void lpm_cpu_hotplug_enter(unsigned int cpu)
 		struct lpm_cpu *lpm_cpu;
 		uint32_t ss_pwr = ~0U;
 
-		lpm_cpu = cluster->cpu;
+		lpm_cpu = per_cpu(cpu_lpm, cpu);
 		for (i = 0; i < lpm_cpu->nlevels; i++) {
 			if (ss_pwr < lpm_cpu->levels[i].pwr.ss_power)
 				continue;

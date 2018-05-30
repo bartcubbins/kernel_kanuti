@@ -29,6 +29,7 @@ struct power_params {
 
 struct lpm_cpu_level {
 	const char *name;
+	enum msm_pm_sleep_mode mode;
 	bool use_bc_timer;
 	struct power_params pwr;
 	unsigned int psci_id;

@@ -21,6 +21,19 @@
 #include <linux/cpuidle.h>
 #include <dt-bindings/msm/pm.h>
 
+enum msm_pm_sleep_mode {
+	MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT,
+	MSM_PM_SLEEP_MODE_RETENTION,
+	MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE,
+	MSM_PM_SLEEP_MODE_POWER_COLLAPSE,
+	MSM_PM_SLEEP_MODE_FASTPC,
+	MSM_PM_SLEEP_MODE_POWER_COLLAPSE_SUSPEND,
+	MSM_PM_SLEEP_MODE_NR,
+	MSM_PM_SLEEP_MODE_NOT_SELECTED,
+};
+
+#define MSM_PM_MODE(cpu, mode_nr)  ((cpu) * MSM_PM_SLEEP_MODE_NR + (mode_nr))
+
 struct latency_level {
 	int affinity_level;
 	int reset_level;
