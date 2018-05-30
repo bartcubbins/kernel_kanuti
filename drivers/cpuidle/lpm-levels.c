@@ -30,6 +30,7 @@
 #include <linux/pm_qos.h>
 #include <linux/of_platform.h>
 #include <linux/smp.h>
+#include <linux/remote_spinlock.h>
 #include <linux/dma-mapping.h>
 #include <linux/moduleparam.h>
 #include <linux/sched.h>
@@ -58,6 +59,8 @@
 #define PSCI_AFFINITY_LEVEL(lvl) ((lvl & 0x3) << 24)
 #define BIAS_HYST (bias_hyst * NSEC_PER_MSEC)
 
+static remote_spinlock_t scm_handoff_lock;
+
 enum {
 	MSM_LPM_LVL_DBG_SUSPEND_LIMITS = BIT(0),
 	MSM_LPM_LVL_DBG_IDLE_LIMITS = BIT(1),
@@ -68,6 +71,7 @@ enum debug_event {
 	CPU_EXIT,
 	CLUSTER_ENTER,
 	CLUSTER_EXIT,
+	PRE_PC_CB,
 	CPU_HP_STARTING,
 	CPU_HP_DYING,
 };
@@ -1760,6 +1764,57 @@ fail:
 	return rc;
 }
 late_initcall(lpm_levels_module_init);
+
+enum msm_pm_l2_scm_flag lpm_cpu_pre_pc_cb(unsigned int cpu)
+{
+	struct lpm_cluster *cluster = per_cpu(cpu_lpm, cpu)->parent;
+	enum msm_pm_l2_scm_flag retflag = MSM_SCM_L2_ON;
+
+	/*
+	 * No need to acquire the lock if probe isn't completed yet
+	 * In the event of the hotplug happening before lpm probe, we want to
+	 * flush the cache to make sure that L2 is flushed. In particular, this
+	 * could cause incoherencies for a cluster architecture. This wouldn't
+	 * affect the idle case as the idle driver wouldn't be registered
+	 * before the probe function
+	 */
+	if (!cluster)
+		return MSM_SCM_L2_OFF;
+
+	/*
+	 * Assumes L2 only. What/How parameters gets passed into TZ will
+	 * determine how this function reports this info back in msm-pm.c
+	 */
+	spin_lock(&cluster->sync_lock);
+
+	if (!cluster->lpm_dev) {
+		retflag = MSM_SCM_L2_OFF;
+		goto unlock_and_return;
+	}
+
+	if (!cpumask_equal(&cluster->num_children_in_sync,
+						&cluster->child_cpus))
+		goto unlock_and_return;
+
+	if (cluster->lpm_dev)
+		retflag = cluster->lpm_dev->tz_flag;
+	/*
+	 * The scm_handoff_lock will be release by the secure monitor.
+	 * It is used to serialize power-collapses from this point on,
+	 * so that both Linux and the secure context have a consistent
+	 * view regarding the number of running cpus (cpu_count).
+	 *
+	 * It must be acquired before releasing the cluster lock.
+	 */
+unlock_and_return:
+	update_debug_pc_event(PRE_PC_CB, retflag, 0xdeadbeef, 0xdeadbeef,
+			0xdeadbeef);
+	//trace_pre_pc_cb(retflag);
+	remote_spin_lock_rlock_id(&scm_handoff_lock,
+				  REMOTE_SPINLOCK_TID_START + cpu);
+	spin_unlock(&cluster->sync_lock);
+	return retflag;
+}
 
 #if defined(CONFIG_MSM_PM) && defined(CONFIG_ARCH_MSM8916)
 /**

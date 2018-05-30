@@ -75,6 +75,10 @@ struct lpm_cluster_level {
 	int reset_level;
 };
 
+struct low_power_ops {
+	enum msm_pm_l2_scm_flag tz_flag;
+};
+
 struct cluster_history {
 	uint32_t resi[MAXSAMPLES];
 	int mode[MAXSAMPLES];
@@ -93,6 +97,7 @@ struct lpm_cluster {
 	struct list_head child;
 	const char *cluster_name;
 	unsigned long aff_level; /* Affinity level of the node */
+	struct low_power_ops *lpm_dev;
 	struct lpm_cluster_level levels[NR_LPM_LEVELS];
 	int nlevels;
 	int min_child_level;
