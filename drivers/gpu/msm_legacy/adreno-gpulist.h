@@ -20,7 +20,6 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.major = 0,
 		.minor = 6,
 		.patchid = 0x00,
-		.features = ADRENO_SOFT_FAULT_DETECT,
 		.pm4fw_name = "a300_pm4.fw",
 		.pfpfw_name = "a300_pfp.fw",
 		.gpudev = &adreno_a3xx_gpudev,
@@ -33,7 +32,6 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.major = 0,
 		.minor = 6,
 		.patchid = 0x20,
-		.features = ADRENO_SOFT_FAULT_DETECT,
 		.pm4fw_name = "a300_pm4.fw",
 		.pfpfw_name = "a300_pfp.fw",
 		.gpudev = &adreno_a3xx_gpudev,
@@ -46,7 +44,6 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.major = 0,
 		.minor = 4,
 		.patchid = 0x00,
-		.features = ADRENO_SOFT_FAULT_DETECT,
 		.pm4fw_name = "a300_pm4.fw",
 		.pfpfw_name = "a300_pfp.fw",
 		.gpudev = &adreno_a3xx_gpudev,
@@ -59,7 +56,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.major = 0,
 		.minor = 5,
 		.patchid = ANY_ID,
-		.features = ADRENO_SOFT_FAULT_DETECT,
+		.features = 0,
 		.pm4fw_name = "a420_pm4.fw",
 		.pfpfw_name = "a420_pfp.fw",
 		.gpudev = &adreno_a4xx_gpudev,
@@ -73,7 +70,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.minor = 0,
 		.patchid = ANY_ID,
 		.features = ADRENO_USES_OCMEM | ADRENO_WARM_START |
-				ADRENO_USE_BOOTSTRAP | ADRENO_SOFT_FAULT_DETECT,
+					ADRENO_USE_BOOTSTRAP,
 		.pm4fw_name = "a420_pm4.fw",
 		.pfpfw_name = "a420_pfp.fw",
 		.gpudev = &adreno_a4xx_gpudev,
@@ -95,8 +92,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.patchid = ANY_ID,
 		.features = ADRENO_USES_OCMEM  | ADRENO_WARM_START |
 			ADRENO_USE_BOOTSTRAP | ADRENO_SPTP_PC | ADRENO_PPD |
-			ADRENO_CONTENT_PROTECTION | ADRENO_PREEMPTION |
-			ADRENO_SOFT_FAULT_DETECT,
+			ADRENO_CONTENT_PROTECTION | ADRENO_PREEMPTION,
 		.pm4fw_name = "a420_pm4.fw",
 		.pfpfw_name = "a420_pfp.fw",
 		.gpudev = &adreno_a4xx_gpudev,
@@ -120,8 +116,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.minor = 8,
 		.patchid = ANY_ID,
 		.features = ADRENO_USES_OCMEM  | ADRENO_WARM_START |
-			ADRENO_USE_BOOTSTRAP | ADRENO_SPTP_PC |
-			ADRENO_SOFT_FAULT_DETECT,
+			ADRENO_USE_BOOTSTRAP | ADRENO_SPTP_PC,
 		.pm4fw_name = "a420_pm4.fw",
 		.pfpfw_name = "a420_pfp.fw",
 		.gpudev = &adreno_a4xx_gpudev,

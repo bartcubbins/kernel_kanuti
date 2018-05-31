@@ -111,8 +111,6 @@
 #define ADRENO_LM BIT(8)
 /* The core uses 64 bit GPU addresses */
 #define ADRENO_64BIT BIT(9)
-/* The core has soft fault detection available */
-#define ADRENO_SOFT_FAULT_DETECT BIT(11)
 
 /*
  * Adreno GPU quirks - control bits for various workarounds
