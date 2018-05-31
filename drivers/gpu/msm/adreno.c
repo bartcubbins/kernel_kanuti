@@ -182,7 +182,7 @@ unsigned int adreno_get_rptr(struct adreno_ringbuffer *rb)
 	struct adreno_device *adreno_dev = ADRENO_RB_DEVICE(rb);
 	unsigned int rptr = 0;
 
-	if (adreno_is_a3xx(adreno_dev))
+	if (adreno_is_a3xx(adreno_dev) || adreno_is_a4xx(adreno_dev))
 		adreno_readreg(adreno_dev, ADRENO_REG_CP_RB_RPTR,
 				&rptr);
 	else {
@@ -2357,8 +2357,8 @@ static void adreno_read(struct kgsl_device *device, void __iomem *base,
 	BUG_ON(offsetwords*sizeof(uint32_t) >= mem_len);
 	reg = (base + (offsetwords << 2));
 
-	if (!in_interrupt())
-		kgsl_pre_hwaccess(device);
+	//if (!in_interrupt())
+	//	kgsl_pre_hwaccess(device);
 
 	/*ensure this read finishes before the next one.
 	 * i.e. act like normal readl() */
@@ -2399,8 +2399,8 @@ static void adreno_regwrite(struct kgsl_device *device,
 
 	BUG_ON(offsetwords*sizeof(uint32_t) >= device->reg_len);
 
-	if (!in_interrupt())
-		kgsl_pre_hwaccess(device);
+	//if (!in_interrupt())
+	//	kgsl_pre_hwaccess(device);
 
 	trace_kgsl_regwrite(device, offsetwords, value);
 
