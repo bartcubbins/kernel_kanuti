@@ -1,18 +1,3 @@
-choice
-	prompt "Qualcomm Adreno proprietary stack version"
-
-config QCOM_KGSL_CURRENT
-	bool "Use regular KGSL stack"
-
-config QCOM_KGSL_LEGACY
-	bool "Use legacy KGSL stack"
-endchoice
-
-source drivers/gpu/msm_legacy/Kconfig
-
-menu "Qualcomm Adreno proprietary stack"
-	depends on QCOM_KGSL_CURRENT
-
 config QCOM_KGSL
 	tristate "Qualcomm 3D Graphics driver"
 	default n
@@ -60,5 +45,3 @@ config QCOM_ADRENO_DEFAULT_GOVERNOR
 config QCOM_KGSL_IOMMU
 	bool
 	default y if QCOM_KGSL && (MSM_IOMMU || ARM_SMMU)
-
-endmenu
