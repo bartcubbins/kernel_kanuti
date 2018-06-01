@@ -2399,8 +2399,8 @@ static void adreno_regwrite(struct kgsl_device *device,
 
 	BUG_ON(offsetwords*sizeof(uint32_t) >= device->reg_len);
 
-	//if (!in_interrupt())
-	//	kgsl_pre_hwaccess(device);
+	if (!in_interrupt())
+		kgsl_pre_hwaccess(device);
 
 	trace_kgsl_regwrite(device, offsetwords, value);
 
