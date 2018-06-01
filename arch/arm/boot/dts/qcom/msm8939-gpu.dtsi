@@ -175,7 +175,7 @@
 		};
 	};
 
-	kgsl_msm_iommu: qcom,kgsl-iommu@1f00000 {
+	kgsl_msm_iommu: qcom,kgsl-iommu {
 		compatible = "qcom,kgsl-smmu-v2";
 		reg = <0x1f00000 0x10000>;
 
