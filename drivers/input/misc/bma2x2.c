@@ -1312,8 +1312,8 @@
 
 /*! Bosch sensor unknown place*/
 #define BOSCH_SENSOR_PLACE_UNKNOWN (-1)
-/*! Bosch sensor remapping table size P0~P7*/
-#define MAX_AXIS_REMAP_TAB_SZ 8
+/*! Bosch sensor remapping table size P0~P8*/
+#define MAX_AXIS_REMAP_TAB_SZ 9
 #define BOSCH_SENSOR_PLANE	0
 #define BOSCH_SENSOR_UP	1
 #define BOSCH_SENSOR_DOWN	2
@@ -1686,6 +1686,7 @@ bst_axis_remap_tab_dft[MAX_AXIS_REMAP_TAB_SZ] = {
 	{  1,    0,    2,    -1,     -1,     -1 }, /* P5 */
 	{  0,    1,    2,     1,     -1,     -1 }, /* P6 */
 	{  1,    0,    2,     1,      1,     -1 }, /* P7 */
+	{  2,    1,    0,     1,      1,     -1 }, /* P8 */
 };
 
 static const int bosch_sensor_range_map[MAX_RANGE_MAP] = {
