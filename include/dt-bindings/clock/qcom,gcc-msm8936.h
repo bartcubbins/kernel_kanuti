@@ -65,4 +65,20 @@
 #define USB_FS_IC_CLK_SRC		42
 #define VCODEC0_CLK_SRC			43
 
+/* Voteable Clocks */
+#define GCC_BLSP1_AHB_CLK		44
+#define GCC_BOOT_ROM_AHB_CLK		45
+#define GCC_PRNG_AHB_CLK		46
+#define GCC_APSS_TCU_CLK		47
+#define GCC_GFX_TBU_CLK			48
+#define GCC_GFX_TCU_CLK			49
+#define GCC_GTCU_AHB_CLK		50
+#define GCC_JPEG_TBU_CLK		51
+#define GCC_MDP_TBU_CLK			52
+#define GCC_SMMU_CFG_CLK		53
+#define GCC_VENUS_TBU_CLK		54
+#define GCC_VFE_TBU_CLK			55
+#define GCC_TBU_CPP_CLK			56
+#define GCC_MDP_RT_TBU_CLK		57
+
 #endif
