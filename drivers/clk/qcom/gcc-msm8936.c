@@ -39,9 +39,11 @@ enum {
 	P_GPLL0,
 	P_GPLL0_AUX,
 	P_GPLL1,
+	P_GPLL1_AUX,
 	P_GPLL2,
 	P_GPLL2_AUX,
 	P_DSI0_PHYPLL_DSI,
+	P_SLEEP_CLK,
 };
 
 static const struct parent_map gcc_xo_gpll0_map[] = {
@@ -91,6 +93,30 @@ static const char * const gcc_xo_gpll0a_gpll1_gpll2a[] = {
 	"gpll0_vote",
 	"gpll1_vote",
 	"gpll2_vote",
+};
+
+static const struct parent_map gcc_xo_gpll0a_map[] = {
+	{ P_XO, 0 },
+	{ P_GPLL0_AUX, 2 },
+};
+
+static const char * const gcc_xo_gpll0a[] = {
+	"xo",
+	"gpll0_vote",
+};
+
+static const struct parent_map gcc_xo_gpll0_gpll1a_sleep_map[] = {
+	{ P_XO, 0 },
+	{ P_GPLL0, 1 },
+	{ P_GPLL1_AUX, 2 },
+	{ P_SLEEP_CLK, 6 },
+};
+
+static const char * const gcc_xo_gpll0_gpll1a_sleep[] = {
+	"xo",
+	"gpll0_vote",
+	"gpll1_vote",
+	"sleep_clk",
 };
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
@@ -494,6 +520,82 @@ static struct clk_rcg2 blsp1_uart2_apps_clk_src = {
 	},
 };
 
+static const struct freq_tbl ftbl_gcc_camss_cci_clk[] = {
+	F(19200000, P_XO, 1, 0, 0),
+	F(37500000, P_GPLL0_AUX, 1, 3, 64),
+	{ }
+};
+
+static struct clk_rcg2 cci_clk_src = {
+	.cmd_rcgr = 0x51000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0a_map,
+	.freq_tbl = ftbl_gcc_camss_cci_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "cci_clk_src",
+		.parent_names = gcc_xo_gpll0a,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_camss_gp0_1_clk[] = {
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 camss_gp0_clk_src = {
+	.cmd_rcgr = 0x54000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_camss_gp0_1_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "camss_gp0_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 4,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 camss_gp1_clk_src = {
+	.cmd_rcgr = 0x55000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_camss_gp0_1_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "camss_gp1_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 4,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_camss_jpeg0_clk[] = {
+	F(133330000, P_GPLL0, 6, 0,	0),
+	F(266670000, P_GPLL0, 3, 0,	0),
+	F(320000000, P_GPLL0, 2.5, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 jpeg0_clk_src = {
+	.cmd_rcgr = 0x57000,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_map,
+	.freq_tbl = ftbl_gcc_camss_jpeg0_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "jpeg0_clk_src",
+		.parent_names = gcc_xo_gpll0,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+
+
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
@@ -531,6 +633,11 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[BLSP1_QUP6_I2C_APPS_CLK] = &blsp1_qup6_i2c_apps_clk_src.clkr,
 	[BLSP1_UART1_APPS_CLK] = &blsp1_uart1_apps_clk_src.clkr,
 	[BLSP1_UART2_APPS_CLK] = &blsp1_uart2_apps_clk_src.clkr,
+
+	[CCI_CLK_SRC] = &cci_clk_src.clkr,
+	[CAMSS_GP0_CLK_SRC] = &camss_gp0_clk_src.clkr,
+	[CAMSS_GP1_CLK_SRC] = &camss_gp1_clk_src.clkr,
+	[JPEG0_CLK_SRC] = &jpeg0_clk_src.clkr,
 };
 
 static const struct qcom_cc_desc gcc_msm8936_desc = {

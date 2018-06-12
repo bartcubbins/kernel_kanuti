@@ -39,4 +39,9 @@
 #define BLSP1_UART1_APPS_CLK		20
 #define BLSP1_UART2_APPS_CLK		21
 
+#define CCI_CLK_SRC			22
+#define CAMSS_GP0_CLK_SRC		23
+#define CAMSS_GP1_CLK_SRC		24
+#define JPEG0_CLK_SRC			25
+
 #endif
