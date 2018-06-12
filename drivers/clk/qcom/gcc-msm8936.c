@@ -594,6 +594,55 @@ static struct clk_rcg2 jpeg0_clk_src = {
 	},
 };
 
+static const struct freq_tbl ftbl_gcc_camss_mclk0_1_2_clk[] = {
+	F(23880000, P_GPLL0, 1, 1, 45),
+	F(66670000, P_GPLL0, 12, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 mclk0_clk_src = {
+	.cmd_rcgr = 0x52000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_camss_mclk0_1_2_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "mclk0_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 4,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 mclk1_clk_src = {
+	.cmd_rcgr = 0x53000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_camss_mclk0_1_2_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "mclk1_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 4,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 mclk2_clk_src = {
+        .cmd_rcgr = 0x5c000,
+        .mnd_width = 8,
+        .hid_width = 5,
+        .parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+        .freq_tbl = ftbl_gcc_camss_mclk0_1_2_clk,
+        .clkr.hw.init = &(struct clk_init_data){
+                .name = "mclk2_clk_src",
+                .parent_names = gcc_xo_gpll0_gpll1a_sleep,
+                .num_parents = 4,
+                .ops = &clk_rcg2_ops,
+        },
+};
+
+
 
 
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
@@ -638,12 +687,16 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[CAMSS_GP0_CLK_SRC] = &camss_gp0_clk_src.clkr,
 	[CAMSS_GP1_CLK_SRC] = &camss_gp1_clk_src.clkr,
 	[JPEG0_CLK_SRC] = &jpeg0_clk_src.clkr,
+
+	[MCLK0_CLK_SRC] = &mclk0_clk_src.clkr,
+	[MCLK1_CLK_SRC] = &mclk1_clk_src.clkr,
+	[MCLK2_CLK_SRC] = &mclk2_clk_src.clkr,
 };
 
 static const struct qcom_cc_desc gcc_msm8936_desc = {
 	.config		= &gcc_msm8936_regmap_config,
 	.clks		= gcc_msm8936_clocks,
-//	.num_clks	= ARRAY_SIZE(gcc_msm8936_clocks),
+	.num_clks	= ARRAY_SIZE(gcc_msm8936_clocks),
 //	.resets         = gcc_msm8936_resets,
 //	.num_resets     = ARRAY_SIZE(gcc_msm8936_resets),
 //	.gdscs = gcc_msm8936_gdscs,

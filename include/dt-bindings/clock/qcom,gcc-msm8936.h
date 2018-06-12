@@ -44,4 +44,8 @@
 #define CAMSS_GP1_CLK_SRC		24
 #define JPEG0_CLK_SRC			25
 
+#define MCLK0_CLK_SRC			26
+#define MCLK1_CLK_SRC			27
+#define MCLK2_CLK_SRC			28
+
 #endif
