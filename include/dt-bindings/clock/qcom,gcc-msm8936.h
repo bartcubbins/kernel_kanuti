@@ -129,4 +129,14 @@
 #define GCC_CAMSS_VFE_AHB_CLK		101
 #define GCC_CAMSS_VFE_AXI_CLK		102
 
+#define GCC_OXILI_GMEM_CLK		103
+#define GCC_GP1_CLK			104
+#define GCC_GP2_CLK			105
+#define GCC_GP3_CLK			106
+#define GCC_MDSS_AHB_CLK		107
+#define GCC_MDSS_AXI_CLK		108
+#define GCC_MDSS_ESC0_CLK		109
+#define GCC_MDSS_MDP_CLK		110
+#define GCC_MDSS_VSYNC_CLK		111
+
 #endif
