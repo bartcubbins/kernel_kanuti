@@ -42,6 +42,7 @@ enum {
 	P_GPLL1_AUX,
 	P_GPLL2,
 	P_GPLL2_AUX,
+	P_DSI0_PHYPLL_BYTE,
 	P_DSI0_PHYPLL_DSI,
 	P_SLEEP_CLK,
 };
@@ -130,6 +131,18 @@ static const char * const gcc_xo_gpll0_gpll1a[] = {
 	"gpll0_vote",
 	"gpll1_vote",
 };
+
+static const struct parent_map gcc_xo_dsibyte_map[] = {
+	{ P_XO, 0, },
+	{ P_DSI0_PHYPLL_BYTE, 2 },
+};
+
+static const char * const gcc_xo_dsibyte[] = {
+	"xo",
+	"dsi0pllbyte",
+};
+
+
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
@@ -686,6 +699,212 @@ static struct clk_rcg2 csi1phytimer_clk_src = {
 	},
 };
 
+static const struct freq_tbl ftbl_gcc_camss_cpp_clk[] = {
+	F(160000000, P_GPLL0, 5, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	F(228570000, P_GPLL0, 3.5, 0, 0),
+	F(266670000, P_GPLL0, 3, 0, 0),
+	F(320000000, P_GPLL0, 2.5, 0, 0),
+	F(465000000, P_GPLL2, 2, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 cpp_clk_src = {
+	.cmd_rcgr = 0x58018,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll2_map,
+	.freq_tbl = ftbl_gcc_camss_cpp_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "cpp_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll2,
+		.num_parents = 3,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_gp1_3_clk[] = {
+	F(19200000, P_XO, 1, 0,	0),
+	{ }
+};
+
+static struct clk_rcg2 gp1_clk_src = {
+	.cmd_rcgr = 0x08004,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_gp1_3_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "gp1_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 3,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 gp2_clk_src = {
+	.cmd_rcgr = 0x09004,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_gp1_3_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "gp2_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 3,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 gp3_clk_src = {
+	.cmd_rcgr = 0x0a004,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
+	.freq_tbl = ftbl_gcc_gp1_3_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "gp3_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a_sleep,
+		.num_parents = 3,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_mdss_esc0_clk[] = {
+	F(19200000, P_XO, 1, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 esc0_clk_src = {
+	.cmd_rcgr = 0x4d05c,
+	.hid_width = 5,
+	.parent_map = gcc_xo_dsibyte_map,
+	.freq_tbl = ftbl_gcc_mdss_esc0_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "esc0_clk_src",
+		.parent_names = gcc_xo_dsibyte,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_mdss_vsync_clk[] = {
+	F(19200000, P_XO, 1, 0,	0),
+	{ }
+};
+
+static struct clk_rcg2 vsync_clk_src = {
+	.cmd_rcgr = 0x4d02c,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0a_map,
+	.freq_tbl = ftbl_gcc_mdss_vsync_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "vsync_clk_src",
+		.parent_names = gcc_xo_gpll0a,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_pdm2_clk[] = {
+	F(64000000, P_GPLL0, 12.5, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 pdm2_clk_src = {
+	.cmd_rcgr = 0x44010,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_map,
+	.freq_tbl = ftbl_gcc_pdm2_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "pdm2_clk_src",
+		.parent_names = gcc_xo_gpll0,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_sdcc1_2_apps_clk[] = {
+	F(144000, P_XO, 16, 3, 25),
+	F(400000, P_XO, 12, 1, 4),
+	F(20000000, P_GPLL0, 10, 1, 4),
+	F(25000000, P_GPLL0, 16, 1, 2),
+	F(50000000, P_GPLL0, 16, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(177770000, P_GPLL0, 4.5, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 sdcc1_apps_clk_src = {
+	.cmd_rcgr = 0x42004,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_map,
+	.freq_tbl = ftbl_gcc_sdcc1_2_apps_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "sdcc1_apps_clk_src",
+		.parent_names = gcc_xo_gpll0,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 sdcc2_apps_clk_src = {
+	.cmd_rcgr = 0x43004,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_map,
+	.freq_tbl = ftbl_gcc_sdcc1_2_apps_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "sdcc2_apps_clk_src",
+		.parent_names = gcc_xo_gpll0,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_usb_hs_system_clk[] = {
+	F(57140000, P_GPLL0, 14, 0, 0),
+	F(80000000, P_GPLL0, 10, 0, 0),
+	F( 100000000, P_GPLL0, 8, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 usb_hs_system_clk_src = {
+	.cmd_rcgr = 0x41010,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_map,
+	.freq_tbl = ftbl_gcc_usb_hs_system_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "usb_hs_system_clk_src",
+		.parent_names = gcc_xo_gpll0,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static const struct freq_tbl ftbl_gcc_venus0_vcodec0_clk[] = {
+	F(133330000, P_GPLL0, 6, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	F(266670000, P_GPLL0, 3, 0, 0),
+	{ }
+};
+
+static struct clk_rcg2 vcodec0_clk_src = {
+	.cmd_rcgr = 0x4C000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_map,
+	.freq_tbl = ftbl_gcc_venus0_vcodec0_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "vcodec0_clk_src",
+		.parent_names = gcc_xo_gpll0,
+		.num_parents = 2,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+
 
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
@@ -736,6 +955,20 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 
 	[CSI0PHYTIMER_CLK_SRC] = &csi0phytimer_clk_src.clkr,
 	[CSI1PHYTIMER_CLK_SRC] = &csi1phytimer_clk_src.clkr,
+
+	[CPP_CLK_SRC] = &cpp_clk_src.clkr,
+	[GP1_CLK_SRC] = &gp1_clk_src.clkr,
+	[GP2_CLK_SRC] = &gp2_clk_src.clkr,
+	[GP3_CLK_SRC] = &gp3_clk_src.clkr,
+	[ESC0_CLK_SRC] = &esc0_clk_src.clkr,
+	[VSYNC_CLK_SRC] = &vsync_clk_src.clkr,
+	[PDM2_CLK_SRC] = &pdm2_clk_src.clkr,
+	[SDCC1_APPS_CLK_SRC] = &sdcc1_apps_clk_src.clkr,
+	[SDCC2_APPS_CLK_SRC] = &sdcc2_apps_clk_src.clkr,
+	[USB_HS_SYSTEM_CLK_SRC] = &usb_hs_system_clk_src.clkr,
+	//[USB_FS_SYSTEM_CLK_SRC] = &usb_fs_system_clk_src.clkr,
+	//[USB_FS_IC_CLK_SRC] = &usb_fs_ic_clk_src.clkr,
+	[VCODEC0_CLK_SRC] = &vcodec0_clk_src.clkr,
 };
 
 static const struct qcom_cc_desc gcc_msm8936_desc = {

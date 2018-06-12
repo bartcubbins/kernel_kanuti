@@ -51,4 +51,18 @@
 #define CSI0PHYTIMER_CLK_SRC		29
 #define CSI1PHYTIMER_CLK_SRC		30
 
+#define CPP_CLK_SRC			31
+#define GP1_CLK_SRC			32
+#define GP2_CLK_SRC			33
+#define GP3_CLK_SRC			34
+#define ESC0_CLK_SRC			35
+#define VSYNC_CLK_SRC			36
+#define PDM2_CLK_SRC			37
+#define SDCC1_APPS_CLK_SRC		38
+#define SDCC2_APPS_CLK_SRC		39
+#define USB_HS_SYSTEM_CLK_SRC		40
+#define USB_FS_SYSTEM_CLK_SRC		41
+#define USB_FS_IC_CLK_SRC		42
+#define VCODEC0_CLK_SRC			43
+
 #endif
