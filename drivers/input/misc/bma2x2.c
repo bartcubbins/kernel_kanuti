@@ -67,7 +67,9 @@
 #define ISR_INFO(dev, fmt, arg...)
 #endif
 
+#ifndef CONFIG_ARCH_SONY_KANUTI
 #define BMA2X2_SENSOR_IDENTIFICATION_ENABLE
+#endif
 
 #define SENSOR_NAME                 "bma2x2-accel"
 #define ABSMIN                      -512
