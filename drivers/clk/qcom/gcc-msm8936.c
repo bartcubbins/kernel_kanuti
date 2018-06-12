@@ -119,6 +119,18 @@ static const char * const gcc_xo_gpll0_gpll1a_sleep[] = {
 	"sleep_clk",
 };
 
+static const struct parent_map gcc_xo_gpll0_gpll1a_map[] = {
+	{ P_XO, 0 },
+	{ P_GPLL0, 1 },
+	{ P_GPLL1_AUX, 2 },
+};
+
+static const char * const gcc_xo_gpll0_gpll1a[] = {
+	"xo",
+	"gpll0_vote",
+	"gpll1_vote",
+};
+
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
 static struct clk_pll gpll0 = {
@@ -642,7 +654,37 @@ static struct clk_rcg2 mclk2_clk_src = {
         },
 };
 
+static const struct freq_tbl ftbl_gcc_camss_csi0_1phytimer_clk[] = {
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	{ }
+};
 
+static struct clk_rcg2 csi0phytimer_clk_src = {
+	.cmd_rcgr = 0x4e000,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_map,
+	.freq_tbl = ftbl_gcc_camss_csi0_1phytimer_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "csi0phytimer_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a,
+		.num_parents = 3,
+		.ops = &clk_rcg2_ops,
+	},
+};
+
+static struct clk_rcg2 csi1phytimer_clk_src = {
+	.cmd_rcgr = 0x4f000,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0_gpll1a_map,
+	.freq_tbl = ftbl_gcc_camss_csi0_1phytimer_clk,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "csi1phytimer_clk_src",
+		.parent_names = gcc_xo_gpll0_gpll1a,
+		.num_parents = 3,
+		.ops = &clk_rcg2_ops,
+	},
+};
 
 
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
@@ -691,6 +733,9 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[MCLK0_CLK_SRC] = &mclk0_clk_src.clkr,
 	[MCLK1_CLK_SRC] = &mclk1_clk_src.clkr,
 	[MCLK2_CLK_SRC] = &mclk2_clk_src.clkr,
+
+	[CSI0PHYTIMER_CLK_SRC] = &csi0phytimer_clk_src.clkr,
+	[CSI1PHYTIMER_CLK_SRC] = &csi1phytimer_clk_src.clkr,
 };
 
 static const struct qcom_cc_desc gcc_msm8936_desc = {

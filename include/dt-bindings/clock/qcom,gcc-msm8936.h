@@ -48,4 +48,7 @@
 #define MCLK1_CLK_SRC			27
 #define MCLK2_CLK_SRC			28
 
+#define CSI0PHYTIMER_CLK_SRC		29
+#define CSI1PHYTIMER_CLK_SRC		30
+
 #endif
