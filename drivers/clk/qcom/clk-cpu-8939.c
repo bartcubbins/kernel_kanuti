@@ -323,6 +323,12 @@ static struct clk_regmap_mux_div a53ssmux_cci = {
 };
 
 
+static struct clk_hw *clk_cpu_8939_hw[] = {
+	[P_A53_LC_CLK]	= &a53ssmux_lc.clkr.hw,
+	[P_A53_BC_CLK]	= &a53ssmux_bc.clkr.hw,
+	[P_A53_CCI_CLK]	= &a53ssmux_cci.clkr.hw,
+};
+
 static int find_vdd_level(struct clk_init_data *clk_data, unsigned long rate)
 {
 	int level;
@@ -387,12 +393,12 @@ static int add_opp(struct clk_hw *hw, struct device *cpudev, struct device *vreg
 static void print_opp_table(int a53_c0_cpu, int a53_c1_cpu)
 {
 	struct dev_pm_opp *oppfmax, *oppfmin;
-	unsigned int apc0_rate_max = a53_lc_clk.clkr.hw.init->num_rate_max - 1;
-	unsigned int apc1_rate_max = a53_bc_clk.clkr.hw.init->num_rate_max - 1;
-	unsigned long apc0_fmax = a53_lc_clk.clkr.hw.init->rate_max[apc0_rate_max];
-	unsigned long apc1_fmax = a53_bc_clk.clkr.hw.init->rate_max[apc1_rate_max];
-	unsigned long apc0_fmin = a53_lc_clk.clkr.hw.init->rate_max[1];
-	unsigned long apc1_fmin = a53_bc_clk.clkr.hw.init->rate_max[1];
+	unsigned int apc0_rate_max = a53ssmux_lc.clkr.hw.init->num_rate_max - 1;
+	unsigned int apc1_rate_max = a53ssmux_bc.clkr.hw.init->num_rate_max - 1;
+	unsigned long apc0_fmax = a53ssmux_lc.clkr.hw.init->rate_max[apc0_rate_max];
+	unsigned long apc1_fmax = a53ssmux_bc.clkr.hw.init->rate_max[apc1_rate_max];
+	unsigned long apc0_fmin = a53ssmux_lc.clkr.hw.init->rate_max[1];
+	unsigned long apc1_fmin = a53ssmux_bc.clkr.hw.init->rate_max[1];
 
 	rcu_read_lock();
 
@@ -427,7 +433,7 @@ static void populate_opp_table(struct platform_device *pdev)
 	struct platform_device *apc0_dev, *apc1_dev;
 	struct device_node *apc0_node = NULL, *apc1_node = NULL;
 	unsigned long apc0_fmax, apc1_fmax;
-	unsigned int apc0_rate_max = 0, apc1_arte_max = 0;
+	unsigned int apc0_rate_max = 0, apc1_rate_max = 0;
 	int cpu, a53_c0_cpu = 0, a53_c1_cpu = 0;
 
 	apc0_node = of_parse_phandle(pdev->dev.of_node,	"vdd-c0-supply", 0);
@@ -454,21 +460,21 @@ static void populate_opp_table(struct platform_device *pdev)
 		return;
 	}
 
-	apc0_rate_max = a53_lc_clk.clkr.hw.init->num_rate_max - 1;
-	apc1_rate_max = a53_bc_clk.clkr.hw.init->num_rate_max - 1;
-	apc0_fmax = a53_lc_clk.clkr.hw.init->rate_max[apc0_rate_max];
-	apc1_fmax = a53_bc_clk.clkr.hw.init->rate_max[apc1_rate_max];
+	apc0_rate_max = a53ssmux_lc.clkr.hw.init->num_rate_max - 1;
+	apc1_rate_max = a53ssmux_bc.clkr.hw.init->num_rate_max - 1;
+	apc0_fmax = a53ssmux_lc.clkr.hw.init->rate_max[apc0_rate_max];
+	apc1_fmax = a53ssmux_bc.clkr.hw.init->rate_max[apc1_rate_max];
 
 	for_each_possible_cpu(cpu) {
 		pr_debug("the CPU number is : %d\n", cpu);
 		if (cpu/4 == 0) {
 			a53_c1_cpu = cpu;
-			WARN(add_opp(&a53_bc_clk.clkr.hw, get_cpu_device(cpu),
+			WARN(add_opp(&a53ssmux_bc.clkr.hw, get_cpu_device(cpu),
 				     &apc1_dev->dev, apc1_fmax),
 				     "Failed to add OPP levels for A53 big cluster\n");
 		} else if (cpu/4 == 1) {
 			a53_c0_cpu = cpu;
-			WARN(add_opp(&a53_lc_clk.clkr.hw, get_cpu_device(cpu),
+			WARN(add_opp(&a53ssmux_lc.clkr.hw, get_cpu_device(cpu),
 				     &apc0_dev->dev, apc0_fmax),
 				     "Failed to add OPP levels for A53 little cluster\n");
 		}
@@ -622,42 +628,6 @@ out:
 								*version);
 }
 
-static int of_get_clk_src(struct platform_device *pdev,
-				struct clk_src *parents, int mux_id)
-{
-	struct device_node *of = pdev->dev.of_node;
-	int mux_parents, i, j, index;
-	struct clk *c;
-	char clk_name[] = "clk-xxx-x";
-
-	mux_parents = of_property_count_strings(of, "clock-names");
-	if (mux_parents <= 0) {
-		dev_err(&pdev->dev, "missing clock-names\n");
-		return -EINVAL;
-	}
-	j = 0;
-
-	for (i = 0; i < 8; i++) {
-		snprintf(clk_name, ARRAY_SIZE(clk_name), "clk-%s-%d",
-							mux_names[mux_id], i);
-		index = of_property_match_string(of, "clock-names", clk_name);
-		if (IS_ERR_VALUE(index))
-			continue;
-
-		parents[j].sel = i;
-		parents[j].src = c = devm_clk_get(&pdev->dev, clk_name);
-		if (IS_ERR(c)) {
-			if (c != ERR_PTR(-EPROBE_DEFER))
-				dev_err(&pdev->dev, "clk_get: %s\n fail",
-						clk_name);
-			return PTR_ERR(c);
-		}
-		j++;
-	}
-
-	return j;
-}
-
 static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
 {
 	struct resource *res;
@@ -690,9 +660,9 @@ static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
 	}
 	cpuclk[mux_id]->c.vdd_class->regulator[0] = regulator;
 
-	rc = of_get_clk_src(pdev, a53ssmux[mux_id]->parents, mux_id);
-	if (IS_ERR_VALUE(rc))
-		return rc;
+	//rc = of_get_clk_src(pdev, a53ssmux[mux_id]->parents, mux_id);
+	//if (IS_ERR_VALUE(rc))
+	//	return rc;
 
 	a53ssmux[mux_id]->num_parents = rc;
 
@@ -878,33 +848,6 @@ static int __init clock_a53_init(void)
 	return platform_driver_register(&clock_a53_driver);
 }
 arch_initcall(clock_a53_init);
-
-static int __init clock_cpu_lpm_get_latency(void)
-{
-	int rc = 0;
-	struct device_node *ofnode = of_find_compatible_node(NULL, NULL,
-					"qcom,cpu-clock-8939");
-
-	if (!ofnode)
-		return 0;
-
-	rc = lpm_get_latency(&a53_bc_clk.latency_lvl,
-			&a53_bc_clk.cpu_latency_no_l2_pc_us);
-	if (rc < 0)
-		pr_err("Failed to get the L2 PC value for perf\n");
-
-	rc = lpm_get_latency(&a53_lc_clk.latency_lvl,
-			&a53_lc_clk.cpu_latency_no_l2_pc_us);
-	if (rc < 0)
-		pr_err("Failed to get the L2 PC value for pwr\n");
-
-	pr_debug("Latency for pwr/perf cluster %d : %d\n",
-		a53_lc_clk.cpu_latency_no_l2_pc_us,
-		a53_bc_clk.cpu_latency_no_l2_pc_us);
-
-	return rc;
-}
-late_initcall(clock_cpu_lpm_get_latency);
 
 #define APCS_C0_PLL			0xb116000
 #define C0_PLL_MODE			0x0
