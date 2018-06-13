@@ -23,6 +23,7 @@
 #include <linux/reset-controller.h>
 
 #include <dt-bindings/clock/qcom,gcc-msm8936.h>
+#include <dt-bindings/reset/qcom,gcc-msm8936.h>
 
 #include "common.h"
 #include "clk-regmap.h"
@@ -2447,12 +2448,17 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	//[GCC_SNOC_QOSGEN_CLK] = &gcc_snoc_qosgen_clk.clkr,
 };
 
+static const struct qcom_reset_map gcc_msm8936_resets[] = {
+	[GCC_CAMSS_MICRO_BCR] = {0x56008},
+	[GCC_USB_HS_BCR] = {0x41000},
+};
+
 static const struct qcom_cc_desc gcc_msm8936_desc = {
 	.config		= &gcc_msm8936_regmap_config,
 	.clks		= gcc_msm8936_clocks,
 	.num_clks	= ARRAY_SIZE(gcc_msm8936_clocks),
-//	.resets         = gcc_msm8936_resets,
-//	.num_resets     = ARRAY_SIZE(gcc_msm8936_resets),
+	.resets         = gcc_msm8936_resets,
+	.num_resets     = ARRAY_SIZE(gcc_msm8936_resets),
 //	.gdscs = gcc_msm8936_gdscs,
 //	.num_gdscs = ARRAY_SIZE(gcc_msm8936_gdscs),
 };
