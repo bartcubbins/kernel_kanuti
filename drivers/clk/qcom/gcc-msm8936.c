@@ -2270,18 +2270,50 @@ static struct clk_rcg2 crypto_clk_src = {
 	},
 };
 
+static struct gdsc venus_gdsc = {
+	.gdscr = 0x4c018,
+	.pd = {
+		.name = "venus",
+	},
+	.pwrsts = PWRSTS_OFF_ON,
+};
+
+static struct gdsc mdss_gdsc = {
+	.gdscr = 0x4d078,
+	.pd = {
+		.name = "mdss",
+	},
+	.pwrsts = PWRSTS_OFF_ON,
+};
+
+static struct gdsc jpeg_gdsc = {
+	.gdscr = 0x5701c,
+	.pd = {
+		.name = "jpeg",
+	},
+	.pwrsts = PWRSTS_OFF_ON,
+};
+
+static struct gdsc vfe_gdsc = {
+	.gdscr = 0x58034,
+	.pd = {
+		.name = "vfe",
+	},
+	.pwrsts = PWRSTS_OFF_ON,
+};
+
+static struct gdsc oxili_gdsc = {
+	.gdscr = 0x5901c,
+	.pd = {
+		.name = "oxili",
+	},
+	.pwrsts = PWRSTS_OFF_ON,
+};
+
 
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
-
-static const struct regmap_config gcc_msm8936_regmap_config = {
-	.reg_bits	= 32,
-	.reg_stride	= 4,
-	.val_bits	= 32,
-	.max_register	= 0x80000,
-	.fast_io	= true,
-};
 
 static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[GPLL0] = &gpll0.clkr,
@@ -2448,9 +2480,25 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	//[GCC_SNOC_QOSGEN_CLK] = &gcc_snoc_qosgen_clk.clkr,
 };
 
+static struct gdsc *gcc_msm8936_gdscs[] = {
+	[VENUS_GDSC] = &venus_gdsc,
+	[MDSS_GDSC] = &mdss_gdsc,
+	[JPEG_GDSC] = &jpeg_gdsc,
+	[VFE_GDSC] = &vfe_gdsc,
+	[OXILI_GDSC] = &oxili_gdsc,
+};
+
 static const struct qcom_reset_map gcc_msm8936_resets[] = {
 	[GCC_CAMSS_MICRO_BCR] = {0x56008},
 	[GCC_USB_HS_BCR] = {0x41000},
+};
+
+static const struct regmap_config gcc_msm8936_regmap_config = {
+	.reg_bits	= 32,
+	.reg_stride	= 4,
+	.val_bits	= 32,
+	.max_register	= 0x80000,
+	.fast_io	= true,
 };
 
 static const struct qcom_cc_desc gcc_msm8936_desc = {
@@ -2459,8 +2507,8 @@ static const struct qcom_cc_desc gcc_msm8936_desc = {
 	.num_clks	= ARRAY_SIZE(gcc_msm8936_clocks),
 	.resets         = gcc_msm8936_resets,
 	.num_resets     = ARRAY_SIZE(gcc_msm8936_resets),
-//	.gdscs = gcc_msm8936_gdscs,
-//	.num_gdscs = ARRAY_SIZE(gcc_msm8936_gdscs),
+	.gdscs = gcc_msm8936_gdscs,
+	.num_gdscs = ARRAY_SIZE(gcc_msm8936_gdscs),
 };
 
 static const struct of_device_id gcc_msm8936_match_table[] = {
@@ -2532,9 +2580,9 @@ static int gcc_msm8936_probe(struct platform_device *pdev)
 	clk_set_rate(apss_ahb_clk_src.clkr.hw.clk, 19200000);
 	clk_prepare_enable(apss_ahb_clk_src.clkr.hw.clk);
 
-	ret = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
-	if (ret)
-		return ret;
+	//ret = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
+	//if (ret)
+	//	return ret;
 
 	dev_info(&pdev->dev, "Registered GCC clocks\n");
 
