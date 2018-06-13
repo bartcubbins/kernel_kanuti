@@ -2517,6 +2517,29 @@ static const struct of_device_id gcc_msm8936_match_table[] = {
 };
 MODULE_DEVICE_TABLE(of, gcc_msm8936_match_table);
 
+static int gcc_msm8936_probe(struct platform_device *pdev)
+{
+	struct clk *clk;
+	struct device *dev = &pdev->dev;
+	int ret;
+
+	/* Temporary until RPM clocks supported */
+	clk = clk_register_fixed_rate(dev, "xo", NULL, CLK_IS_ROOT, 19200000);
+	if (IS_ERR(clk))
+		return PTR_ERR(clk);
+
+	ret = qcom_cc_probe(pdev, &gcc_msm8936_desc);
+	if (ret) {
+		dev_err(&pdev->dev, "Failed to register GCC clocks\n");
+		return ret;
+	}
+
+	dev_info(&pdev->dev, "Registered GCC clocks\n");
+
+	return 0;
+}
+
+#if 0
 #define GCC_REG_BASE 0x1800000
 static int gcc_msm8936_probe(struct platform_device *pdev)
 {
@@ -2580,15 +2603,15 @@ static int gcc_msm8936_probe(struct platform_device *pdev)
 	clk_set_rate(apss_ahb_clk_src.clkr.hw.clk, 19200000);
 	clk_prepare_enable(apss_ahb_clk_src.clkr.hw.clk);
 
-	//ret = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
-	//if (ret)
-	//	return ret;
+	ret = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
+	if (ret)
+		return ret;
 
 	dev_info(&pdev->dev, "Registered GCC clocks\n");
 
 	return 0;
 }
-
+#endif
 
 static struct platform_driver gcc_msm8936_driver = {
 	.probe		= gcc_msm8936_probe,
