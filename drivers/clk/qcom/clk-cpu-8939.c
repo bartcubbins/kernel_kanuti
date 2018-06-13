@@ -712,34 +712,43 @@ static struct notifier_block clock_panic_notifier = {
 
 static int clock_a53_probe(struct platform_device *pdev)
 {
-	int speed_bin, version, rc, cpu, mux_id, rate;
+	int i, speed_bin, version, rc, cpu, mux_id, clks_sz;
 	char prop_name[] = "qcom,speedX-bin-vX-XXX";
-	int mux_num;
+	struct clk_onecell_data *clk_onecell = NULL;
 
 	get_speed_bin(pdev, &speed_bin, &version);
 
-	mux_num = A53SS_MUX_NUM;
+	rc = cpu_parse_devicetree(pdev);
+	if (rc)
+		return rc;
 
-	for (mux_id = 0; mux_id < mux_num; mux_id++) {
-		rc = cpu_parse_devicetree(pdev);
-		if (rc)
-			return rc;
+	clk_onecell = devm_kzalloc(&pdev->dev, sizeof(struct clk_onecell_data), GFP_KERNEL);
+	if (!clk_onecell)
+		return -ENOMEM;
 
+	clks_sz = ARRAY_SIZE(clk_cpu_8939_hw) * sizeof(struct clk *);
+	clk_onecell->clks = devm_kzalloc(&pdev->dev, clks_sz, GFP_KERNEL);
+	if (!clk_onecell->clks) {
+		devm_kfree(&pdev->dev, clk_onecell);
+		return -ENOMEM;
+	}
+
+	clk_onecell->clk_num = ARRAY_SIZE(clk_cpu_8939_hw);
+
+	for (mux_id = 0; mux_id < A53SS_MUX_NUM; mux_id++) {
 		snprintf(prop_name, ARRAY_SIZE(prop_name),
 					"qcom,speed%d-bin-v%d-%s",
 					speed_bin, version, mux_names[mux_id]);
 
-		rc = of_get_fmax_vdd_class(pdev, &cpuclk[mux_id]->c,
-								prop_name);
+		rc = of_get_fmax_vdd_class(pdev, mux_id, prop_name);
 		if (rc) {
 			/* Fall back to most conservative PVS table */
 			dev_err(&pdev->dev, "Unable to load voltage plan %s!\n",
 								prop_name);
-
+			pr_err("Error %d\n", rc);
 			snprintf(prop_name, ARRAY_SIZE(prop_name),
 				"qcom,speed0-bin-v0-%s", mux_names[mux_id]);
-			rc = of_get_fmax_vdd_class(pdev, &cpuclk[mux_id]->c,
-								prop_name);
+			rc = of_get_fmax_vdd_class(pdev, mux_id, prop_name);
 			if (rc) {
 				dev_err(&pdev->dev,
 					"Unable to load safe voltage plan\n");
