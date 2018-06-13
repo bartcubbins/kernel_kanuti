@@ -628,13 +628,10 @@ out:
 								*version);
 }
 
-static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
+static int cpu_parse_devicetree(struct platform_device *pdev)
 {
-	struct resource *res;
-	int rc;
-	char rcg_name[] = "apcs-xxx-rcg-base";
-	char vdd_name[] = "vdd-xxx";
-	struct regulator *regulator;
+//	struct resource *res;
+//	int rc;
 
 /*
 	rc = cpu_8939_map_pll(pdev, ..., APCS_C0_PLL_BASE, "c0-pll");
@@ -682,79 +679,8 @@ static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
 
 
 
-	res = platform_get_resource_byname(pdev,
-					IORESOURCE_MEM, rcg_name);
-	if (!res) {
-		dev_err(&pdev->dev, "missing %s\n", rcg_name);
-		return -EINVAL;
-	}
-	a53ssmux[mux_id]->base = devm_ioremap(&pdev->dev, res->start,
-							resource_size(res));
-	if (!a53ssmux[mux_id]->base) {
-		dev_err(&pdev->dev, "ioremap failed for %s\n", rcg_name);
-		return -ENOMEM;
-	}
-
-	snprintf(vdd_name, ARRAY_SIZE(vdd_name), "vdd-%s", mux_names[mux_id]);
-	regulator = devm_regulator_get(&pdev->dev, vdd_name);
-	if (IS_ERR(regulator)) {
-		if (PTR_ERR(regulator) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "unable to get regulator\n");
-		return PTR_ERR(regulator);
-	}
-	cpuclk[mux_id]->c.vdd_class->regulator[0] = regulator;
-
-	//rc = of_get_clk_src(pdev, a53ssmux[mux_id]->parents, mux_id);
-	//if (IS_ERR_VALUE(rc))
-	//	return rc;
-
-	a53ssmux[mux_id]->num_parents = rc;
-
 	return 0;
 }
-
-static void config_pll(int mux_id)
-{
-	unsigned long rate, aux_rate;
-	struct clk *aux_clk, *main_pll;
-
-	aux_clk = a53ssmux[mux_id]->parents[0].src;
-	main_pll = a53ssmux[mux_id]->parents[1].src;
-
-	aux_rate = clk_get_rate(aux_clk);
-	rate = clk_get_rate(&a53ssmux[mux_id]->c);
-	clk_set_rate(&a53ssmux[mux_id]->c, aux_rate);
-	clk_set_rate(main_pll, clk_round_rate(main_pll, 1));
-	clk_set_rate(&a53ssmux[mux_id]->c, rate);
-
-	return;
-}
-
-static int clock_8939_pm_event(struct notifier_block *this,
-				unsigned long event, void *ptr)
-{
-	switch (event) {
-	case PM_POST_HIBERNATION:
-	case PM_POST_SUSPEND:
-		clk_unprepare(&a53_lc_clk.c);
-		clk_unprepare(&a53_bc_clk.c);
-		clk_unprepare(&cci_clk.c);
-		break;
-	case PM_HIBERNATION_PREPARE:
-	case PM_SUSPEND_PREPARE:
-		clk_prepare(&a53_lc_clk.c);
-		clk_prepare(&a53_bc_clk.c);
-		clk_prepare(&cci_clk.c);
-		break;
-	default:
-		break;
-	}
-	return NOTIFY_DONE;
-}
-
-static struct notifier_block clock_8939_pm_notifier = {
-	.notifier_call = clock_8939_pm_event,
-};
 
 /**
  * clock_panic_callback() - panic notification callback function.
@@ -770,11 +696,11 @@ static int clock_panic_callback(struct notifier_block *nfb,
 {
 	unsigned long rate;
 
-	rate  = clk_hw_is_enabled(&a53_bc_clk.clkr.hw) ? clk_hw_get_rate(&a53_bc_clk.clkr.hw) : 0;
-	pr_err("%s frequency: %10lu Hz\n", clk_hw_get_name(&a53_bc_clk.clkr.hw), rate);
+	rate  = clk_hw_is_enabled(&a53ssmux_bc.clkr.hw) ? clk_hw_get_rate(&a53ssmux_bc.clkr.hw) : 0;
+	pr_err("%s frequency: %10lu Hz\n", clk_hw_get_name(&a53ssmux_bc.clkr.hw), rate);
 
-	rate  = clk_hw_is_enabled(&a53_lc_clk.clkr.hw) ? clk_hw_get_rate(%a53_lc_clk.clkr.hw) : 0;
-	pr_err("%s frequency: %10lu Hz\n", clk_hw_get_name(%a53_lc_clk.clkr.hw), rate);
+	rate  = clk_hw_is_enabled(&a53ssmux_lc.clkr.hw) ? clk_hw_get_rate(&a53ssmux_lc.clkr.hw) : 0;
+	pr_err("%s frequency: %10lu Hz\n", clk_hw_get_name(&a53ssmux_lc.clkr.hw), rate);
 
 	return NOTIFY_OK;
 }
@@ -795,7 +721,7 @@ static int clock_a53_probe(struct platform_device *pdev)
 	mux_num = A53SS_MUX_NUM;
 
 	for (mux_id = 0; mux_id < mux_num; mux_id++) {
-		rc = cpu_parse_devicetree(pdev, mux_id);
+		rc = cpu_parse_devicetree(pdev);
 		if (rc)
 			return rc;
 
