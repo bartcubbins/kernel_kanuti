@@ -41,9 +41,9 @@
 #include "clk-rcg.h"
 #include "clk-regmap-mux-div.h"
 
-DEFINE_VDD_REGS_INIT(vdd_cpu_bc, 1);
-DEFINE_VDD_REGS_INIT(vdd_cpu_lc, 1);
-DEFINE_VDD_REGS_INIT(vdd_cpu_cci, 1);
+DEFINE_VDD_REGS_INIT(vdd_c0, 1);
+DEFINE_VDD_REGS_INIT(vdd_c1, 1);
+DEFINE_VDD_REGS_INIT(vdd_cci, 1);
 
 enum {
 	A53SS_MUX_BC,
@@ -654,8 +654,34 @@ static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
 		return rc;
 */
 
-	snprintf(rcg_name, ARRAY_SIZE(rcg_name), "apcs-%s-rcg-base",
-						mux_names[mux_id]);
+	vdd_c0.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_c0");
+	if (IS_ERR(vdd_c0.regulator[0])) {
+		if (PTR_ERR(vdd_c0.regulator[0]) != -EPROBE_DEFER)
+			dev_err(&pdev->dev, "Unable to get vdd_c0 regulator!!!\n");
+		return PTR_ERR(vdd_c0.regulator[0]);
+	}
+	vdd_c0.use_max_uV = true;
+
+	vdd_c1.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_c1");
+	if (IS_ERR(vdd_c1.regulator[0])) {
+		if (PTR_ERR(vdd_c1.regulator[0]) != -EPROBE_DEFER)
+			dev_err(&pdev->dev, "Unable to get vdd_c1 regulator!!!\n");
+		return PTR_ERR(vdd_c1.regulator[0]);
+	}
+	vdd_c1.use_max_uV = true;
+
+	vdd_cci.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_cci");
+	if (IS_ERR(vdd_cci.regulator[0])) {
+		if (PTR_ERR(vdd_cci.regulator[0]) != -EPROBE_DEFER)
+			dev_err(&pdev->dev, "Unable to get vdd_cci regulator!!!\n");
+		return PTR_ERR(vdd_cci.regulator[0]);
+	}
+	vdd_cci.use_max_uV = true;
+
+
+
+
+
 	res = platform_get_resource_byname(pdev,
 					IORESOURCE_MEM, rcg_name);
 	if (!res) {

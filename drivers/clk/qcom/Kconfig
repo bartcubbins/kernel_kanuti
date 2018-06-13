@@ -243,7 +243,6 @@ config CLOCK_CPU_OSM
 config CLOCK_CPU_8939
 	tristate "MSM8939 CPU Clock Controller"
 	depends on COMMON_CLK_QCOM
-	select RCGWR_CLOCKS
 	help
 	  Support for the MSM8939 CPU clock controller.
 	  Say Y if you want to support CPU frequency scaling on devices
