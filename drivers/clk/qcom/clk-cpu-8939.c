@@ -98,8 +98,8 @@ struct cpu_desc_8939 {
 	struct pm_qos_request req;
 };
 
-static struct cpu_desc_8939 a53_bc_clk_desc;
-static struct cpu_desc_8939 a53_lc_clk_desc;
+static struct cpu_desc_8939 a53ssmux_bc_desc;
+static struct cpu_desc_8939 a53ssmux_lc_desc;
 static void do_nothing(void *unused) { }
 
 static int cpu_clk_8939_set_rate(struct clk_hw *hw, unsigned long rate,
@@ -136,11 +136,11 @@ static int cpu_clk_8939_set_rate_big(struct clk_hw *hw, unsigned long rate,
 {
 	int rc;
 
-	cpu_clk_8939_pm_qos_add_req(&a53_bc_clk_desc);
+	cpu_clk_8939_pm_qos_add_req(&a53ssmux_bc_desc);
 
 	rc = cpu_clk_8939_set_rate(hw, rate, parent_rate);
 
-	pm_qos_remove_request(&a53_bc_clk_desc.req);
+	pm_qos_remove_request(&a53ssmux_bc_desc.req);
 
 	return rc;
 }
@@ -150,11 +150,11 @@ static int cpu_clk_8939_set_rate_and_parent_big(struct clk_hw *hw, unsigned long
 {
 	int rc;
 
-	cpu_clk_8939_pm_qos_add_req(&a53_bc_clk_desc);
+	cpu_clk_8939_pm_qos_add_req(&a53ssmux_bc_desc);
 
 	rc = cpu_clk_8939_set_rate_and_parent(hw, rate, prate, index);
 
-	pm_qos_remove_request(&a53_bc_clk_desc.req);
+	pm_qos_remove_request(&a53ssmux_bc_desc.req);
 
 	return rc;
 }
@@ -164,11 +164,11 @@ static int cpu_clk_8939_set_rate_little(struct clk_hw *hw, unsigned long rate,
 {
 	int rc;
 
-	cpu_clk_8939_pm_qos_add_req(&a53_lc_clk_desc);
+	cpu_clk_8939_pm_qos_add_req(&a53ssmux_lc_desc);
 
 	rc = cpu_clk_8939_set_rate(hw, rate, parent_rate);
 
-	pm_qos_remove_request(&a53_lc_clk_desc.req);
+	pm_qos_remove_request(&a53ssmux_lc_desc.req);
 
 	return rc;
 }
@@ -178,11 +178,11 @@ static int cpu_clk_8939_set_rate_and_parent_little(struct clk_hw *hw, unsigned l
 {
 	int rc;
 
-	cpu_clk_8939_pm_qos_add_req(&a53_lc_clk_desc);
+	cpu_clk_8939_pm_qos_add_req(&a53ssmux_lc_desc);
 
 	rc = cpu_clk_8939_set_rate_and_parent(hw, rate, prate, index);
 
-	pm_qos_remove_request(&a53_lc_clk_desc.req);
+	pm_qos_remove_request(&a53ssmux_lc_desc.req);
 
 	return rc;
 }
@@ -714,6 +714,7 @@ static int clock_a53_probe(struct platform_device *pdev)
 {
 	int i, speed_bin, version, rc, cpu, mux_id, clks_sz;
 	char prop_name[] = "qcom,speedX-bin-vX-XXX";
+	struct clk *clk_tmp = NULL;
 	struct clk_onecell_data *clk_onecell = NULL;
 
 	get_speed_bin(pdev, &speed_bin, &version);
@@ -758,52 +759,50 @@ static int clock_a53_probe(struct platform_device *pdev)
 		}
 	}
 
-	rc = of_msm_clock_register(pdev->dev.of_node,
-			cpu_clocks_8939, ARRAY_SIZE(cpu_clocks_8939));
+	for (i = 0; i < ARRAY_SIZE(clk_cpu_8939_hw); i++) {
+		clk_tmp = devm_clk_register(&pdev->dev, clk_cpu_8939_hw[i]);
+		if (IS_ERR(clk_tmp)) {
+			dev_err(&pdev->dev,
+				"Cannot register HW clock at position %d\n",i);
+			return PTR_ERR(clk_tmp);
+		}
+		clk_onecell->clks[i] = clk_tmp;
+	}
+
+	rc = of_clk_add_provider(pdev->dev.of_node, of_clk_src_onecell_get,
+				 clk_onecell);
 	if (rc) {
-		dev_err(&pdev->dev, "msm_clock_register failed\n");
+		dev_err(&pdev->dev, "Cannot register CPU clock provider.\n");
+
+		if (clk_onecell)
+			devm_kfree(&pdev->dev, clk_onecell->clks);
+		devm_kfree(&pdev->dev, clk_onecell);
+
 		return rc;
 	}
 
-	rate = clk_get_rate(&cci_clk.c);
-	clk_set_rate(&cci_clk.c, rate);
-
- 	 for (mux_id = 0; mux_id < A53SS_MUX_CCI; mux_id++) {
- 	 	 /* Force a PLL reconfiguration */
- 	 	 config_pll(mux_id);
- 	 }
-
-	/*
-	 * We don't want the CPU clocks to be turned off at late init
-	 * if CPUFREQ or HOTPLUG configs are disabled. So, bump up the
-	 * refcount of these clocks. Any cpufreq/hotplug manager can assume
-	 * that the clocks have already been prepared and enabled by the time
-	 * they take over.
-	 */
 	get_online_cpus();
-	for_each_online_cpu(cpu) {
-		WARN(clk_prepare_enable(&cpuclk[cpu/4]->c),
-				"Unable to turn on CPU clock");
-		clk_prepare_enable(&cci_clk.c);
-	}
-	put_online_cpus();
-
-	for_each_possible_cpu(cpu) {
-		if (logical_cpu_to_clk(cpu) == &a53_bc_clk.c)
-			cpumask_set_cpu(cpu, &a53_bc_clk.cpumask);
-		if (logical_cpu_to_clk(cpu) == &a53_lc_clk.c)
-			cpumask_set_cpu(cpu, &a53_lc_clk.cpumask);
-	}
-
-	a53_lc_clk.hw_low_power_ctrl = true;
-	a53_bc_clk.hw_low_power_ctrl = true;
-
-	register_pm_notifier(&clock_8939_pm_notifier);
 
 	populate_opp_table(pdev);
 
+	rc = of_platform_populate(pdev->dev.of_node, NULL, NULL, &pdev->dev);
+	if (rc)
+		return rc;
+
+
+	/* Assign cpumask to the CPU descriptors */
+	for_each_possible_cpu(cpu) {
+		pr_debug("the CPU number is : %d\n", cpu);
+		if (cpu/4 == 0) {
+			cpumask_set_cpu(cpu, &a53ssmux_bc_desc.cpumask);
+		} else if (cpu/4 == 1) {
+			cpumask_set_cpu(cpu, &a53ssmux_lc_desc.cpumask);
+		}
+	}
+
 	atomic_notifier_chain_register(&panic_notifier_list,
 						&clock_panic_notifier);
+	put_online_cpus();
 
 	return 0;
 }
