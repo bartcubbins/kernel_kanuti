@@ -636,6 +636,24 @@ static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
 	char vdd_name[] = "vdd-xxx";
 	struct regulator *regulator;
 
+/*
+	rc = cpu_8939_map_pll(pdev, ..., APCS_C0_PLL_BASE, "c0-pll");
+	if (rc)
+		return rc;
+
+	rc = cpu_8939_map_pll(pdev, ..., APCS_C1_PLL_BASE, "c1-pll");
+	if (rc)
+		return rc;
+
+	rc = cpu_8939_map_pll(pdev, ..., APCS_CCI_PLL_BASE, "cci-pll);
+	if (rc)
+		return rc;
+
+	rc = cpu_8939_map_spm(pdev);
+	if (rc)
+		return rc;
+*/
+
 	snprintf(rcg_name, ARRAY_SIZE(rcg_name), "apcs-%s-rcg-base",
 						mux_names[mux_id]);
 	res = platform_get_resource_byname(pdev,
