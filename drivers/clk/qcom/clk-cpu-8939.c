@@ -54,6 +54,10 @@ enum {
 
 static const char const *mux_names[] = {"c0", "c1", "cci"};
 
+static DEFINE_VDD_REGS_INIT(vdd_cpu_a53_lc, 1);
+static DEFINE_VDD_REGS_INIT(vdd_cpu_a53_bc, 1);
+static DEFINE_VDD_REGS_INIT(vdd_cpu_a53_cci, 1);
+
 #define CPU_LATENCY_NO_L2_PC_US (250)
 
 #define to_clk_regmap_mux_div(_hw) \
@@ -220,7 +224,7 @@ static const struct clk_ops clk_ops_cpu_big = {
 	.set_rate_and_parent = cpu_clk_8939_set_rate_and_parent_big,
 	.set_parent = cpu_clk_8939_set_parent,
 	.recalc_rate = cpu_clk_8939_recalc_rate,
-	.determine_rate = cpu_clk_8939_determine_rate,
+	//.determine_rate = cpu_clk_8939_determine_rate,
 	.debug_init = clk_debug_measure_add,
 };
 
@@ -232,11 +236,11 @@ static const struct clk_ops clk_ops_cpu_little = {
 	.set_rate_and_parent = cpu_clk_8939_set_rate_and_parent_little,
 	.set_parent = cpu_clk_8939_set_parent,
 	.recalc_rate = cpu_clk_8939_recalc_rate,
-	.determine_rate = cpu_clk_8939_determine_rate,
+	//.determine_rate = cpu_clk_8939_determine_rate,
 	.debug_init = clk_debug_measure_add,
 };
 
-static const struct clk_ops clk_ops_cci = {
+static const struct clk_ops clk_ops_cpu_cci = {
 	.enable = cpu_clk_8939_enable,
 	.disable = cpu_clk_8939_disable,
 	.get_parent = cpu_clk_8939_get_parent,
@@ -244,33 +248,33 @@ static const struct clk_ops clk_ops_cci = {
 	.set_rate_and_parent = cpu_clk_8939_set_rate_and_parent,
 	.set_parent = cpu_clk_8939_set_parent,
 	.recalc_rate = cpu_clk_8939_recalc_rate,
-	.determine_rate = cpu_clk_8939_determine_rate_cci,
+	//.determine_rate = cpu_clk_8939_determine_rate_cci,
 	.debug_init = clk_debug_measure_add,
 };
 
 
 static struct clk_init_data cpu_8939_clk_init_data[A53SS_MUX_NUM] = {
-	[A53SS_MUX_C0] = {
+	[A53SS_MUX_LC] = {
 		.name = "a53ssmux_lc",
-		.parent_names = cpuss_parent_names_a53_lc,
-		.num_parents = ARRAY_SIZE(cpuss_parent_map_a53_lc),
+		//.parent_names = cpuss_parent_names_a53_lc,
+		//.num_parents = ARRAY_SIZE(cpuss_parent_map_a53_lc),
 		.ops = &clk_ops_cpu_little,
 		.vdd_class = &vdd_cpu_a53_lc,
 		.flags = CLK_SET_RATE_PARENT,
 	},
-	[A53SS_MUX_C1] = {
+	[A53SS_MUX_BC] = {
 		.name = "a53ssmux_bc",
-		.parent_names = cpuss_parent_names_a53_lc,
-		.num_parents = ARRAY_SIZE(cpuss_parent_names_a53_lc),
+		//.parent_names = cpuss_parent_names_a53_bc,
+		//.num_parents = ARRAY_SIZE(cpuss_parent_names_a53_bc),
 		.ops = &clk_ops_cpu_big,
-		.vdd_class = &vdd_cpu_a53_lc,
+		.vdd_class = &vdd_cpu_a53_bc,
 		.flags = CLK_SET_RATE_PARENT,
 	},
 	[A53SS_MUX_CCI] = {
 		.name = "a53ssmux_cci",
-		.parent_names = cpuss_parent_names_a53_cci,
-		.num_parents = ARRAY_SIZE(cpuss_parent_names_a53_cci),
-		.ops = &clk_ops_a53_cci,
+		//.parent_names = cpuss_parent_names_a53_cci,
+		//.num_parents = ARRAY_SIZE(cpuss_parent_names_a53_cci),
+		.ops = &clk_ops_cpu_cci,
 		.vdd_class = &vdd_cpu_a53_cci,
 		.flags = CLK_SET_RATE_PARENT,
 	},
@@ -285,9 +289,9 @@ static struct clk_regmap_mux_div a53ssmux_lc = {
 	.safe_src = 4,
 	.safe_div = 2,
 	.safe_freq = 400000000,
-	.parent_map = cpuss_parent_map_a53_lc,
-	.clk_nb.notifier_call = cpu_clk_8939_notifier_cb,
-	.clkr.hw.init = &cpu_8939_clk_init_data[A53SS_MUX_C0],
+	//.parent_map = cpuss_parent_map_a53_lc,
+	//.clk_nb.notifier_call = cpu_clk_8939_notifier_cb,
+	.clkr.hw.init = &cpu_8939_clk_init_data[A53SS_MUX_LC],
 };
 
 static struct clk_regmap_mux_div a53ssmux_bc = {
@@ -299,9 +303,9 @@ static struct clk_regmap_mux_div a53ssmux_bc = {
 	.safe_src = 4,
 	.safe_div = 2,
 	.safe_freq = 400000000,
-	.parent_map = cpuss_parent_map_a53_bc,
-	.clk_nb.notifier_call = cpu_clk_8939_notifier_cb,
-	.clkr.hw.init = &cpu_8939_clk_init_data[A53SS_MUX_C1],
+	//.parent_map = cpuss_parent_map_a53_bc,
+	//.clk_nb.notifier_call = cpu_clk_8939_notifier_cb,
+	.clkr.hw.init = &cpu_8939_clk_init_data[A53SS_MUX_BC],
 };
 
 static struct clk_regmap_mux_div a53ssmux_cci = {
@@ -313,8 +317,8 @@ static struct clk_regmap_mux_div a53ssmux_cci = {
 	.safe_src = 4,
 	.safe_div = 4,
 	.safe_freq = 200000000,
-	.parent_map = cpuss_parent_map_a53_cci,
-	.clk_nb.notifier_call = cpu_clk_8939_cci_notifier_cb,
+	//.parent_map = cpuss_parent_map_a53_cci,
+	//.clk_nb.notifier_call = cpu_clk_8939_cci_notifier_cb,
 	.clkr.hw.init = &cpu_8939_clk_init_data[A53SS_MUX_CCI],
 };
 
@@ -334,6 +338,148 @@ static int find_vdd_level(struct clk_init_data *clk_data, unsigned long rate)
 	}
 
 	return level;
+}
+
+static int add_opp(struct clk_hw *hw, struct device *cpudev, struct device *vregdev,
+			unsigned long max_rate)
+{
+	struct clk_init_data *clk_data = NULL;
+	struct clk_vdd_class *voltspec = NULL;
+	unsigned long rate = 0;
+	long ret, uv;
+	int level, j = 1;
+
+	if (IS_ERR_OR_NULL(cpudev)) {
+		pr_err("%s: Invalid parameters\n", __func__);
+		return -EINVAL;
+	}
+
+	clk_data = (struct clk_init_data *)hw->init;
+	voltspec = clk_data->vdd_class;
+
+	while (1) {
+		rate = clk_data->rate_max[j++];
+		level = find_vdd_level(clk_data, rate);
+		if (level <= 0) {
+			pr_warn("clock-cpu: no corner for %lu.\n", rate);
+			return -EINVAL;
+		}
+
+		uv = voltspec->vdd_uv[level];
+		if (uv < 0) {
+			pr_warn("clock-cpu: no uv for %lu.\n", rate);
+			return -EINVAL;
+		}
+
+		ret = dev_pm_opp_add(cpudev, rate, uv);
+		if (ret) {
+			pr_warn("clock-cpu: failed to add OPP for %lu\n", rate);
+			return rate;
+		}
+
+		if (rate >= max_rate)
+			break;
+	}
+
+	return 0;
+}
+
+static void print_opp_table(int a53_c0_cpu, int a53_c1_cpu)
+{
+	struct dev_pm_opp *oppfmax, *oppfmin;
+	unsigned int apc0_rate_max = a53_lc_clk.clkr.hw.init->num_rate_max - 1;
+	unsigned int apc1_rate_max = a53_bc_clk.clkr.hw.init->num_rate_max - 1;
+	unsigned long apc0_fmax = a53_lc_clk.clkr.hw.init->rate_max[apc0_rate_max];
+	unsigned long apc1_fmax = a53_bc_clk.clkr.hw.init->rate_max[apc1_rate_max];
+	unsigned long apc0_fmin = a53_lc_clk.clkr.hw.init->rate_max[1];
+	unsigned long apc1_fmin = a53_bc_clk.clkr.hw.init->rate_max[1];
+
+	rcu_read_lock();
+
+	oppfmax = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c0_cpu),
+					apc0_fmax, true);
+	oppfmin = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c0_cpu),
+					apc0_fmin, true);
+
+	/*
+	 * One time information during boot. Important to know that this
+	 * looks sane since it can eventually make its way to the scheduler.
+	 */
+	pr_info("clock_cpu: a53_c0: OPP voltage for %lu: %ld\n",
+		apc0_fmin, dev_pm_opp_get_voltage(oppfmin));
+	pr_info("clock_cpu: a53_c0: OPP voltage for %lu: %ld\n",
+		apc0_fmax, dev_pm_opp_get_voltage(oppfmax));
+
+	oppfmax = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c1_cpu),
+						apc1_fmax, true);
+	oppfmin = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c1_cpu),
+						apc1_fmin, true);
+	pr_info("clock_cpu: a53_c1: OPP voltage for %lu: %lu\n", apc1_fmin,
+		dev_pm_opp_get_voltage(oppfmin));
+	pr_info("clock_cpu: a53_c1: OPP voltage for %lu: %lu\n", apc1_fmax,
+		dev_pm_opp_get_voltage(oppfmax));
+
+	rcu_read_unlock();
+}
+
+static void populate_opp_table(struct platform_device *pdev)
+{
+	struct platform_device *apc0_dev, *apc1_dev;
+	struct device_node *apc0_node = NULL, *apc1_node = NULL;
+	unsigned long apc0_fmax, apc1_fmax;
+	unsigned int apc0_rate_max = 0, apc1_arte_max = 0;
+	int cpu, a53_c0_cpu = 0, a53_c1_cpu = 0;
+
+	apc0_node = of_parse_phandle(pdev->dev.of_node,	"vdd-c0-supply", 0);
+	if (!apc0_node) {
+		pr_err("Can't find the apc0 dt node.\n");
+		return;
+	}
+
+	apc1_node = of_parse_phandle(pdev->dev.of_node, "vdd-c1-supply", 0);
+	if (!apc1_node) {
+		pr_err("Can't find the apc1 dt node.\n");
+		return;
+	}
+
+	apc0_dev = of_find_device_by_node(apc0_node);
+	if (!apc0_dev) {
+		pr_err("Can't find the apc0 device node.\n");
+		return;
+	}
+
+	apc1_dev = of_find_device_by_node(apc1_node);
+	if (!apc1_dev) {
+		pr_err("Can't find the apc1 device node.\n");
+		return;
+	}
+
+	apc0_rate_max = a53_lc_clk.clkr.hw.init->num_rate_max - 1;
+	apc1_rate_max = a53_bc_clk.clkr.hw.init->num_rate_max - 1;
+	apc0_fmax = a53_lc_clk.clkr.hw.init->rate_max[apc0_rate_max];
+	apc1_fmax = a53_bc_clk.clkr.hw.init->rate_max[apc1_rate_max];
+
+	for_each_possible_cpu(cpu) {
+		pr_debug("the CPU number is : %d\n", cpu);
+		if (cpu/4 == 0) {
+			a53_c1_cpu = cpu;
+			WARN(add_opp(&a53_bc_clk.clkr.hw, get_cpu_device(cpu),
+				     &apc1_dev->dev, apc1_fmax),
+				     "Failed to add OPP levels for A53 big cluster\n");
+		} else if (cpu/4 == 1) {
+			a53_c0_cpu = cpu;
+			WARN(add_opp(&a53_lc_clk.clkr.hw, get_cpu_device(cpu),
+				     &apc0_dev->dev, apc0_fmax),
+				     "Failed to add OPP levels for A53 little cluster\n");
+		}
+	}
+
+	/* One time print during bootup */
+	pr_info("clock-cpu-8939: OPP tables populated (cpu %d and %d)",
+		a53_c0_cpu, a53_c1_cpu);
+
+	print_opp_table(a53_c0_cpu, a53_c1_cpu);
+
 }
 
 static int of_get_fmax_vdd_class(struct platform_device *pdev,
@@ -551,173 +697,6 @@ static int cpu_parse_devicetree(struct platform_device *pdev, int mux_id)
 	a53ssmux[mux_id]->num_parents = rc;
 
 	return 0;
-}
-
-static int add_opp(struct clk *c, struct device *cpudev, struct device *vregdev,
-			unsigned long max_rate)
-{
-	unsigned long rate = 0;
-	int level;
-	long ret, uv, corner;
-	bool use_voltages = false;
-	struct dev_pm_opp *oppl;
-	int j = 1;
-
-	rcu_read_lock();
-	/* Check if the regulator driver has already populated OPP tables */
-	oppl = dev_pm_opp_find_freq_exact(vregdev, 2, true);
-	rcu_read_unlock();
-	if (!IS_ERR_OR_NULL(oppl))
-		use_voltages = true;
-
-	while (1) {
-		rate = c->fmax[j++];
-		level = find_vdd_level(c, rate);
-		if (level <= 0) {
-			pr_warn("clock-cpu: no uv for %lu.\n", rate);
-			return -EINVAL;
-		}
-		uv = corner = c->vdd_class->vdd_uv[level];
-		/*
-		 * If corner to voltage mapping is available, populate the OPP
-		 * table with the voltages rather than corners.
-		 */
-		if (use_voltages) {
-			uv = corner_to_voltage(corner, vregdev);
-			if (uv < 0) {
-				pr_warn("clock-cpu: no uv for corner %lu\n",
-					 corner);
-				return uv;
-			}
-			ret = dev_pm_opp_add(cpudev, rate, uv);
-			if (ret) {
-				pr_warn("clock-cpu: couldn't add OPP for %lu\n",
-					 rate);
-				return ret;
-			}
-
-		} else {
-			/*
-			 * Populate both CPU and regulator devices with the
-			 * freq-to-corner OPP table to maintain backward
-			 * compatibility.
-			 */
-			ret = dev_pm_opp_add(cpudev, rate, corner);
-			if (ret) {
-				pr_warn("clock-cpu: couldn't add OPP for %lu\n",
-					rate);
-				return ret;
-			}
-			ret = dev_pm_opp_add(vregdev, rate, corner);
-			if (ret) {
-				pr_warn("clock-cpu: couldn't add OPP for %lu\n",
-					rate);
-				return ret;
-			}
-		}
-		if (rate >= max_rate)
-			break;
-	}
-
-	return 0;
-}
-
-static void print_opp_table(int a53_c0_cpu, int a53_c1_cpu)
-{
-	struct dev_pm_opp *oppfmax, *oppfmin;
-	unsigned int apc0_rate_max = a53_lc_clk.clkr.hw.init->num_rate_max - 1;
-	unsigned int apc1_rate_max = a53_bc_clk.clkr.hw.init->num_rate_max - 1;
-	unsigned long apc0_fmax = a53_lc_clk.clkr.hw.init->rate_max[apc0_rate_max];
-	unsigned long apc1_fmax = a53_bc_clk.clkr.hw.init->rate_max[apc1_rate_max];
-	unsigned long apc0_fmin = a53_lc_clk.clkr.hw.init->rate_max[1];
-	unsigned long apc1_fmin = a53_bc_clk.clkr.hw.init->rate_max[1]
-
-	rcu_read_lock();
-
-	oppfmax = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c0_cpu),
-					apc0_fmax, true);
-	oppfmin = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c0_cpu),
-					apc0_fmin, true);
-
-	/*
-	 * One time information during boot. Important to know that this
-	 * looks sane since it can eventually make its way to the scheduler.
-	 */
-	pr_info("clock_cpu: a53_c0: OPP voltage for %lu: %ld\n",
-		apc0_fmin, dev_pm_opp_get_voltage(oppfmin));
-	pr_info("clock_cpu: a53_c0: OPP voltage for %lu: %ld\n",
-		apc0_fmax, dev_pm_opp_get_voltage(oppfmax));
-
-	oppfmax = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c1_cpu),
-						apc1_fmax, true);
-	oppfmin = dev_pm_opp_find_freq_exact(get_cpu_device(a53_c1_cpu),
-						apc1_fmin, true);
-	pr_info("clock_cpu: a53_c1: OPP voltage for %lu: %lu\n", apc1_fmin,
-		dev_pm_opp_get_voltage(oppfmin));
-	pr_info("clock_cpu: a53_c1: OPP voltage for %lu: %lu\n", apc1_fmax,
-		dev_pm_opp_get_voltage(oppfmax));
-
-	rcu_read_unlock();
-}
-
-static void populate_opp_table(struct platform_device *pdev)
-{
-	struct platform_device *apc0_dev, *apc1_dev;
-	struct device_node *apc0_node = NULL, *apc1_node = NULL;
-	unsigned long apc0_fmax, apc1_fmax;
-	unsigned int apc0_rate_max = 0, apc1_arte_max = 0;
-	int cpu, a53_c0_cpu = 0, a53_c1_cpu = 0;
-
-	apc0_node = of_parse_phandle(pdev->dev.of_node,	"vdd-c0-supply", 0);
-	if (!apc0_node) {
-		pr_err("Can't find the apc0 dt node.\n");
-		return;
-	}
-
-	apc1_node = of_parse_phandle(pdev->dev.of_node, "vdd-c1-supply", 0);
-	if (!apc1_node) {
-		pr_err("Can't find the apc1 dt node.\n");
-		return;
-	}
-
-	apc0_dev = of_find_device_by_node(apc0_node);
-	if (!apc0_dev) {
-		pr_err("Can't find the apc0 device node.\n");
-		return;
-	}
-
-	apc1_dev = of_find_device_by_node(apc1_node);
-	if (!apc1_dev) {
-		pr_err("Can't find the apc1 device node.\n");
-		return;
-	}
-
-	apc0_rate_max = a53_lc_clk.clkr.hw.init->num_rate_max - 1;
-	apc1_rate_max = a53_bc_clk.clkr.hw.init->num_rate_max - 1;
-	apc0_fmax = a53_lc_clk.clkr.hw.init->rate_max[apc0_rate_max];
-	apc1_fmax = a53_bc_clk.clkr.hw.init->rate_max[apc1_rate_max];
-
-	for_each_possible_cpu(cpu) {
-		pr_debug("the CPU number is : %d\n", cpu);
-		if (cpu/4 == 0) {
-			a53_c1_cpu = cpu;
-			WARN(add_opp(&a53_bc_clk.clkr.hw, get_cpu_device(cpu),
-				     &apc1_dev->dev, apc1_fmax),
-				     "Failed to add OPP levels for A53 big cluster\n");
-		} else if (cpu/4 == 1) {
-			a53_c0_cpu = cpu;
-			WARN(add_opp(&a53_lc_clk.clkr.hw, get_cpu_device(cpu),
-				     &apc0_dev->dev, apc0_fmax),
-				     "Failed to add OPP levels for A53 little cluster\n");
-		}
-	}
-
-	/* One time print during bootup */
-	pr_info("clock-cpu-8939: OPP tables populated (cpu %d and %d)",
-		a53_c0_cpu, a53_c1_cpu);
-
-	print_opp_table(a53_c0_cpu, a53_c1_cpu);
-
 }
 
 static void config_pll(int mux_id)
