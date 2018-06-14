@@ -17,5 +17,8 @@
 #define P_A53_LC_CLK		0
 #define P_A53_BC_CLK		1
 #define P_A53_CCI_CLK		2
+#define P_A53SSPLL_C0		3
+#define P_A53SSPLL_C1		4
+#define P_A53SSPLL_CCI		5
 
 #endif

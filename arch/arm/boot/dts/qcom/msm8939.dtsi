@@ -55,8 +55,8 @@
 		status = "ok";
 	};
 
-	clock_cpu: qcom,cpu-clock-8939@b111050 {
-		compatible = "qcom,cpu-clock-8939";
+	clock_cpu: cpu-clock-controller@b111050 {
+		compatible = "qcom,clk-cpu-msm8939";
 		reg =   <0xb011050 0x8>,
 			<0xb111050 0x8>,
 			<0xb1d1050 0x8>,
@@ -66,9 +66,9 @@
 		reg-names = "apcs-c1-rcg-base", "apcs-c0-rcg-base",
 				"apcs-cci-rcg-base", "efuse", "efuse1",
 				"efuse2";
-		vdd-c0-supply = <&apc_vreg_corner>;
-		vdd-c1-supply = <&apc_vreg_corner>;
-		vdd-cci-supply = <&apc_vreg_corner>;
+		//vdd-c0-supply = <&apc_vreg_corner>;
+		//vdd-c1-supply = <&apc_vreg_corner>;
+		//vdd-cci-supply = <&apc_vreg_corner>;
 		clocks = <&clock_gcc clk_gpll0_ao>,
 			 <&clock_gcc clk_a53ss_c0_pll>,
 			 <&clock_gcc clk_gpll0_ao>,

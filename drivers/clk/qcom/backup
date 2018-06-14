@@ -67,27 +67,27 @@ enum {
 
 static const struct parent_map cpuss_parent_map_a53_lc[] = {
 	{ P_GPLL0, 4 },
-	{ P_A53SSPLL_C0, 5 },
+	{ P_A53SSPLL, 5 },
 };
 
 static const char * const cpuss_parent_names_a53_lc[] = {
 	"gpll0_vote",
-	"a53sspll_c0",
+	"a53sspll_lc",
 };
 
 static const struct parent_map cpuss_parent_map_a53_bc[] = {
 	{ P_GPLL0, 4 },
-	{ P_A53SSPLL_C1, 5 },
+	{ P_A53SSPLL, 5 },
 };
 
 static const char * const cpuss_parent_names_a53_bc[] = {
 	"gpll0_vote",
-	"a53sspll_c1",
+	"a53sspll_bc",
 };
 
 static const struct parent_map cpuss_parent_map_a53_cci[] = {
 	{ P_GPLL0, 4 },
-	{ P_A53SSPLL_CCI, 5 },
+	{ P_A53SSPLL, 5 },
 };
 
 static const char * const cpuss_parent_names_a53_cci[] = {
@@ -421,6 +421,62 @@ static struct clk_init_data cpu_8939_clk_init_data[A53SS_MUX_NUM] = {
 	},
 };
 
+#if 0
+static struct clk_regmap_mux_div a53ssmux_lc = {
+	.reg_offset = 0x50,
+	.hid_width = 5,
+	.hid_shift = 0,
+	.src_width = 3,
+	.src_shift = 8,
+	.safe_src = 4,
+	.safe_freq = 200000000,
+	.parent_map = cpuss_parent_map_a53_lc,
+	.clkr.hw.init = &(struct clk_init_data) {
+		.name = "a53ssmux_lc",
+		.parent_names = cpuss_parent_names_a53_lc,
+		.num_parents = 2,
+		.ops = &clk_regmap_mux_div_ops,
+		.flags = CLK_SET_RATE_PARENT,// | CLK_GET_RATE_NOCACHE,
+	},
+};
+
+static struct clk_regmap_mux_div a53ssmux_bc = {
+	.reg_offset = 0x50,
+	.hid_width = 5,
+	.hid_shift = 0,
+	.src_width = 3,
+	.src_shift = 8,
+	.safe_src = 4,
+	.safe_freq = 400000000,
+	.parent_map = cpuss_parent_map_a53_bc,
+	.clkr.hw.init = &(struct clk_init_data) {
+		.name = "a53ssmux_bc",
+		.parent_names = cpuss_parent_names_a53_bc,
+		.num_parents = 2,
+		.ops = &clk_regmap_mux_div_ops,
+		.flags = CLK_SET_RATE_PARENT,// | CLK_GET_RATE_NOCACHE,
+	},
+};
+
+static struct clk_regmap_mux_div a53ssmux_cci = {
+	.reg_offset = 0x50,
+	.hid_width = 5,
+	.hid_shift = 0,
+	.src_width = 3,
+	.src_shift = 8,
+	.safe_src = 4,
+	.safe_freq = 200000000,
+	.parent_map = cpuss_parent_map_a53_cci,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "a53ssmux_cci",
+		.parent_names = cpuss_parent_names_a53_cci,
+		.num_parents = 2,
+		.ops = &clk_regmap_mux_div_ops,
+		.flags = CLK_SET_RATE_PARENT,// | CLK_GET_RATE_NOCACHE,
+	},
+};
+#endif
+
 static struct clk_regmap_mux_div a53ssmux_lc = {
 	.reg_offset = 0x0,
 	.hid_width = 5,
@@ -463,14 +519,16 @@ static struct clk_regmap_mux_div a53ssmux_cci = {
 	.clkr.hw.init = &cpu_8939_clk_init_data[A53SS_MUX_CCI],
 };
 
+
+
 static struct clk_hw *clk_cpu_8939_hw[] = {
 	[P_A53_LC_CLK]	= &a53ssmux_lc.clkr.hw,
 	[P_A53_BC_CLK]	= &a53ssmux_bc.clkr.hw,
 	[P_A53_CCI_CLK]	= &a53ssmux_cci.clkr.hw,
 //	[P_GPLL_CLK] = &gpll0_vote.hw,
-//	[P_LC_CLK] = &a53sspll_lc.hw,
-//	[P_BC_CLK] = &a53sspll_bc.hw,
-//	[P_CCI_CLK] = &a53sspll_cci.hw,
+        [P_LC_CLK] = &a53sspll_lc.hw,
+	[P_BC_CLK] = &a53sspll_bc.hw,
+	[P_CCI_CLK] = &a53sspll_cci.hw,
 };
 
 static int find_vdd_level(struct clk_init_data *clk_data, unsigned long rate)
@@ -636,8 +694,8 @@ static int of_get_fmax_vdd_class(struct platform_device *pdev,
 				 int mux_id, char *prop_name)
 {
 	struct device_node *of = pdev->dev.of_node;
-	struct clk_vdd_class *vdd = NULL;
 	int prop_len, i, j;
+	struct clk_vdd_class *vdd = NULL;
 	int nreg = 2;
 	u32 *array;
 
@@ -696,6 +754,7 @@ static int of_get_fmax_vdd_class(struct platform_device *pdev,
 	vdd->num_levels = prop_len;
 	vdd->cur_level = prop_len;
 	vdd->use_max_uV = true;
+
 	cpu_8939_clk_init_data[mux_id].num_rate_max = prop_len;
 
 	return 0;
@@ -771,79 +830,6 @@ out:
 								*version);
 }
 
-static int of_get_clk_src(struct platform_device *pdev)//,
-//				struct clk_src *parents, int mux_id)
-{
-	struct clk *clk_c0_4 = NULL;
-	struct clk *clk_c0_5 = NULL;
-	struct clk *clk_c1_4 = NULL;
-	struct clk *clk_c1_5 = NULL;
-	struct clk *clk_cci_4 = NULL;
-	struct clk *clk_cci_5 = NULL;
-
-	clk_c0_4 = devm_clk_get(&pdev->dev, "clk-c0-4");
-	if (IS_ERR(clk_c0_4)) {
-		dev_err(&pdev->dev, "The clk-c0-4 clock cannot be found.\n");
-
-		if (PTR_ERR(clk_c0_4) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Critical error. Bailing out.\n");
-
-		return PTR_ERR(clk_c0_4);
-	}
-
-	clk_c0_5 = devm_clk_get(&pdev->dev, "clk-c0-5");
-	if (IS_ERR(clk_c0_5)) {
-		dev_err(&pdev->dev, "The clk-c0-5 clock cannot be found.\n");
-
-		if (PTR_ERR(clk_c0_5) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Critical error. Bailing out.\n");
-
-		return PTR_ERR(clk_c0_5);
-	}
-
-	clk_c1_4 = devm_clk_get(&pdev->dev, "clk-c1-4");
-	if (IS_ERR(clk_c1_4)) {
-		dev_err(&pdev->dev, "The clk-c1-4 clock cannot be found.\n");
-
-		if (PTR_ERR(clk_c1_4) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Critical error. Bailing out.\n");
-
-		return PTR_ERR(clk_c1_4);
-	}
-
-	clk_c1_5 = devm_clk_get(&pdev->dev, "clk-c1-5");
-	if (IS_ERR(clk_c1_5)) {
-		dev_err(&pdev->dev, "The clk-c1-5 clock cannot be found.\n");
-
-		if (PTR_ERR(clk_c1_5) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Critical error. Bailing out.\n");
-
-		return PTR_ERR(clk_c1_5);
-	}
-
-	clk_cci_4 = devm_clk_get(&pdev->dev, "clk-cci-4");
-	if (IS_ERR(clk_cci_4)) {
-		dev_err(&pdev->dev, "The clk-cci-4 clock cannot be found.\n");
-
-		if (PTR_ERR(clk_cci_4) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Critical error. Bailing out.\n");
-
-		return PTR_ERR(clk_cci_4);
-	}
-
-	clk_cci_5 = devm_clk_get(&pdev->dev, "clk-cci-5");
-	if (IS_ERR(clk_cci_5)) {
-		dev_err(&pdev->dev, "The clk-cci-5 clock cannot be found.\n");
-
-		if (PTR_ERR(clk_cci_5) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Critical error. Bailing out.\n");
-
-		return PTR_ERR(clk_cci_5);
-	}
-
-	return 0;
-}
-
 static int cpu_8939_map_pll(struct platform_device *pdev,
 				struct clk_regmap *clkr,
 				int virt_id, char* res_name)
@@ -884,59 +870,51 @@ static int cpu_parse_devicetree(struct platform_device *pdev)
 		pr_info("------------ERROR apcs-c0-rcg-base!!!!-----------\n");
 		return rc;
 	};
-pr_info("------------DONE apcs-c0-rcg-base!!!!-----------\n");
 
 	rc = cpu_8939_map_pll(pdev, &a53ssmux_bc.clkr, APCS_C1_PLL_BASE, "apcs-c1-rcg-base");
 	if (rc) {
 		pr_info("------------ERROR apcs-c1-rcg-base!!!!--------------\n");
 		return rc;
 	};
-pr_info("------------DONE apcs-c1-rcg-base!!!!-----------\n");
 
 	rc = cpu_8939_map_pll(pdev, &a53ssmux_cci.clkr, APCS_CCI_PLL_BASE, "apcs-cci-rcg-base");
 	if (rc) {
 		pr_info("------------ERROR apcs-cci-rcg-base!!!!------------\n");
 		return rc;
 	};
-pr_info("------------DONE apcs-cci-rcg-base!!!!-----------\n");
 
 	//rc = cpu_8939_map_spm(pdev);
 	//if (rc)
 	//	return rc;
 
-	vdd_c0.regulator[0] = devm_regulator_get(&pdev->dev, "vdd-c0");
+	vdd_c0.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_c0");
 	if (IS_ERR(vdd_c0.regulator[0])) {
-		pr_err("vdd-c0 vreg err %ld\n", PTR_ERR(vdd_c0.regulator[0]));
 		if (PTR_ERR(vdd_c0.regulator[0]) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Unable to get vdd_c0 regulator\n");
+			dev_err(&pdev->dev, "Unable to get vdd_c0 regulator!!!\n");
 		return PTR_ERR(vdd_c0.regulator[0]);
 	}
 	vdd_c0.use_max_uV = true;
-pr_info("------------DONE vdd-c0!!!!-----------\n");
 
-	vdd_c1.regulator[0] = devm_regulator_get(&pdev->dev, "vdd-c1");
+	vdd_c1.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_c1");
 	if (IS_ERR(vdd_c1.regulator[0])) {
-		pr_err("vdd-c1 vreg err %ld\n", PTR_ERR(vdd_c1.regulator[0]));
 		if (PTR_ERR(vdd_c1.regulator[0]) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Unable to get vdd_c1 regulator\n");
+			dev_err(&pdev->dev, "Unable to get vdd_c1 regulator!!!\n");
 		return PTR_ERR(vdd_c1.regulator[0]);
 	}
 	vdd_c1.use_max_uV = true;
-pr_info("------------DONE vdd-c1!!!!-----------\n");
 
-	vdd_cci.regulator[0] = devm_regulator_get(&pdev->dev, "vdd-cci");
+	vdd_cci.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_cci");
 	if (IS_ERR(vdd_cci.regulator[0])) {
-		pr_err("vdd-cci vreg err %ld\n", PTR_ERR(vdd_cci.regulator[0]));
 		if (PTR_ERR(vdd_cci.regulator[0]) != -EPROBE_DEFER)
-			dev_err(&pdev->dev, "Unable to get vdd_cci regulator\n");
+			dev_err(&pdev->dev, "Unable to get vdd_cci regulator!!!\n");
 		return PTR_ERR(vdd_cci.regulator[0]);
 	}
 	vdd_cci.use_max_uV = true;
-pr_info("------------DONE vdd-cci!!!!-----------\n");
 
-	rc = of_get_clk_src(pdev);
-	if (IS_ERR_VALUE(rc))
-		return rc;
+
+
+
+
 
 	return 0;
 }
@@ -981,8 +959,6 @@ static int clock_a53_probe(struct platform_device *pdev)
 	rc = cpu_parse_devicetree(pdev);
 	if (rc)
 		return rc;
-
-	pr_info("----------DT PARSED!!!--------\n");
 
 	clk_onecell = devm_kzalloc(&pdev->dev, sizeof(struct clk_onecell_data), GFP_KERNEL);
 	if (!clk_onecell)
@@ -1070,14 +1046,14 @@ static int clock_a53_probe(struct platform_device *pdev)
 }
 
 static struct of_device_id clock_a53_match_table[] = {
-	{.compatible = "qcom,clk-cpu-msm8939"},
+	{.compatible = "qcom,cpu-clock-8939"},
 	{}
 };
 
 static struct platform_driver clock_a53_driver = {
 	.probe = clock_a53_probe,
 	.driver = {
-		.name = "clk-cpu-msm8939",
+		.name = "cpu-clock-8939",
 		.of_match_table = clock_a53_match_table,
 		.owner = THIS_MODULE,
 	},
