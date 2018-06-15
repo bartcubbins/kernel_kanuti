@@ -44,17 +44,10 @@ static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
 
 enum {
-	P_GPLL0_OUT_MAIN,
-	P_GPLL0_AUX,
 	P_GPLL0_OUT_AUX,
-	P_GPLL1,
-	P_GPLL1_AUX,
+	P_GPLL0_OUT_MAIN,
+	P_GPLL2, // ???
 	P_GPLL2_OUT_AUX,
-	P_GPLL2,
-	P_GPLL2_AUX,
-	P_DSI0_PHYPLL_BYTE,
-	P_DSI0_PHYPLL_DSI,
-	P_SLEEP_CLK,
 	P_XO,
 };
 
