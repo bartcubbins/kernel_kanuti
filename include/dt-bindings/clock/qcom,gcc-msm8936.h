@@ -177,12 +177,4 @@
 /* QoS Reference clock */
 #define GCC_SNOC_QOSGEN_CLK		140
 
-/* Indexes for GDSCs */
-#define BIMC_GDSC			0
-#define VENUS_GDSC			1
-#define MDSS_GDSC			2
-#define JPEG_GDSC			3
-#define VFE_GDSC			4
-#define OXILI_GDSC			5
-
 #endif

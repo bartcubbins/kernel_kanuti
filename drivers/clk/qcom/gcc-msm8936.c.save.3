@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#define pr_fmt(fmt) "%s: " fmt, __func__
+#define pr_fmt(fmt) "clk: %s: " fmt, __func__
 
 #include <linux/kernel.h>
 #include <linux/bitops.h>
@@ -20,7 +20,6 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/of_device.h>
-#include <linux/clk.h>
 #include <linux/clk-provider.h>
 #include <linux/regmap.h>
 #include <linux/reset-controller.h>
@@ -30,6 +29,7 @@
 
 #include "common.h"
 #include "clk-regmap.h"
+#include <linux/clk.h>
 #include "clk-pll.h"
 #include "clk-rcg.h"
 #include "clk-branch.h"
@@ -37,13 +37,12 @@
 #include "gdsc.h"
 #include "vdd-level-8936.h"
 
-#define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
-
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
 
 enum {
+	P_XO_A,
 	P_GPLL0_OUT_MAIN,
 	P_GPLL0_AUX,
 	P_GPLL1,
@@ -53,7 +52,6 @@ enum {
 	P_DSI0_PHYPLL_BYTE,
 	P_DSI0_PHYPLL_DSI,
 	P_SLEEP_CLK,
-	P_XO_A,
 };
 
 static const struct parent_map gcc_xo_gpll0_map[] = {
@@ -150,6 +148,10 @@ static const char * const gcc_xo_dsibyte[] = {
 	"xo",
 	"dsi0pllbyte",
 };
+
+
+
+#define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
 static struct clk_pll gpll0 = {
 	.l_reg = 0x21004,
@@ -327,7 +329,7 @@ static const struct freq_tbl ftbl_gcc_camss_vfe0_clk[] = {
 	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
 	F(320000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
 	F(400000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
-	F(465000000, P_GPLL2_OUT_AUX, 2, 0, 0),
+	F(465000000, P_GPLL2, 2, 0, 0),
 	F(480000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
 	F(600000000, P_GPLL0_OUT_MAIN, 2, 0,0),
 	{ }
@@ -743,7 +745,7 @@ static const struct freq_tbl ftbl_gcc_gp1_3_clk[] = {
 };
 
 static struct clk_rcg2 gp1_clk_src = {
-	.cmd_rcgr = 0x55000,
+	.cmd_rcgr = 0x08004,
 	.mnd_width = 8,
 	.hid_width = 5,
 	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
@@ -971,7 +973,7 @@ static struct clk_branch gcc_prng_ahb_clk = {
 };
 
 static struct clk_branch gcc_apss_tcu_clk = {
-	.halt_reg = 0x12018, // CHECKME!!!
+	.halt_reg = 0x12018,
 	.halt_check = BRANCH_HALT_VOTED,
 	.clkr = {
 		.enable_reg = 0x4500c,
@@ -1627,7 +1629,7 @@ static struct clk_branch gcc_camss_csi1phytimer_clk = {
 };
 
 static struct clk_branch gcc_camss_ahb_clk = {
-	.halt_reg = 0x56004,
+	.halt_reg = 0x5a014,
 	.clkr = {
 		.enable_reg = 0x5a014,
 		.enable_mask = BIT(0),
@@ -1639,7 +1641,7 @@ static struct clk_branch gcc_camss_ahb_clk = {
 };
 
 static struct clk_branch gcc_camss_top_ahb_clk = {
-	.halt_reg = 0x5a014,
+	.halt_reg = 0x56004,
 	.clkr = {
 		.enable_reg = 0x56004,
 		.enable_mask = BIT(0),
@@ -1846,7 +1848,7 @@ static struct clk_branch gcc_mdss_esc0_clk = {
 };
 
 static struct clk_branch gcc_mdss_mdp_clk = {
-	.halt_reg = 0x4d088,
+	.halt_reg = 0x4D088,
 	.halt_check = BRANCH_HALT,
 	.clkr = {
 		.enable_reg = 0x4D088,
