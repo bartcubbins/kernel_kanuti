@@ -349,17 +349,17 @@ static struct clk_rcg2 vfe0_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_mdss_mdp_clk[] = {
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
-	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(145500000, P_GPLL0_OUT_MAIN, 5.5, 0, 0),
+	F(50000000, P_GPLL0_OUT_AUX, 16, 0, 0),
+	F(80000000, P_GPLL0_OUT_AUX, 10, 0, 0),
+	F(100000000, P_GPLL0_OUT_AUX, 8, 0, 0),
+	F(145500000, P_GPLL0_OUT_AUX, 5.5, 0, 0),
 	F(153600000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(160000000, P_GPLL0_OUT_MAIN, 5, 0, 0),
-	F(177780000, P_GPLL0_OUT_MAIN, 4.5, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
+	F(160000000, P_GPLL0_OUT_AUX, 5, 0, 0),
+	F(177780000, P_GPLL0_OUT_AUX, 4.5, 0, 0),
+	F(200000000, P_GPLL0_OUT_AUX, 4, 0, 0),
+	F(266670000, P_GPLL0_OUT_AUX, 3, 0, 0),
 	F(307200000, P_GPLL0_OUT_MAIN, 2, 0, 0),
-	F(366670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
+	F(366670000, P_GPLL0_OUT_AUX, 3, 0, 0),
 	{ }
 };
 
@@ -379,18 +379,18 @@ static struct clk_rcg2 mdp_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_oxili_gfx3d_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0),
-	F(50000000, P_GPLL0_AUX, 16, 0, 0),
-	F(80000000, P_GPLL0_AUX, 10, 0, 0),
-	F(100000000, P_GPLL0_AUX, 8, 0, 0),
-	F(160000000, P_GPLL0_AUX, 5, 0, 0),
-	F(200000000, P_GPLL0_AUX, 4, 0, 0),
-	F(220000000, P_GPLL0_AUX,   5,	  0,	0),
-	F(266670000, P_GPLL0_AUX, 3, 0, 0),
-	F(310000000, P_GPLL2, 3, 0, 0),
-	F(400000000, P_GPLL0_AUX, 2, 0, 0),
-	F(465000000, P_GPLL0_AUX, 2, 0, 0),
-	F(550000000, P_GPLL0_AUX, 2, 0, 0),
+	F(19200000, P_XO_A, 1, 0, 0), // CHECKME!!!
+	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
+	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
+	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
+	F(160000000, P_GPLL0_OUT_MAIN, 5, 0, 0),
+	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
+	F(220000000, P_GPLL0_OUT_MAIN,   5,	  0,	0),
+	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
+	F(310000000, P_GPLL2, 3, 0, 0), //CHECKME!!!
+	F(400000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
+	F(465000000, P_GPLL0_AUX, 2, 0, 0), //CHECKME!!!
+	F(550000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
 	{ }
 };
 
@@ -410,7 +410,7 @@ static struct clk_rcg2 gfx3d_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_blsp1_qup1_6_i2c_apps_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0),
+	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
 	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
 	{ }
 };
@@ -504,7 +504,7 @@ static const struct freq_tbl ftbl_gcc_blsp1_uart1_6_apps_clk[] = {
 	F(7372800, P_GPLL0_OUT_MAIN, 1, 144, 15625),
 	F(14745600, P_GPLL0_OUT_MAIN, 1, 288, 15625),
 	F(16000000, P_GPLL0_OUT_MAIN, 10, 1, 5),
-	F(19200000, P_XO_A, 1, 0, 0),
+	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
 	F(24000000, P_GPLL0_OUT_MAIN, 1, 3, 100),
 	F(25000000, P_GPLL0_OUT_MAIN, 16, 1, 2),
 	F(32000000, P_GPLL0_OUT_MAIN, 1, 1, 25),
@@ -549,8 +549,8 @@ static struct clk_rcg2 blsp1_uart2_apps_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_camss_cci_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0),
-	F(37500000, P_GPLL0_AUX, 1, 3, 64),
+	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
+	F(37500000, P_GPLL0_AUX, 1, 3, 64), //CHECKME!!!
 	{ }
 };
 
@@ -718,7 +718,7 @@ static const struct freq_tbl ftbl_gcc_camss_cpp_clk[] = {
 	F(228570000, P_GPLL0_OUT_MAIN, 3.5, 0, 0),
 	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
 	F(320000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
-	F(465000000, P_GPLL2, 2, 0, 0),
+	F(465000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
 	{ }
 };
 
@@ -738,7 +738,7 @@ static struct clk_rcg2 cpp_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_gp1_3_clk[] = {
-	F(19200000, P_XO_A, 1, 0,	0),
+	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
 	{ }
 };
 
@@ -788,7 +788,7 @@ static struct clk_rcg2 gp3_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_mdss_esc0_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0),
+	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
 	{ }
 };
 
@@ -807,7 +807,7 @@ static struct clk_rcg2 esc0_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_mdss_vsync_clk[] = {
-	F(19200000, P_XO_A, 1, 0,	0),
+	F(19200000, P_XO_A, 1, 0,	0), //CHECKME!!!
 	{ }
 };
 
@@ -845,8 +845,8 @@ static struct clk_rcg2 pdm2_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_sdcc1_2_apps_clk[] = {
-	F(144000, P_XO_A, 16, 3, 25),
-	F(400000, P_XO_A, 12, 1, 4),
+	F(144000, P_XO_A, 16, 3, 25), //CHECKME!!!
+	F(400000, P_XO_A, 12, 1, 4), //CHECKME!!!
 	F(20000000, P_GPLL0_OUT_MAIN, 10, 1, 4),
 	F(25000000, P_GPLL0_OUT_MAIN, 16, 1, 2),
 	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
