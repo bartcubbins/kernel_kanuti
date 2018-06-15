@@ -317,7 +317,7 @@ static struct clk_rcg2 mdp_clk_src = {
 
 static const struct parent_map gcc_xo_gpll0a_gpll1_gpll2a_map[] = {
 	{ P_XO, 0 },
-	{ P_GPLL0_OUT_MAIN, 3 },
+	{ P_GPLL0_OUT_MAIN, 1 },
 	{ P_GPLL2, 1 },
 	{ P_GPLL0_OUT_AUX, 2 },
 };
@@ -765,7 +765,7 @@ static struct clk_rcg2 gp3_clk_src = {
 };
 
 static const struct parent_map gcc_xo_dsibyte_map[] = {
-	{ P_XO, 0, },
+	{ P_XO, 0 },
 };
 
 static const char * const gcc_xo_dsibyte[] = {
