@@ -44,10 +44,13 @@ static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
 
 enum {
-	P_GPLL0_OUT_AUX,
-	P_GPLL0_OUT_MAIN,
-	P_GPLL2, // ???
-	P_GPLL2_OUT_AUX,
+	P_GPLL0,
+	P_GPLL0_AUX,
+	P_GPLL1,
+	P_GPLL2_AUX,
+	P_GPLL2_GFX3D,
+	P_GPLL3,
+	P_GPLL3_AUX,
 	P_XO,
 };
 
@@ -149,19 +152,19 @@ static struct clk_pll gpll6 = {
 
 static const struct parent_map gcc_xo_gpll0_map[] = {
 	{ P_XO, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
+	{ P_GPLL0, 1 },
 };
 
 static const char * const gcc_xo_gpll0[] = {
 	"xo",
-	"gpll0_out_main",
+	"gpll0_vote",
 };
 
 static const struct freq_tbl ftbl_apss_ahb_clk[] = {
 	F(19200000, P_XO, 1, 0, 0),
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(133330000, P_GPLL0_OUT_MAIN, 6, 0, 0),
+	F(50000000, P_GPLL0, 16, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(133330000, P_GPLL0, 6, 0, 0),
 	{ }
 };
 
@@ -180,8 +183,8 @@ static struct clk_rcg2 apss_ahb_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_camss_csi0_1_2_clk[] = {
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0,	0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0,	0),
+	F(100000000, P_GPLL0, 8, 0,	0),
+	F(200000000, P_GPLL0, 4, 0,	0),
 	{ }
 };
 
@@ -228,28 +231,28 @@ static struct clk_rcg2 csi2_clk_src = {
 };
 
 static const struct parent_map gcc_xo_gpll0_gpll2_map[] = {
-	{ P_GPLL0_OUT_MAIN, 1 },
-	{ P_GPLL2_OUT_AUX, 2 },
+	{ P_GPLL0, 1 },
+	{ P_GPLL2_AUX, 3 },
 };
 
 static const char * const gcc_xo_gpll0_gpll2[] = {
-	"gpll0_out_main",
-	"gpll2_out_aux",
+	"gpll0_vote",
+	"gpll2_vote",
 };
 
 static const struct freq_tbl ftbl_gcc_camss_vfe0_clk[] = {
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
-	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(160000000, P_GPLL0_OUT_MAIN, 5, 0, 0),
-	F(177780000, P_GPLL0_OUT_MAIN, 4.5, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
-	F(320000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
-	F(400000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
-	F(465000000, P_GPLL2_OUT_AUX, 2, 0, 0),
-	F(480000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
-	F(600000000, P_GPLL0_OUT_MAIN, 2, 0,0),
+	F(50000000, P_GPLL0, 16, 0, 0),
+	F(80000000, P_GPLL0, 10, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(160000000, P_GPLL0, 5, 0, 0),
+	F(177780000, P_GPLL0, 4.5, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	F(266670000, P_GPLL0, 3, 0, 0),
+	F(320000000, P_GPLL0, 2.5, 0, 0),
+	F(400000000, P_GPLL0, 2, 0, 0),
+	F(465000000, P_GPLL2_AUX, 2, 0, 0),
+	F(480000000, P_GPLL0, 2.5, 0, 0),
+	F(600000000, P_GPLL0, 2, 0,0),
 	{ }
 };
 
@@ -269,27 +272,29 @@ static struct clk_rcg2 vfe0_clk_src = {
 };
 
 static const struct parent_map gcc_xo_gpll0_dsiphy_map[] = {
-	{ P_GPLL0_OUT_AUX, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
+	{ P_GPLL0_AUX, 5 },
+	{ P_GPLL1, 1 },
+	{ P_GPLL3_AUX, 4 },
 };
 
 static const char * const gcc_xo_gpll0_dsiphy[] = {
-	"gpll0_out_aux",
-	"gpll0_out_main",
+	"gpll0_vote",
+	"gpll1_vote",
+	"gpll3_vote",
 };
 
 static const struct freq_tbl ftbl_gcc_mdss_mdp_clk[] = {
-	F(50000000, P_GPLL0_OUT_AUX, 16, 0, 0),
-	F(80000000, P_GPLL0_OUT_AUX, 10, 0, 0),
-	F(100000000, P_GPLL0_OUT_AUX, 8, 0, 0),
-	F(145500000, P_GPLL0_OUT_AUX, 5.5, 0, 0),
-	F(153600000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(160000000, P_GPLL0_OUT_AUX, 5, 0, 0),
-	F(177780000, P_GPLL0_OUT_AUX, 4.5, 0, 0),
-	F(200000000, P_GPLL0_OUT_AUX, 4, 0, 0),
-	F(266670000, P_GPLL0_OUT_AUX, 3, 0, 0),
-	F(307200000, P_GPLL0_OUT_MAIN, 2, 0, 0),
-	F(366670000, P_GPLL0_OUT_AUX, 3, 0, 0),
+	F(50000000, P_GPLL0_AUX, 16, 0, 0),
+	F(80000000, P_GPLL0_AUX, 10, 0, 0),
+	F(100000000, P_GPLL0_AUX, 8, 0, 0),
+	F(145500000, P_GPLL0_AUX, 5.5, 0, 0),
+	F(153600000, P_GPLL1, 4, 0, 0),
+	F(160000000, P_GPLL0_AUX, 5, 0, 0),
+	F(177780000, P_GPLL0_AUX, 4.5, 0, 0),
+	F(200000000, P_GPLL0_AUX, 4, 0, 0),
+	F(266670000, P_GPLL0_AUX, 3, 0, 0),
+	F(307200000, P_GPLL1, 2, 0, 0),
+	F(366670000, P_GPLL3_AUX, 3, 0, 0),
 	{ }
 };
 
@@ -310,31 +315,31 @@ static struct clk_rcg2 mdp_clk_src = {
 
 static const struct parent_map gcc_xo_gpll0a_gpll1_gpll2a_map[] = {
 	{ P_XO, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
-	{ P_GPLL2, 1 },
-	{ P_GPLL0_OUT_AUX, 2 },
+	{ P_GPLL0, 1 },
+	{ P_GPLL2_GFX3D, 4 },
+	{ P_GPLL3, 5 },
 };
 
 static const char * const gcc_xo_gpll0a_gpll1_gpll2a[] = {
 	"xo",
-	"gpll0_out_main",
-	"gpll2",
-	"gpll0_out_aux",
+	"gpll0_vote",
+	"gpll2_vote",
+	"gpll3",
 };
 
 static const struct freq_tbl ftbl_gcc_oxili_gfx3d_clk[] = {
 	F(19200000, P_XO, 1, 0, 0),
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
-	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(160000000, P_GPLL0_OUT_MAIN, 5, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(220000000, P_GPLL0_OUT_MAIN,   5,	  0,	0),
-	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
-	F(310000000, P_GPLL2, 3, 0, 0), //CHECKME!!!
-	F(400000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
-	F(465000000, P_GPLL0_OUT_AUX, 2, 0, 0),
-	F(550000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
+	F(50000000, P_GPLL0, 16, 0, 0),
+	F(80000000, P_GPLL0, 10, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(160000000, P_GPLL0, 5, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	F(220000000, P_GPLL3, 5, 0, 0),
+	F(266670000, P_GPLL0, 3, 0, 0),
+	F(310000000, P_GPLL2_GFX3D, 3, 0, 0),
+	F(400000000, P_GPLL0, 2, 0, 0),
+	F(465000000, P_GPLL2_GFX3D, 2, 0, 0),
+	F(550000000, P_GPLL3, 2, 0, 0),
 	{ }
 };
 
@@ -354,8 +359,8 @@ static struct clk_rcg2 gfx3d_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_blsp1_qup1_6_i2c_apps_clk[] = {
-	F(19200000, P_XO, 1, 0, 0), //CHECKME!!!
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
+	F(19200000, P_XO, 1, 0, 0),
+	F(50000000, P_GPLL0, 16, 0, 0),
 	{ }
 };
 
@@ -444,21 +449,21 @@ static struct clk_rcg2 blsp1_qup6_i2c_apps_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_blsp1_uart1_6_apps_clk[] = {
-	F(3686400, P_GPLL0_OUT_MAIN, 1, 72, 15625),
-	F(7372800, P_GPLL0_OUT_MAIN, 1, 144, 15625),
-	F(14745600, P_GPLL0_OUT_MAIN, 1, 288, 15625),
-	F(16000000, P_GPLL0_OUT_MAIN, 10, 1, 5),
-	F(19200000, P_XO, 1, 0, 0), //CHECKME!!!
-	F(24000000, P_GPLL0_OUT_MAIN, 1, 3, 100),
-	F(25000000, P_GPLL0_OUT_MAIN, 16, 1, 2),
-	F(32000000, P_GPLL0_OUT_MAIN, 1, 1, 25),
-	F(40000000, P_GPLL0_OUT_MAIN, 1, 1, 20),
-	F(46400000, P_GPLL0_OUT_MAIN, 1, 29, 500),
-	F(48000000, P_GPLL0_OUT_MAIN, 1, 3, 50),
-	F(51200000, P_GPLL0_OUT_MAIN, 1, 8, 125),
-	F(56000000, P_GPLL0_OUT_MAIN, 1, 7, 100),
-	F(58982400, P_GPLL0_OUT_MAIN, 1, 1152, 15625),
-	F(60000000, P_GPLL0_OUT_MAIN, 1, 3, 40),
+	F(3686400, P_GPLL0, 1, 72, 15625),
+	F(7372800, P_GPLL0, 1, 144, 15625),
+	F(14745600, P_GPLL0, 1, 288, 15625),
+	F(16000000, P_GPLL0, 10, 1, 5),
+	F(19200000, P_XO, 1, 0, 0),
+	F(24000000, P_GPLL0, 1, 3, 100),
+	F(25000000, P_GPLL0, 16, 1, 2),
+	F(32000000, P_GPLL0, 1, 1, 25),
+	F(40000000, P_GPLL0, 1, 1, 20),
+	F(46400000, P_GPLL0, 1, 29, 500),
+	F(48000000, P_GPLL0, 1, 3, 50),
+	F(51200000, P_GPLL0, 1, 8, 125),
+	F(56000000, P_GPLL0, 1, 7, 100),
+	F(58982400, P_GPLL0, 1, 1152, 15625),
+	F(60000000, P_GPLL0, 1, 3, 40),
 	{ }
 };
 
@@ -494,7 +499,7 @@ static struct clk_rcg2 blsp1_uart2_apps_clk_src = {
 
 static const struct parent_map gcc_xo_gpll0a_map[] = {
 	{ P_XO, 0 },
-	{ P_GPLL0_OUT_AUX, 2 },
+	{ P_GPLL0_AUX, 5 },
 };
 
 static const char * const gcc_xo_gpll0a[] = {
@@ -504,7 +509,7 @@ static const char * const gcc_xo_gpll0a[] = {
 
 static const struct freq_tbl ftbl_gcc_camss_cci_clk[] = {
 	F(19200000, P_XO, 1, 0, 0),
-	F(37500000, P_GPLL0_OUT_AUX, 1, 3, 64),
+	F(37500000, P_GPLL0_AUX, 1, 3, 64),
 	{ }
 };
 
@@ -524,16 +529,18 @@ static struct clk_rcg2 cci_clk_src = {
 };
 
 static const struct parent_map gcc_xo_gpll0_gpll1a_sleep_map[] = {
-	{ P_GPLL0_OUT_MAIN, 1 },
+	{ P_XO, 0 },
+	{ P_GPLL0, 1 },
 };
 
 static const char * const gcc_xo_gpll0_gpll1a_sleep[] = {
-	"gpll0_out_main",
+	"xo",
+	"gpll0_vote",
 };
 
 static const struct freq_tbl ftbl_gcc_camss_gp0_1_clk[] = {
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
 	{ }
 };
 
@@ -568,9 +575,9 @@ static struct clk_rcg2 camss_gp1_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_camss_jpeg0_clk[] = {
-	F(133330000, P_GPLL0_OUT_MAIN, 6, 0,	0),
-	F(266670000, P_GPLL0_OUT_MAIN, 3, 0,	0),
-	F(320000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
+	F(133330000, P_GPLL0, 6, 0,	0),
+	F(266670000, P_GPLL0, 3, 0,	0),
+	F(320000000, P_GPLL0, 2.5, 0, 0),
 	{ }
 };
 
@@ -590,8 +597,8 @@ static struct clk_rcg2 jpeg0_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_camss_mclk0_1_2_clk[] = {
-	F(23880000, P_GPLL0_OUT_MAIN, 1, 1, 45),
-	F(66670000, P_GPLL0_OUT_MAIN, 12, 0, 0),
+	F(23880000, P_GPLL0, 1, 1, 45),
+	F(66670000, P_GPLL0, 12, 0, 0),
 	{ }
 };
 
@@ -641,16 +648,16 @@ static struct clk_rcg2 mclk2_clk_src = {
 };
 
 static const struct parent_map gcc_xo_gpll0_gpll1a_map[] = {
-	{ P_GPLL0_OUT_MAIN, 1 },
+	{ P_GPLL0, 1 },
 };
 
 static const char * const gcc_xo_gpll0_gpll1a[] = {
-	"gpll0_out_main",
+	"gpll0_vote",
 };
 
 static const struct freq_tbl ftbl_gcc_camss_csi0_1phytimer_clk[] = {
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
 	{ }
 };
 
@@ -683,12 +690,12 @@ static struct clk_rcg2 csi1phytimer_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_camss_cpp_clk[] = {
-	F(160000000, P_GPLL0_OUT_MAIN, 5, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(228570000, P_GPLL0_OUT_MAIN, 3.5, 0, 0),
-	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
-	F(320000000, P_GPLL0_OUT_MAIN, 2.5, 0, 0),
-	F(465000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
+	F(160000000, P_GPLL0, 5, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	F(228570000, P_GPLL0, 3.5, 0, 0),
+	F(266670000, P_GPLL0, 3, 0, 0),
+	F(320000000, P_GPLL0, 2.5, 0, 0),
+	F(465000000, P_GPLL0, 2, 0, 0),
 	{ }
 };
 
@@ -708,7 +715,7 @@ static struct clk_rcg2 cpp_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_gp1_3_clk[] = {
-	F(19200000, P_XO, 1, 0, 0), //CHECKME!!!
+	F(19200000, P_XO, 1, 0, 0),
 	{ }
 };
 
@@ -785,7 +792,7 @@ static struct clk_rcg2 esc0_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_mdss_vsync_clk[] = {
-	F(19200000, P_XO, 1, 0,	0), //CHECKME!!!
+	F(19200000, P_XO, 1, 0,	0),
 	{ }
 };
 
@@ -804,7 +811,7 @@ static struct clk_rcg2 vsync_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_pdm2_clk[] = {
-	F(64000000, P_GPLL0_OUT_MAIN, 12.5, 0, 0),
+	F(64000000, P_GPLL0, 12.5, 0, 0),
 	{ }
 };
 
@@ -823,14 +830,14 @@ static struct clk_rcg2 pdm2_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_sdcc1_2_apps_clk[] = {
-	F(144000, P_XO, 16, 3, 25), //CHECKME!!!
-	F(400000, P_XO, 12, 1, 4), //CHECKME!!!
-	F(20000000, P_GPLL0_OUT_MAIN, 10, 1, 4),
-	F(25000000, P_GPLL0_OUT_MAIN, 16, 1, 2),
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(177770000, P_GPLL0_OUT_MAIN, 4.5, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
+	F(144000, P_XO, 16, 3, 25),
+	F(400000, P_XO, 12, 1, 4),
+	F(20000000, P_GPLL0, 10, 1, 4),
+	F(25000000, P_GPLL0, 16, 1, 2),
+	F(50000000, P_GPLL0, 16, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(177770000, P_GPLL0, 4.5, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
 	{ }
 };
 
@@ -865,9 +872,9 @@ static struct clk_rcg2 sdcc2_apps_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_usb_hs_system_clk[] = {
-	F(57140000, P_GPLL0_OUT_MAIN, 14, 0, 0),
-	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
-	F( 100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
+	F(57140000, P_GPLL0, 14, 0, 0),
+	F(80000000, P_GPLL0, 10, 0, 0),
+	F( 100000000, P_GPLL0, 8, 0, 0),
 	{ }
 };
 
@@ -886,9 +893,9 @@ static struct clk_rcg2 usb_hs_system_clk_src = {
 };
 
 static const struct freq_tbl ftbl_gcc_venus0_vcodec0_clk[] = {
-	F(133330000, P_GPLL0_OUT_MAIN, 6, 0, 0),
-	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
-	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
+	F(133330000, P_GPLL0, 6, 0, 0),
+	F(200000000, P_GPLL0, 4, 0, 0),
+	F(266670000, P_GPLL0, 3, 0, 0),
 	{ }
 };
 
@@ -2149,10 +2156,10 @@ static struct clk_branch gcc_crypto_axi_clk = {
 };
 
 static const struct freq_tbl ftbl_gcc_crypto_clk[] = {
-	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
-	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
-	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
-	F(160000000, P_GPLL0_OUT_MAIN, 5, 0, 0),
+	F(50000000, P_GPLL0, 16, 0, 0),
+	F(80000000, P_GPLL0, 10, 0, 0),
+	F(100000000, P_GPLL0, 8, 0, 0),
+	F(160000000, P_GPLL0, 5, 0, 0),
 	{ }
 };
 
