@@ -46,109 +46,16 @@ static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
 enum {
 	P_GPLL0_OUT_MAIN,
 	P_GPLL0_AUX,
+	P_GPLL0_OUT_AUX,
 	P_GPLL1,
 	P_GPLL1_AUX,
+	P_GPLL2_OUT_AUX,
 	P_GPLL2,
 	P_GPLL2_AUX,
 	P_DSI0_PHYPLL_BYTE,
 	P_DSI0_PHYPLL_DSI,
 	P_SLEEP_CLK,
 	P_XO_A,
-};
-
-static const struct parent_map gcc_xo_gpll0_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
-};
-
-static const char * const gcc_xo_gpll0[] = {
-	"xo_a",
-	"gpll0_out_main",
-};
-
-static const struct parent_map gcc_xo_gpll0_gpll2_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
-	{ P_GPLL2, 2 },
-};
-
-static const char * const gcc_xo_gpll0_gpll2[] = {
-	"xo",
-	"gpll0_vote",
-	"gpll2_vote",
-};
-
-
-static const struct parent_map gcc_xo_gpll0_dsiphy_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
-	{ P_DSI0_PHYPLL_DSI, 2 },
-};
-
-static const char * const gcc_xo_gpll0_dsiphy[] = {
-	"xo",
-	"gpll0_vote",
-	"dsi0pll",
-};
-
-static const struct parent_map gcc_xo_gpll0a_gpll1_gpll2a_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_AUX, 3 },
-	{ P_GPLL1, 1 },
-	{ P_GPLL2_AUX, 2 },
-};
-
-static const char * const gcc_xo_gpll0a_gpll1_gpll2a[] = {
-	"xo",
-	"gpll0_vote",
-	"gpll1_vote",
-	"gpll2_vote",
-};
-
-static const struct parent_map gcc_xo_gpll0a_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_AUX, 2 },
-};
-
-static const char * const gcc_xo_gpll0a[] = {
-	"xo",
-	"gpll0_vote",
-};
-
-static const struct parent_map gcc_xo_gpll0_gpll1a_sleep_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
-	{ P_GPLL1_AUX, 2 },
-	{ P_SLEEP_CLK, 6 },
-};
-
-static const char * const gcc_xo_gpll0_gpll1a_sleep[] = {
-	"xo",
-	"gpll0_vote",
-	"gpll1_vote",
-	"sleep_clk",
-};
-
-static const struct parent_map gcc_xo_gpll0_gpll1a_map[] = {
-	{ P_XO_A, 0 },
-	{ P_GPLL0_OUT_MAIN, 1 },
-	{ P_GPLL1_AUX, 2 },
-};
-
-static const char * const gcc_xo_gpll0_gpll1a[] = {
-	"xo",
-	"gpll0_vote",
-	"gpll1_vote",
-};
-
-static const struct parent_map gcc_xo_dsibyte_map[] = {
-	{ P_XO_A, 0, },
-	{ P_DSI0_PHYPLL_BYTE, 2 },
-};
-
-static const char * const gcc_xo_dsibyte[] = {
-	"xo",
-	"dsi0pllbyte",
 };
 
 static struct clk_pll gpll0 = {
@@ -247,6 +154,16 @@ static struct clk_pll gpll6 = {
 	},
 };
 
+static const struct parent_map gcc_xo_gpll0_map[] = {
+	{ P_XO_A, 0 },
+	{ P_GPLL0_OUT_MAIN, 1 },
+};
+
+static const char * const gcc_xo_gpll0[] = {
+	"xo",
+	"gpll0_out_main",
+};
+
 static const struct freq_tbl ftbl_apss_ahb_clk[] = {
 	F(19200000, P_XO_A, 1, 0, 0),
 	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
@@ -317,6 +234,16 @@ static struct clk_rcg2 csi2_clk_src = {
 	},
 };
 
+static const struct parent_map gcc_xo_gpll0_gpll2_map[] = {
+	{ P_GPLL0_OUT_MAIN, 1 },
+	{ P_GPLL2_OUT_AUX, 2 },
+};
+
+static const char * const gcc_xo_gpll0_gpll2[] = {
+	"gpll0_out_main",
+	"gpll2_out_aux",
+};
+
 static const struct freq_tbl ftbl_gcc_camss_vfe0_clk[] = {
 	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
 	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
@@ -346,6 +273,16 @@ static struct clk_rcg2 vfe0_clk_src = {
 		VDD_DIG_FMAX_MAP4(LOW, 200000000, NOMINAL, 400000000,
 				NOMINAL_PLUS, 480000000, HIGH, 600000000),
 	},
+};
+
+static const struct parent_map gcc_xo_gpll0_dsiphy_map[] = {
+	{ P_GPLL0_OUT_AUX, 0 },
+	{ P_GPLL0_OUT_MAIN, 1 },
+};
+
+static const char * const gcc_xo_gpll0_dsiphy[] = {
+	"gpll0_out_aux",
+	"gpll0_out_main",
 };
 
 static const struct freq_tbl ftbl_gcc_mdss_mdp_clk[] = {
@@ -378,8 +315,22 @@ static struct clk_rcg2 mdp_clk_src = {
 	},
 };
 
+static const struct parent_map gcc_xo_gpll0a_gpll1_gpll2a_map[] = {
+	{ P_XO_A, 0 },
+	{ P_GPLL0_OUT_MAIN, 3 },
+	{ P_GPLL2, 1 },
+	{ P_GPLL0_OUT_AUX, 2 },
+};
+
+static const char * const gcc_xo_gpll0a_gpll1_gpll2a[] = {
+	"xo",
+	"gpll0_out_main",
+	"gpll2",
+	"gpll0_out_aux",
+};
+
 static const struct freq_tbl ftbl_gcc_oxili_gfx3d_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0), // CHECKME!!!
+	F(19200000, P_XO_A, 1, 0, 0),
 	F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
 	F(80000000, P_GPLL0_OUT_MAIN, 10, 0, 0),
 	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
@@ -389,7 +340,7 @@ static const struct freq_tbl ftbl_gcc_oxili_gfx3d_clk[] = {
 	F(266670000, P_GPLL0_OUT_MAIN, 3, 0, 0),
 	F(310000000, P_GPLL2, 3, 0, 0), //CHECKME!!!
 	F(400000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
-	F(465000000, P_GPLL0_AUX, 2, 0, 0), //CHECKME!!!
+	F(465000000, P_GPLL0_OUT_AUX, 2, 0, 0),
 	F(550000000, P_GPLL0_OUT_MAIN, 2, 0, 0),
 	{ }
 };
@@ -548,9 +499,19 @@ static struct clk_rcg2 blsp1_uart2_apps_clk_src = {
 	},
 };
 
+static const struct parent_map gcc_xo_gpll0a_map[] = {
+	{ P_XO_A, 0 },
+	{ P_GPLL0_OUT_AUX, 2 },
+};
+
+static const char * const gcc_xo_gpll0a[] = {
+	"xo",
+	"gpll0_out_aux",
+};
+
 static const struct freq_tbl ftbl_gcc_camss_cci_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
-	F(37500000, P_GPLL0_AUX, 1, 3, 64), //CHECKME!!!
+	F(19200000, P_XO_A, 1, 0, 0),
+	F(37500000, P_GPLL0_OUT_AUX, 1, 3, 64),
 	{ }
 };
 
@@ -567,6 +528,14 @@ static struct clk_rcg2 cci_clk_src = {
 		.ops = &clk_rcg2_ops,
 		VDD_DIG_FMAX_MAP2(LOW, 19200000, NOMINAL, 37500000),
 	},
+};
+
+static const struct parent_map gcc_xo_gpll0_gpll1a_sleep_map[] = {
+	{ P_GPLL0_OUT_MAIN, 1 },
+};
+
+static const char * const gcc_xo_gpll0_gpll1a_sleep[] = {
+	"gpll0_out_main",
 };
 
 static const struct freq_tbl ftbl_gcc_camss_gp0_1_clk[] = {
@@ -678,6 +647,14 @@ static struct clk_rcg2 mclk2_clk_src = {
         },
 };
 
+static const struct parent_map gcc_xo_gpll0_gpll1a_map[] = {
+	{ P_GPLL0_OUT_MAIN, 1 },
+};
+
+static const char * const gcc_xo_gpll0_gpll1a[] = {
+	"gpll0_out_main",
+};
+
 static const struct freq_tbl ftbl_gcc_camss_csi0_1phytimer_clk[] = {
 	F(100000000, P_GPLL0_OUT_MAIN, 8, 0, 0),
 	F(200000000, P_GPLL0_OUT_MAIN, 4, 0, 0),
@@ -787,8 +764,16 @@ static struct clk_rcg2 gp3_clk_src = {
 	},
 };
 
+static const struct parent_map gcc_xo_dsibyte_map[] = {
+	{ P_XO_A, 0, },
+};
+
+static const char * const gcc_xo_dsibyte[] = {
+	"xo",
+};
+
 static const struct freq_tbl ftbl_gcc_mdss_esc0_clk[] = {
-	F(19200000, P_XO_A, 1, 0, 0), //CHECKME!!!
+	F(19200000, P_XO_A, 1, 0, 0),
 	{ }
 };
 
