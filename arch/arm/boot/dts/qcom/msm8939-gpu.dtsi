@@ -77,33 +77,21 @@
 		qcom,clk-map = <0x000003DE>;
 
 
-		clocks = <&clock_gcc clk_gcc_oxili_gfx3d_clk>,
-		         <&clock_gcc clk_gcc_oxili_ahb_clk>,
-		         <&clock_gcc clk_gcc_oxili_gmem_clk>,
-		         <&clock_gcc clk_gcc_bimc_gfx_clk>,
-		         <&clock_gcc clk_gcc_bimc_gpu_clk>,
-		         <&clock_gcc clk_gcc_gtcu_ahb_clk>,
-			 <&clock_gcc clk_gcc_gfx_tcu_clk>,
-			 <&clock_gcc clk_gcc_gfx_tbu_clk>,
-			 <&clock_gcc clk_gcc_oxili_timer_clk>;
+		clocks = //<&clock_gcc GCC_GFX3D_OXILI_CLK>,
+			 //<&clock_gcc GCC_GFX3D_OXILI_AHB_CLK>,
+			 //<&clock_gcc GCC_GFX3D_OXILI_GMEM_CLK>,
+			 <&clock_gcc GCC_GFX3D_BIMC_CLK>,
+			 <&clock_gcc GCC_BIMC_GPU_CLK>,
+			 <&clock_gcc GCC_GFX3D_GTCU_AHB_CLK>,
+			 <&clock_gcc GCC_GFX3D_TCU_CLK>,
+			 <&clock_gcc GCC_GFX3D_TBU_CLK>,
+			 <&clock_gcc GCC_GFX3D_OXILI_TIMER_CLK>;
 
 		clock-names = "core_clk", "iface_clk", "mem_clk",
 		              "mem_iface_clk", "alt_mem_iface_clk",
 		              "gtcu_iface_clk", "gtcu_clk", "gtbu_clk",
 		              "rbbmtimer_clk";
 
-/*
-		clocks = <&clock_gcc clk_gcc_oxili_gfx3d_clk>,
-		         <&clock_gcc clk_gcc_oxili_ahb_clk>,
-		         <&clock_gcc clk_gcc_oxili_gmem_clk>,
-		         <&clock_gcc clk_gcc_bimc_gfx_clk>,
-		         <&clock_gcc clk_gcc_bimc_gpu_clk>,
-			 <&clock_gcc clk_gcc_oxili_timer_clk>;
-
-		clock-names = "core_clk", "iface_clk", "mem_clk",
-		              "mem_iface_clk", "alt_mem_iface_clk",
-		              "rbbmtimer_clk";
-*/
 		/* Bus Scale Settings */
 		qcom,gpubw-dev = <&gpubw>;
 
@@ -183,10 +171,10 @@
 		* at this fixed offset.
 		*/
 		qcom,protect = <0x48000 0x1000>;
-		clocks = <&clock_gcc clk_gcc_smmu_cfg_clk>,
-			<&clock_gcc clk_gcc_gfx_tcu_clk>,
-			<&clock_gcc clk_gcc_gtcu_ahb_clk>,
-			<&clock_gcc clk_gcc_gfx_tbu_clk>;
+		clocks = <&clock_gcc GCC_SMMU_CFG_CLK>,
+			<&clock_gcc GCC_GFX3D_TCU_CLK>,
+			<&clock_gcc GCC_GFX3D_GTCU_AHB_CLK>,
+			<&clock_gcc GCC_GFX_TBU_CLK>;
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
 /*		qcom,secure_align_mask = <0xfff>;

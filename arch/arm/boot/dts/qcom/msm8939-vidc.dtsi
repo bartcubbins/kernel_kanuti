@@ -18,11 +18,11 @@
 		venus-supply = <&gdsc_venus>;
 		venus-core0-supply = <&gdsc_venus_core0>;
 		venus-core1-supply = <&gdsc_venus_core1>;
-		clocks = <&clock_gcc clk_gcc_venus0_vcodec0_clk>,
-			<&clock_gcc clk_gcc_venus0_core0_vcodec0_clk>,
-			<&clock_gcc clk_gcc_venus0_core1_vcodec0_clk>,
-			<&clock_gcc clk_gcc_venus0_ahb_clk>,
-			<&clock_gcc clk_gcc_venus0_axi_clk>;
+		clocks = <&clock_gcc GCC_VENUS0_VCODEC0_CLK>,
+			<&clock_gcc GCC_VENUS0_CORE0_VCODEC0_CLK>,
+			<&clock_gcc GCC_VENUS0_CORE1_VCODEC0_CLK>,
+			<&clock_gcc GCC_VENUS0_AHB_CLK>,
+			<&clock_gcc GCC_VENUS0_AXI_CLK>;
 		clock-names = "core_clk", "core0_clk", "core1_clk", "iface_clk", "bus_clk";
 		qcom,clock-configs = <0x1 0x0 0x0 0x0 0x0>;
 		qcom,sw-power-collapse;

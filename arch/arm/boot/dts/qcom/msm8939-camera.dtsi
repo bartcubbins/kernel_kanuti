@@ -34,12 +34,12 @@
 		mmagic-supply = <&stub_mmagic_camss>;
 		gdscr-supply = <&stub_camss_top>;
 		qcom,cam-vreg-name = "mmagic", "gdscr";
-		clocks = <&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
-			<&clock_gcc clk_csi0phytimer_clk_src>,
-			<&clock_gcc clk_gcc_camss_csi0phytimer_clk>,
-			<&clock_gcc clk_camss_top_ahb_clk_src>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+		clocks = <&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
+			<&clock_gcc CSI0PHYTIMER_CLK_SRC>,
+			<&clock_gcc GCC_CAMSS_CSI0PHYTIMER_CLK>,
+			<&clock_gcc CAMSS_TOP_AHB_CLK_SRC>,
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "camss_top_ahb_clk", "ispif_ahb_clk",
 			"csiphy_timer_src_clk", "csiphy_timer_clk",
 			"camss_ahb_src", "camss_ahb_clk";
@@ -59,12 +59,12 @@
 		mmagic-supply = <&stub_mmagic_camss>;
 		gdscr-supply = <&stub_camss_top>;
 		qcom,cam-vreg-name = "mmagic", "gdscr";
-		clocks = <&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
-			<&clock_gcc clk_csi1phytimer_clk_src>,
-			<&clock_gcc clk_gcc_camss_csi1phytimer_clk>,
-			<&clock_gcc clk_camss_top_ahb_clk_src>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+		clocks = <&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
+			<&clock_gcc CSI1PHYTIMER_CLK_SRC>,
+			<&clock_gcc GCC_CAMSS_CSI1PHYTIMER_CLK>,
+			<&clock_gcc CAMSS_TOP_AHB_CLK_SRC>,
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "camss_top_ahb_clk", "ispif_ahb_clk",
 			"csiphy_timer_src_clk", "csiphy_timer_clk",
 			"camss_ahb_src", "camss_ahb_clk";
@@ -83,15 +83,15 @@
 		mmagic-supply = <&stub_mmagic_camss>;
 		gdscr-supply = <&stub_camss_top>;
 		qcom,cam-vreg-name = "mmagic", "gdscr";
-		clocks = <&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_csi0_ahb_clk>,
-			<&clock_gcc clk_csi0_clk_src>,
-			<&clock_gcc clk_gcc_camss_csi0phy_clk>,
-			<&clock_gcc clk_gcc_camss_csi0_clk>,
-			<&clock_gcc clk_gcc_camss_csi0pix_clk>,
-			<&clock_gcc clk_gcc_camss_csi0rdi_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+		clocks = <&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI0_AHB_CLK>,
+			<&clock_gcc CSI0_CLK_SRC>,
+			<&clock_gcc GCC_CAMSS_CSI0PHY_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI0_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI0PIX_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI0RDI_CLK>,
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "camss_top_ahb_clk",
 			"ispif_ahb_clk", "csi_ahb_clk", "csi_src_clk",
 			"csi0_phy_clk", "csi_clk",  "csi_pix_clk",
@@ -111,15 +111,15 @@
 		mmagic-supply = <&stub_mmagic_camss>;
 		gdscr-supply = <&stub_camss_top>;
 		qcom,cam-vreg-name = "mmagic", "gdscr";
-		clocks = <&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
+		clocks = <&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
 			<&clock_gcc clk_gcc_camss_csi1_ahb_clk>,
 			<&clock_gcc clk_csi1_clk_src>,
 			<&clock_gcc clk_gcc_camss_csi1phy_clk>,
 			<&clock_gcc clk_gcc_camss_csi1_clk>,
 			<&clock_gcc clk_gcc_camss_csi1pix_clk>,
 			<&clock_gcc clk_gcc_camss_csi1rdi_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "camss_top_ahb_clk",
 			"ispif_ahb_clk", "csi_ahb_clk", "csi_src_clk",
 			"csi1_phy_clk", "csi_clk", "csi_pix_clk",
@@ -139,15 +139,15 @@
 		mmagic-supply = <&stub_mmagic_camss>;
 		gdscr-supply = <&stub_camss_top>;
 		qcom,cam-vreg-name = "mmagic", "gdscr";
-		clocks = <&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_csi2_ahb_clk>,
-			<&clock_gcc clk_csi2_clk_src>,
-			<&clock_gcc clk_gcc_camss_csi2phy_clk>,
-			<&clock_gcc clk_gcc_camss_csi2_clk>,
-			<&clock_gcc clk_gcc_camss_csi2pix_clk>,
-			<&clock_gcc clk_gcc_camss_csi2rdi_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+		clocks = <&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI2_AHB_CLK>,
+			<&clock_gcc CSI2_CLK_SRC>,
+			<&clock_gcc GCC_CAMSS_CSI2PHY_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI2_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI2PIX_CLK>,
+			<&clock_gcc GCC_CAMSS_CSI2RDI_CLK>,
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "camss_top_ahb_clk",
 			"ispif_ahb_clk", "csi_ahb_clk", "csi_src_clk",
 			"csi2_phy_clk", "csi_clk", "csi_pix_clk",
@@ -170,10 +170,10 @@
 		vfe1-vdd-supply = <&gdsc_vfe>;
 		qcom,vdd-names = "mmagic-vdd", "camss-vdd",
 				 "vfe0-vdd", "vfe1-vdd";
-		clocks = <&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_camss_top_ahb_clk_src>,
+		clocks = <&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc CAMSS_TOP_AHB_CLK_SRC>,
 			<&clock_gcc clk_csi0_clk_src>,
 			<&clock_gcc clk_gcc_camss_csi0_clk>,
 			<&clock_gcc clk_gcc_camss_csi0pix_clk>,
@@ -234,14 +234,14 @@
 		vdd-supply = <&gdsc_vfe>;
 		mmagic-vdd-supply = <&stub_mmagic_camss>;
 		camss-vdd-supply = <&stub_camss_top>;
-		clocks = <&clock_gcc clk_gcc_camss_top_ahb_clk>,
+		clocks = <&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
 			<&clock_gcc clk_vfe0_clk_src>,
 			<&clock_gcc clk_gcc_camss_vfe0_clk>,
 			<&clock_gcc clk_gcc_camss_csi_vfe0_clk>,
 			<&clock_gcc clk_gcc_camss_vfe_ahb_clk>,
 			<&clock_gcc clk_gcc_camss_vfe_axi_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ispif_ahb_clk>;
+			<&clock_gcc GCC_CAMSS_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>;
 		clock-names = "camss_top_ahb_clk", "vfe_clk_src",
 			"camss_vfe_vfe_clk", "camss_csi_vfe_clk", "iface_clk",
 			"bus_clk", "camss_ahb_clk", "ispif_ahb_clk";
@@ -312,8 +312,8 @@
 		clocks = <&clock_gcc clk_gcc_camss_jpeg0_clk>,
 			<&clock_gcc clk_gcc_camss_jpeg_ahb_clk>,
 			<&clock_gcc clk_gcc_camss_jpeg_axi_clk>,
-			<&clock_gcc clk_gcc_camss_top_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+			<&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "core_clk", "iface_clk",
 			"bus_clk0", "camss_top_ahb_clk",
 			"camss_ahb_clk";
@@ -350,7 +350,7 @@
 		camss-vdd-supply = <&stub_camss_top>;
 		vdd-supply = <&gdsc_vfe>;
 		qcom,vdd-names = "mmagic-vdd", "camss-vdd", "vdd";
-		clocks = <&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
+		clocks = <&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
 			<&clock_gcc clk_vfe0_clk_src>,
 			<&clock_gcc clk_gcc_camss_vfe0_clk>,
 			<&clock_gcc clk_gcc_camss_vfe_ahb_clk>,
@@ -358,8 +358,8 @@
 			<&clock_gcc clk_gcc_camss_cpp_ahb_clk>,
 			<&clock_gcc clk_gcc_camss_vfe_axi_clk>,
 			<&clock_gcc clk_gcc_camss_micro_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_top_ahb_clk>;
+			<&clock_gcc GCC_CAMSS_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_TOP_AHB_CLK>;
 		clock-names = "ispif_ahb_clk", "vfe_clk_src",
 			"camss_vfe_vfe_clk", "iface_clk", "cpp_core_clk",
 			"cpp_iface_clk", "cpp_bus_clk", "micro_iface_clk",
@@ -401,12 +401,12 @@
 		mmagic-supply = <&stub_mmagic_camss>;
 		camss-supply = <&stub_camss_top>;
 		qcom,cam-vreg-name = "mmagic", "gdscr";
-		clocks = <&clock_gcc clk_gcc_camss_ispif_ahb_clk>,
-			<&clock_gcc clk_gcc_camss_top_ahb_clk>,
+		clocks = <&clock_gcc GCC_CAMSS_ISPIF_AHB_CLK>,
+			<&clock_gcc GCC_CAMSS_TOP_AHB_CLK>,
 			<&clock_gcc clk_cci_clk_src>,
 			<&clock_gcc clk_gcc_camss_cci_ahb_clk>,
 			<&clock_gcc clk_gcc_camss_cci_clk>,
-			<&clock_gcc clk_gcc_camss_ahb_clk>;
+			<&clock_gcc GCC_CAMSS_AHB_CLK>;
 		clock-names = "ispif_ahb_clk", "camss_top_ahb_clk",
 			"cci_src_clk", "cci_ahb_clk",
 			"cci_clk", "camss_ahb_clk";

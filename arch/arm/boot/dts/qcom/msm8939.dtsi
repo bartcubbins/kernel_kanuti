@@ -11,7 +11,7 @@
  */
 
 #include "skeleton64.dtsi"
-#include <dt-bindings/clock/msm-clocks-8936.h>
+//#include <dt-bindings/clock/msm-clocks-8936.h>
 #include <dt-bindings/clock/qcom,gcc-msm8936.h>
 #include <dt-bindings/clock/msm-cpu-clocks-8939.h>
 #include "msm8939-common.dtsi"
@@ -20,7 +20,7 @@
 #include "msm8939-pm.dtsi"
 #include "msm8939-smem.dtsi"
 #include "msm8939-smp2p.dtsi"
-#include "msm8939-gpu.dtsi"
+//#include "msm8939-gpu.dtsi"
 
 / {
 	model = "Qualcomm Technologies, Inc. MSM8939";
@@ -69,12 +69,12 @@
 		//vdd-c0-supply = <&apc_vreg_corner>;
 		//vdd-c1-supply = <&apc_vreg_corner>;
 		//vdd-cci-supply = <&apc_vreg_corner>;
-		clocks = <&clock_gcc clk_gpll0_ao>,
-			 <&clock_gcc clk_a53ss_c0_pll>,
-			 <&clock_gcc clk_gpll0_ao>,
-			 <&clock_gcc clk_a53ss_c1_pll>,
-			 <&clock_gcc clk_gpll0_ao>,
-			 <&clock_gcc clk_a53ss_cci_pll>;
+		//clocks = <&clock_gcc clk_gpll0_ao>,
+		//	 <&clock_gcc clk_a53ss_c0_pll>,
+		//	 <&clock_gcc clk_gpll0_ao>,
+		//	 <&clock_gcc clk_a53ss_c1_pll>,
+		//	 <&clock_gcc clk_gpll0_ao>,
+		//	 <&clock_gcc clk_a53ss_cci_pll>;
 		clock-names = "clk-c0-4", "clk-c0-5",
 				"clk-c1-4", "clk-c1-5",
 				"clk-cci-4", "clk-cci-5";
@@ -233,7 +233,7 @@
 	cci_cache: qcom,cci {
 		compatible = "devfreq-simple-dev";
 		clock-names = "devfreq_clk";
-		clocks = <&clock_cpu clk_cci_clk>;
+		//clocks = <&clock_cpu clk_cci_clk>;
 		governor = "cpufreq";
 		freq-tbl-khz =
 			<  200000 >,
@@ -344,15 +344,15 @@
 		clock-names = "l2_clk", "cpu0_clk", "cpu1_clk", "cpu2_clk",
 				"cpu3_clk", "cpu4_clk", "cpu5_clk",
 				"cpu6_clk", "cpu7_clk";
-		clocks = <&clock_cpu clk_cci_clk>,
-			 <&clock_cpu clk_a53_bc_clk>,
-			 <&clock_cpu clk_a53_bc_clk>,
-			 <&clock_cpu clk_a53_bc_clk>,
-			 <&clock_cpu clk_a53_bc_clk>,
-			 <&clock_cpu clk_a53_lc_clk>,
-			 <&clock_cpu clk_a53_lc_clk>,
-			 <&clock_cpu clk_a53_lc_clk>,
-			 <&clock_cpu clk_a53_lc_clk>;
+		//clocks = <&clock_cpu clk_cci_clk>,
+		//	 <&clock_cpu clk_a53_bc_clk>,
+		//	 <&clock_cpu clk_a53_bc_clk>,
+		//	 <&clock_cpu clk_a53_bc_clk>,
+		//	 <&clock_cpu clk_a53_bc_clk>,
+		//	 <&clock_cpu clk_a53_lc_clk>,
+		//	 <&clock_cpu clk_a53_lc_clk>,
+		//	 <&clock_cpu clk_a53_lc_clk>,
+		//	 <&clock_cpu clk_a53_lc_clk>;
 
 		qcom,governor-per-policy;
 
@@ -395,8 +395,8 @@
 		      <0x8f0000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//	   <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU0>;
@@ -408,8 +408,8 @@
 		      <0x8f2000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU1>;
@@ -421,8 +421,8 @@
 		      <0x8f4000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU2>;
@@ -434,8 +434,8 @@
 		      <0x8f6000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU3>;
@@ -447,8 +447,8 @@
 		      <0x8d0000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU4>;
@@ -460,8 +460,8 @@
 		      <0x8d2000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU5>;
@@ -473,8 +473,8 @@
 		      <0x8d4000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU6>;
@@ -486,8 +486,8 @@
 		      <0x8d6000 0x1000>;
 		reg-names = "etm-base", "debug-base";
 
-		clocks = <&clock_rpm clk_qdss_clk>,
-		         <&clock_rpm clk_qdss_a_clk>;
+		//clocks = <&clock_rpm clk_qdss_clk>,
+		//         <&clock_rpm clk_qdss_a_clk>;
 		clock-names = "core_clk", "core_a_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU7>;
