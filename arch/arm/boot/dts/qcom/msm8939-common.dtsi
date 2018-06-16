@@ -736,7 +736,14 @@
 
 	};
 
+	clock_gcc_mdss: mdss-clock-controller@1800000 {
+		compatible = "qcom,gcc-mdss-8936";
+		reg = <0x1800000 0x80000>;
+		#clock-cells = <1>;
+		status = "ok";
+	};
 
+#if 0
 	clock_gcc_mdss: qcom,gcc-mdss@1a98300 {
 		compatible = "qcom,gcc-mdss-8936";
 		//clocks = <&mdss_dsi0_pll clk_dsi_pll0_pixel_clk_src>,
@@ -744,6 +751,7 @@
 		clock-names = "pclk0_src", "byte0_src";
 		#clock-cells = <1>;
 	};
+#endif
 
 	clock_debug: qcom,cc-debug@1874000 {
 		compatible = "qcom,cc-debug-8936";
