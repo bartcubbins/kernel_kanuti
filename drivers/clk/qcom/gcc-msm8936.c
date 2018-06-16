@@ -237,6 +237,9 @@ static struct clk_pll gpll6 = {
 	},
 };
 
+/* TODO: This map is valid only for apss_ahb_clk_src
+ * and it MUST be separated!!!
+ */
 static const struct parent_map gcc_xo_gpll0_map[] = {
 	{ P_XO_A, 0 },
 	{ P_GPLL0, 1 },
