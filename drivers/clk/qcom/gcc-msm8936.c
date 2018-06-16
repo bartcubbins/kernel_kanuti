@@ -44,6 +44,8 @@ static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
 
 enum {
+	P_DSI0_PHYPLL_BYTE,
+	P_DSI0_PHYPLL_DSI,
 	P_GPLL0,
 	P_GPLL0_AUX,
 	P_GPLL1,
@@ -810,7 +812,7 @@ static const struct freq_tbl ftbl_gcc_gp1_3_clk[] = {
 };
 
 static struct clk_rcg2 gp1_clk_src = {
-	.cmd_rcgr = 0x55000,
+	.cmd_rcgr = 0x08004,
 	.mnd_width = 8,
 	.hid_width = 5,
 	.parent_map = gcc_xo_gpll0_gpll1a_sleep_map,
@@ -2305,7 +2307,7 @@ static struct pll_config gpll4_config = {
 
 static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[GPLL0] = &gpll0.clkr,
-	[GPLL0_VOTE] = &gpll0_vote.clkr,
+	[GPLL0_VOTE] = &gpll0_vote,
 	[GPLL1] = &gpll1.clkr,
 	[GPLL1_VOTE] = &gpll1_vote,
 	[GPLL2] = &gpll2.clkr,
@@ -2529,6 +2531,8 @@ static int gcc_msm8936_probe(struct platform_device *pdev)
 }
 #endif
 
+static struct platform_driver gcc_mdss_8936_driver;
+
 #define GCC_REG_BASE 0x1800000
 static int gcc_msm8936_probe(struct platform_device *pdev)
 {
@@ -2624,6 +2628,8 @@ pr_info("---------------GCC 6!!!-------------\n");
 
 	dev_info(&pdev->dev, "Registered GCC clocks\n");
 
+	ret = platform_driver_register(&gcc_mdss_8936_driver);
+
 	return 0;
 }
 
@@ -2646,6 +2652,165 @@ static void __exit gcc_msm8936_exit(void)
 	platform_driver_unregister(&gcc_msm8936_driver);
 }
 module_exit(gcc_msm8936_exit);
+
+
+/*
+ * MDSS BLOCK BEGIN
+ */
+static const struct parent_map gcc_xo_gpll0a_dsibyte_map[] = {
+	{ P_XO, 0 },
+	{ P_DSI0_PHYPLL_BYTE, 1 },
+};
+
+static const char * const gcc_xo_gpll0a_dsibyte[] = {
+	"xo",
+	"dsi0pllbyte",
+};
+
+static struct clk_rcg2 byte0_clk_src = {
+	.cmd_rcgr = 0x4d044,
+	.mnd_width = 0,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0a_dsibyte_map,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "byte0_clk_src",
+		.parent_names = gcc_xo_gpll0a_dsibyte,
+		.num_parents = ARRAY_SIZE(gcc_xo_gpll0a_dsibyte),
+		.ops = &clk_byte2_ops,
+		.flags = CLK_SET_RATE_PARENT | CLK_GET_RATE_NOCACHE,
+		VDD_DIG_FMAX_MAP2(LOW, 112000000, NOMINAL, 188000000),
+	},
+};
+
+static const struct parent_map gcc_xo_gpll0a_dsiphy_map[] = {
+	{ P_XO, 0 },
+	{ P_DSI0_PHYPLL_DSI, 1 },
+};
+
+static const char * const gcc_xo_gpll0a_dsiphy[] = {
+	"xo",
+	"dsi0pll",
+};
+
+static struct clk_rcg2 pclk0_clk_src = {
+	.cmd_rcgr = 0x4d000,
+	.mnd_width = 8,
+	.hid_width = 5,
+	.parent_map = gcc_xo_gpll0a_dsiphy_map,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "pclk0_clk_src",
+		.parent_names = gcc_xo_gpll0a_dsiphy,
+		.num_parents = ARRAY_SIZE(gcc_xo_gpll0a_dsiphy),
+		.ops = &clk_pixel_ops,
+		.flags = CLK_SET_RATE_PARENT | CLK_GET_RATE_NOCACHE,
+		VDD_DIG_FMAX_MAP2(LOW, 149000000, NOMINAL, 250000000),
+	},
+};
+
+static struct clk_branch gcc_mdss_byte0_clk = {
+	.halt_reg = 0x4d094,
+	.halt_check = BRANCH_HALT,
+	.clkr = {
+		.enable_reg = 0x4d094,
+		.enable_mask = BIT(0),
+		.hw.init = &(struct clk_init_data) {
+			.name ="gcc_mdss_byte0_clk",
+			.parent_names = (const char*[]) {
+				"byte0_clk_src",
+			},
+			.num_parents = 1,
+			.flags = CLK_GET_RATE_NOCACHE | CLK_SET_RATE_PARENT,
+			.ops = &clk_branch2_ops,
+		},
+	},
+};
+
+static struct clk_branch gcc_mdss_pclk0_clk = {
+	.halt_reg = 0x4d084,
+	.halt_check = BRANCH_HALT,
+	.clkr = {
+		.enable_reg = 0x4d084,
+		.enable_mask = BIT(0),
+		.hw.init = &(struct clk_init_data) {
+			.name ="gcc_mdss_pclk0_clk",
+			.parent_names = (const char*[]) {
+				"pclk0_clk_src",
+			},
+			.num_parents = 1,
+			.flags = CLK_GET_RATE_NOCACHE | CLK_SET_RATE_PARENT,
+			.ops = &clk_branch2_ops,
+		},
+	},
+};
+
+/* MDSS Clocks */
+static struct clk_regmap *gcc_mdss_msm8936_clocks[] = {
+	[BYTE0_CLK_SRC]		= &byte0_clk_src.clkr,
+	[PCLK0_CLK_SRC]		= &pclk0_clk_src.clkr,
+	[GCC_MDSS_BYTE0_CLK]	= &gcc_mdss_byte0_clk.clkr,
+	[GCC_MDSS_PCLK0_CLK]	= &gcc_mdss_pclk0_clk.clkr,
+};
+
+static const struct qcom_cc_desc gcc_msm8936_mdss_desc = {
+	.config		= &gcc_msm8936_regmap_config,
+	.clks		= gcc_mdss_msm8936_clocks,
+	.num_clks	= ARRAY_SIZE(gcc_mdss_msm8936_clocks),
+};
+
+static struct of_device_id gcc_mdss_8936_match_table[] = {
+	{ .compatible = "qcom,gcc-mdss-8936" },
+	{},
+};
+
+static int msm_gcc_8936_mdss_probe(struct platform_device *pdev)
+{
+	void __iomem *base;
+	struct resource *res;
+	struct regmap *regmap;
+	int ret = 0;
+
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (res == NULL) {
+		dev_err(&pdev->dev, "Failed to get MDSS resources.\n");
+		return -EINVAL;
+	}
+
+	base = devm_ioremap(&pdev->dev, res->start, resource_size(res));
+	if (IS_ERR(base)) {
+		dev_err(&pdev->dev, "Unable to map MDSS clock controller.\n");
+		return PTR_ERR(base);
+	}
+
+	regmap = devm_regmap_init_mmio(&pdev->dev, base, gcc_msm8936_mdss_desc.config);
+	if (IS_ERR(regmap)) {
+		dev_err(&pdev->dev, "Unable to map MDSS MMIO.\n");
+		return PTR_ERR(regmap);
+	}
+
+	ret = qcom_cc_really_probe(pdev, &gcc_msm8936_mdss_desc, regmap);
+	if (ret) {
+		dev_err(&pdev->dev, "Failed to register MDSS clocks\n");
+		return ret;
+	}
+
+	dev_info(&pdev->dev, "Registered GCC MDSS clocks.\n");
+
+	return ret;
+}
+
+static struct platform_driver gcc_mdss_8936_driver = {
+	.probe = msm_gcc_8936_mdss_probe,
+	.driver = {
+		.name = "gcc-mdss-msm8936",
+		.of_match_table = gcc_mdss_8936_match_table,
+		.owner = THIS_MODULE,
+	},
+};
+/*
+ * MDSS BLOCK END
+ */
+
+
 
 MODULE_DESCRIPTION("Qualcomm GCC MSM8936 Driver");
 MODULE_LICENSE("GPL v2");

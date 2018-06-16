@@ -18,6 +18,12 @@
 #define GCC_XO				0
 #define GCC_XO_A			1
 
+/* MDSS clocks */
+#define BYTE0_CLK_SRC			0
+#define PCLK0_CLK_SRC			1
+#define GCC_MDSS_BYTE0_CLK		2
+#define GCC_MDSS_PCLK0_CLK		3
+
 /* PLLs */
 #define GPLL0				0
 #define GPLL0_VOTE			1
