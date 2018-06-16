@@ -52,6 +52,29 @@ enum {
 	P_GPLL3,
 	P_GPLL3_AUX,
 	P_XO,
+	P_XO_A,
+};
+
+static struct clk_fixed_factor xo = {
+	.mult = 1,
+	.div = 1,
+	.hw.init = &(struct clk_init_data){
+		.name = "xo",
+		.parent_names = (const char *[]){ "cxo" },
+		.num_parents = 1,
+		.ops = &clk_fixed_factor_ops,
+	},
+};
+
+static struct clk_fixed_factor xo_a = {
+	.mult = 1,
+	.div = 1,
+	.hw.init = &(struct clk_init_data){
+		.name = "xo_a",
+		.parent_names = (const char *[]){ "cxo_a" },
+		.num_parents = 1,
+		.ops = &clk_fixed_factor_ops,
+	},
 };
 
 static struct clk_pll gpll0 = {
@@ -67,6 +90,36 @@ static struct clk_pll gpll0 = {
 		.parent_names = (const char *[]){ "xo" },
 		.num_parents = 1,
 		.ops = &clk_pll_ops,
+	},
+};
+
+#if 0
+static unsigned int gpll0_voter;
+
+static struct clk_pll_acpu_vote gpll0_vote = {
+	.soft_voter = &gpll0_voter,
+	.soft_voter_mask = PLL_SOFT_VOTE_PRIMARY,
+	.clkr = {
+		.enable_reg = 0x45000,
+		.enable_mask = BIT(0),
+		.hw.init = &(struct clk_init_data){
+			.name = "gpll0_vote",
+			.parent_names = (const char *[]){ "gpll0" },
+			.num_parents = 1,
+			.ops = &clk_pll_vote_ops,
+		},
+	},
+};
+#endif
+
+static struct clk_regmap gpll0_vote = {
+	.enable_reg = 0x45000,
+	.enable_mask = BIT(0),
+	.hw.init = &(struct clk_init_data){
+		.name = "gpll0_vote",
+		.parent_names = (const char *[]){ "gpll0" },
+		.num_parents = 1,
+		.ops = &clk_pll_vote_ops,
 	},
 };
 
@@ -86,6 +139,17 @@ static struct clk_pll gpll1 = {
 	},
 };
 
+static struct clk_regmap gpll1_vote = {
+	.enable_reg = 0x45000,
+	.enable_mask = BIT(1),
+	.hw.init = &(struct clk_init_data){
+		.name = "gpll1_vote",
+		.parent_names = (const char *[]){ "gpll1" },
+		.num_parents = 1,
+		.ops = &clk_pll_vote_ops,
+	},
+};
+
 static struct clk_pll gpll2 = {
 	.l_reg = 0x4a004,
 	.m_reg = 0x4a008,
@@ -102,13 +166,24 @@ static struct clk_pll gpll2 = {
 	},
 };
 
+static struct clk_regmap gpll2_vote = {
+	.enable_reg = 0x45000,
+	.enable_mask = BIT(2),
+	.hw.init = &(struct clk_init_data){
+		.name = "gpll2_vote",
+		.parent_names = (const char *[]){ "gpll2" },
+		.num_parents = 1,
+		.ops = &clk_pll_vote_ops,
+	},
+};
+
 static struct clk_pll gpll3 = {
 	.l_reg		= 0x22004,
 	.m_reg		= 0x22008,
 	.n_reg		= 0x2200c,
-	.config_reg	= 0x22010,
+	.config_reg	= 0x22014,
 	.mode_reg	= 0x22000,
-	.status_reg	= 0x22024,
+	.status_reg	= 0x2201c,
 	.status_bit	= 17,
 	.clkr.hw.init = &(struct clk_init_data) {
 		.name = "gpll3",
@@ -118,13 +193,24 @@ static struct clk_pll gpll3 = {
 	},
 };
 
+static struct clk_regmap gpll3_vote = {
+	.enable_reg = 0x45000,
+	.enable_mask = BIT(4),
+	.hw.init = &(struct clk_init_data){
+		.name = "gpll3_vote",
+		.parent_names = (const char *[]){ "gpll3" },
+		.num_parents = 1,
+		.ops = &clk_pll_vote_ops,
+	},
+};
+
 static struct clk_pll gpll4 = {
 	.l_reg = 0x24004,
 	.m_reg = 0x24008,
 	.n_reg = 0x2400c,
-	.config_reg = 0x24018,
+	.config_reg = 0x24014,
 	.mode_reg = 0x24000,
-	.status_reg = 0x24024,
+	.status_reg = 0x2401c,
 	.status_bit = 17,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll4",
@@ -140,6 +226,7 @@ static struct clk_pll gpll6 = {
 	.m_reg = 0x37008,
 	.n_reg = 0x3700c,
 	.config_reg = 0x37014,
+	.mode_reg = 0x37000,
 	.status_reg = 0x3701c,
 	.status_bit = 17,
 	.clkr.hw.init = &(struct clk_init_data){
@@ -151,17 +238,17 @@ static struct clk_pll gpll6 = {
 };
 
 static const struct parent_map gcc_xo_gpll0_map[] = {
-	{ P_XO, 0 },
+	{ P_XO_A, 0 },
 	{ P_GPLL0, 1 },
 };
 
 static const char * const gcc_xo_gpll0[] = {
-	"xo",
+	"xo_a",
 	"gpll0_vote",
 };
 
 static const struct freq_tbl ftbl_apss_ahb_clk[] = {
-	F(19200000, P_XO, 1, 0, 0),
+	F(19200000, P_XO_A, 1, 0, 0),
 	F(50000000, P_GPLL0, 16, 0, 0),
 	F(100000000, P_GPLL0, 8, 0, 0),
 	F(133330000, P_GPLL0, 6, 0, 0),
@@ -324,7 +411,7 @@ static const char * const gcc_xo_gpll0a_gpll1_gpll2a[] = {
 	"xo",
 	"gpll0_vote",
 	"gpll2_vote",
-	"gpll3",
+	"gpll3_vote",
 };
 
 static const struct freq_tbl ftbl_gcc_oxili_gfx3d_clk[] = {
@@ -504,7 +591,7 @@ static const struct parent_map gcc_xo_gpll0a_map[] = {
 
 static const char * const gcc_xo_gpll0a[] = {
 	"xo",
-	"gpll0_out_aux",
+	"gpll0_vote",
 };
 
 static const struct freq_tbl ftbl_gcc_camss_cci_clk[] = {
@@ -2177,7 +2264,7 @@ static struct clk_rcg2 crypto_clk_src = {
 	},
 };
 
-/* GPLL3 at 1100MHz, main output enabled. */
+/* GPLL3 at 1100 MHz, main output enabled. */
 static struct pll_config gpll3_config = {
 	.l = 57,
 	.m = 7,
@@ -2196,11 +2283,32 @@ static struct pll_config gpll3_config = {
 	.aux_output_mask = BIT(1),
 };
 
+/* GPLL4 at 1200 MHz, main output enabled. */
+static struct pll_config gpll4_config = {
+	.l = 62,
+	.m =  1,
+	.n =  2,
+	.vco_val = 0x0,
+	.vco_mask = BIT(20),
+	.pre_div_val = 0x0,
+	.pre_div_mask = BIT(12),
+	.post_div_val = 0x0,
+	.post_div_mask = BM(9, 8),
+	.mn_ena_val = BIT(24),
+	.mn_ena_mask = BIT(24),
+	//.main_output_val = BIT(0),
+	.main_output_mask = BIT(0),
+};
+
 static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[GPLL0] = &gpll0.clkr,
+	[GPLL0_VOTE] = &gpll0_vote.clkr,
 	[GPLL1] = &gpll1.clkr,
+	[GPLL1_VOTE] = &gpll1_vote,
 	[GPLL2] = &gpll2.clkr,
+	[GPLL2_VOTE] = &gpll2_vote,
 	[GPLL3] = &gpll3.clkr,
+	[GPLL3_VOTE] = &gpll3_vote,
 	[GPLL4] = &gpll4.clkr,
 	[GPLL6] = &gpll6.clkr,
 
@@ -2360,6 +2468,11 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	//[GCC_SNOC_QOSGEN_CLK] = &gcc_snoc_qosgen_clk.clkr,
 };
 
+static struct clk_hw *gcc_msm8936_hws[] = {
+	[GCC_XO]		= &xo.hw,
+	[GCC_XO_A]		= &xo_a.hw,
+};
+
 static const struct qcom_reset_map gcc_msm8936_resets[] = {
 	[GCC_CAMSS_MICRO_BCR] = {0x56008},
 	[GCC_USB_HS_BCR] = {0x41000},
@@ -2376,9 +2489,9 @@ static const struct regmap_config gcc_msm8936_regmap_config = {
 static const struct qcom_cc_desc gcc_msm8936_desc = {
 	.config		= &gcc_msm8936_regmap_config,
 	.clks		= gcc_msm8936_clocks,
-	.num_clks	= ARRAY_SIZE(gcc_msm8936_clocks),
-	//.hwclks		= gcc_msm8936_hws,
-	//.num_hwclks	= ARRAY_SIZE(gcc_msm8936_hws),
+	.num_clks	= 125,//ARRAY_SIZE(gcc_msm8936_clocks),
+	.hwclks		= gcc_msm8936_hws,
+	.num_hwclks	= ARRAY_SIZE(gcc_msm8936_hws),
 	.resets		= gcc_msm8936_resets,
 	.num_resets	= ARRAY_SIZE(gcc_msm8936_resets),
 };
@@ -2482,7 +2595,7 @@ pr_info("---------------GCC 1!!!-------------\n");
 	}
 pr_info("---------------GCC 2!!!-------------\n");
 
-//	clk_set_rate(apss_ahb_clk_src.clkr.hw.clk, 19200000);
+	clk_set_rate(apss_ahb_clk_src.clkr.hw.clk, 19200000);
 	clk_prepare_enable(apss_ahb_clk_src.clkr.hw.clk);
 pr_info("---------------GCC 3!!!-------------\n");
 
@@ -2496,6 +2609,8 @@ pr_info("---------------GCC 4!!!-------------\n");
 
 	clk_pll_configure_sr_hpm_lp(&gpll3, regmap,
 					&gpll3_config, true);
+	clk_pll_configure_sr_hpm_lp(&gpll4, regmap,
+					&gpll4_config, true);
 
 	clk_set_rate(gpll3.clkr.hw.clk, 1100000000);
 pr_info("---------------GCC 5!!!-------------\n");
