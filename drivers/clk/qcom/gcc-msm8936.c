@@ -325,6 +325,21 @@ static struct clk_pll_acpu_vote gpll0_out_main = {
 	},
 };
 
+static struct clk_pll_acpu_vote gpll0_ao = {
+	.soft_voter = &soft_vote_gpll0,
+	.soft_voter_mask = PLL_SOFT_VOTE_CPU,
+	.clkr = {
+		.enable_reg = 0x45000,
+		.enable_mask = BIT(0),
+		.hw.init = &(struct clk_init_data){
+			.name = "gpll0_ao",
+			.parent_names = (const char *[]){ "gpll0" },
+			.num_parents = 1,
+			.ops = &clk_pll_vote_ops,
+		},
+	},
+};
+
 static struct clk_pll gpll1 = {
 	.l_reg = 0x20004,
 	.m_reg = 0x20008,
@@ -2746,16 +2761,17 @@ static struct clk_gate2 gcc_snoc_qosgen_clk = {
 static struct clk_regmap *gcc_msm8936_clocks[] = {
 	/* PLLs */
 	[GPLL0]				= &gpll0.clkr,
-	[GPLL1]				= &gpll1.clkr,
-	[GPLL2]				= &gpll2.clkr,
-	[GPLL3]				= &gpll3.clkr,
-	[GPLL4]				= &gpll4.clkr,
-	[GPLL6]				= &gpll6.clkr,
 	[GPLL0_CLK_SRC]			= &gpll0_out_main.clkr,
+	[GPLL0_AO]			= &gpll0_ao.clkr,
+	[GPLL1]				= &gpll1.clkr,
 	[GPLL1_CLK_SRC]			= &gpll1_out_main,
+	[GPLL2]				= &gpll2.clkr,
 	[GPLL2_CLK_SRC]			= &gpll2_out_main,
+	[GPLL3]				= &gpll3.clkr,
 	[GPLL3_CLK_SRC]			= &gpll3_out_main,
+	[GPLL4]				= &gpll4.clkr,
 	[GPLL4_CLK_SRC]			= &gpll4_out_main,
+	[GPLL6]				= &gpll6.clkr,
 	[GPLL6_CLK_SRC]			= &gpll6_out_main,
 	[CLK_A53SS_C0_PLL]		= &a53ss_c0_pll.clkr,
 	[CLK_A53SS_C1_PLL]		= &a53ss_c1_pll.clkr,
