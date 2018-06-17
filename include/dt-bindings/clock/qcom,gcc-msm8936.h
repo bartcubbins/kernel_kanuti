@@ -19,6 +19,8 @@
 #define CLK_A53SS_C1_PLL		1
 #define CLK_A53SS_CCI_PLL		2
 
+#define GPLL0_AO			0
+
 /* Hardware clocks */
 #define GCC_XO				0
 #define GCC_XO_A			1

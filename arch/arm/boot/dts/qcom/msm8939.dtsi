@@ -75,6 +75,12 @@
 		//	 <&clock_gcc clk_a53ss_c1_pll>,
 		//	 <&clock_gcc clk_gpll0_ao>,
 		//	 <&clock_gcc clk_a53ss_cci_pll>;
+		clocks = <&clock_gcc GPLL0_AO>,
+			<&clock_gcc CLK_A53SS_C0_PLL>,
+			<&clock_gcc GPLL0_AO>,
+			<&clock_gcc CLK_A53SS_C1_PLL>,
+			<&clock_gcc GPLL0_AO>,
+			<&clock_gcc CLK_A53SS_CCI_PLL>;
 		clock-names = "clk-c0-4", "clk-c0-5",
 				"clk-c1-4", "clk-c1-5",
 				"clk-cci-4", "clk-cci-5";

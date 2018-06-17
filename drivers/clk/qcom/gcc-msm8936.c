@@ -187,6 +187,21 @@ static struct clk_pll gpll0 = {
 	},
 };
 
+static struct clk_pll_acpu_vote gpll0_ao = {
+	//.soft_voter = &gpll0_voter,
+	.soft_voter_mask = PLL_SOFT_VOTE_CPU,
+	.clkr = {
+		.enable_reg = 0x45000,
+		.enable_mask = BIT(0),
+		.hw.init = &(struct clk_init_data){
+			.name = "gpll0_ao",
+			.parent_names = (const char *[]){ "gpll0" },
+			.num_parents = 1,
+			.ops = &clk_pll_vote_ops,
+		},
+	},
+};
+
 #if 0
 static unsigned int gpll0_voter;
 
@@ -2401,6 +2416,8 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[CLK_A53SS_C0_PLL] = &a53ss_c0_pll.clkr,
 	[CLK_A53SS_C1_PLL] = &a53ss_c1_pll.clkr,
 	[CLK_A53SS_CCI_PLL] = &a53ss_cci_pll.clkr,
+
+	[GPLL0_AO] = &gpll0_ao.clkr,
 
 	[GPLL0] = &gpll0.clkr,
 	[GPLL0_VOTE] = &gpll0_vote,
