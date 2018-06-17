@@ -39,6 +39,8 @@
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
+#define F_APCS_PLL(f, l, m, n) { (f), (l), (m), (n), 0 }
+
 static DEFINE_VDD_REGULATORS(vdd_dig, VDD_DIG_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_sr2_pll, VDD_SR2_PLL_NUM, 2, vdd_sr2_levels);
 static DEFINE_VDD_REGULATORS(vdd_hf_pll, VDD_HF_PLL_NUM, 2, vdd_hf_levels);
@@ -76,6 +78,96 @@ static struct clk_fixed_factor xo_a = {
 		.parent_names = (const char *[]){ "cxo_a" },
 		.num_parents = 1,
 		.ops = &clk_fixed_factor_ops,
+	},
+};
+
+static struct pll_freq_tbl apcs_c0_pll_freq[] = {
+	F_APCS_PLL( 998400000,  52, 0x0, 0x1),
+	F_APCS_PLL(1113600000,  58, 0x0, 0x1),
+	F_APCS_PLL(1209600000,  63, 0x0, 0x1),
+};
+
+static struct clk_pll a53ss_c0_pll = {
+	.l_reg = 0x00004,
+	.m_reg = 0x00008,
+	.n_reg = 0x0000c,
+	.config_reg = 0x00010,
+	.mode_reg = 0x00000,
+	.status_reg = 0x0001c,
+	.status_bit = 17,
+	.freq_tbl = apcs_c0_pll_freq,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "a53ss_c0_pll",
+		.parent_names = (const char *[]){ "xo_a" },
+		.num_parents = 1,
+		.ops = &clk_pll_sr2_ops,
+	},
+};
+
+static struct pll_freq_tbl apcs_c1_pll_freq[] = {
+	F_APCS_PLL( 652800000, 34, 0x0, 0x1),
+	F_APCS_PLL( 691200000, 36, 0x0, 0x1),
+	F_APCS_PLL( 729600000, 38, 0x0, 0x1),
+	F_APCS_PLL( 806400000, 42, 0x0, 0x1),
+	F_APCS_PLL( 844800000, 44, 0x0, 0x1),
+	F_APCS_PLL( 883200000, 46, 0x0, 0x1),
+	F_APCS_PLL( 960000000, 50, 0x0, 0x1),
+	F_APCS_PLL( 998400000, 52, 0x0, 0x1),
+	F_APCS_PLL(1036800000, 54, 0x0, 0x1),
+	F_APCS_PLL(1113600000, 58, 0x0, 0x1),
+	F_APCS_PLL(1209600000, 63, 0x0, 0x1),
+	F_APCS_PLL(1190400000, 62, 0x0, 0x1),
+	F_APCS_PLL(1267200000, 66, 0x0, 0x1),
+	F_APCS_PLL(1344000000, 70, 0x0, 0x1),
+	F_APCS_PLL(1363200000, 71, 0x0, 0x1),
+	F_APCS_PLL(1420800000, 74, 0x0, 0x1),
+	F_APCS_PLL(1459200000, 76, 0x0, 0x1),
+	F_APCS_PLL(1497600000, 78, 0x0, 0x1),
+	F_APCS_PLL(1536000000, 80, 0x0, 0x1),
+	F_APCS_PLL(1574400000, 82, 0x0, 0x1),
+	F_APCS_PLL(1612800000, 84, 0x0, 0x1),
+	F_APCS_PLL(1632000000, 85, 0x0, 0x1),
+	F_APCS_PLL(1651200000, 86, 0x0, 0x1),
+	F_APCS_PLL(1689600000, 88, 0x0, 0x1),
+	F_APCS_PLL(1708800000, 89, 0x0, 0x1),
+};
+
+static struct clk_pll a53ss_c1_pll = {
+	.l_reg = 0x00004,
+	.m_reg = 0x00008,
+	.n_reg = 0x0000c,
+	.config_reg = 0x00010,
+	.mode_reg = 0x00000,
+	.status_reg = 0x0001c,
+	.status_bit = 17,
+	.freq_tbl = apcs_c1_pll_freq,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "a53ss_c1_pll",
+		.parent_names = (const char *[]){ "xo_a" },
+		.num_parents = 1,
+		.ops = &clk_pll_sr2_ops,
+	},
+};
+
+static struct pll_freq_tbl apcs_cci_pll_freq[] = {
+	F_APCS_PLL(403200000, 21, 0x0, 0x1),
+	F_APCS_PLL(595200000, 31, 0x0, 0x1),
+};
+
+static struct clk_pll a53ss_cci_pll = {
+	.l_reg = 0x00004,
+	.m_reg = 0x00008,
+	.n_reg = 0x0000c,
+	.config_reg = 0x00010,
+	.mode_reg = 0x00000,
+	.status_reg = 0x0001c,
+	.status_bit = 17,
+	.freq_tbl = apcs_cci_pll_freq,
+	.clkr.hw.init = &(struct clk_init_data){
+		.name = "a53ss_cci_pll",
+		.parent_names = (const char *[]){ "xo_a" },
+		.num_parents = 1,
+		.ops = &clk_pll_sr2_ops,
 	},
 };
 
@@ -2306,6 +2398,10 @@ static struct pll_config gpll4_config = {
 };
 
 static struct clk_regmap *gcc_msm8936_clocks[] = {
+	[CLK_A53SS_C0_PLL] = &a53ss_c0_pll.clkr,
+	[CLK_A53SS_C1_PLL] = &a53ss_c1_pll.clkr,
+	[CLK_A53SS_CCI_PLL] = &a53ss_cci_pll.clkr,
+
 	[GPLL0] = &gpll0.clkr,
 	[GPLL0_VOTE] = &gpll0_vote,
 	[GPLL1] = &gpll1.clkr,

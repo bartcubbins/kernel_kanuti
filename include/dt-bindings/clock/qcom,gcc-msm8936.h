@@ -14,6 +14,11 @@
 #ifndef _DT_BINDINGS_CLK_MSM_GCC_8936_H
 #define _DT_BINDINGS_CLK_MSM_GCC_8936_H
 
+/* CPU clocks */
+#define CLK_A53SS_C0_PLL		0
+#define CLK_A53SS_C1_PLL		1
+#define CLK_A53SS_CCI_PLL		2
+
 /* Hardware clocks */
 #define GCC_XO				0
 #define GCC_XO_A			1
