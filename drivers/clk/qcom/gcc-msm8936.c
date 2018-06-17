@@ -395,7 +395,6 @@ static struct pll_config gpll4_config = {
 	.post_div_mask = BM(9, 8),
 	.mn_ena_val = BIT(24),
 	.mn_ena_mask = BIT(24),
-	//.main_output_val = BIT(0),
 	.main_output_mask = BIT(0),
 };
 
@@ -3005,22 +3004,18 @@ static int gcc_msm8936_probe(struct platform_device *pdev)
 					"Unable to get vdd_hf_dig regulator\n");
 		return PTR_ERR(vdd_hf_pll.regulator[1]);
 	}
-pr_info("---------------GCC REGULATORS PARSED!!!-------------\n");
 
 	/* Vote for GPLL0 to turn on. Needed by acpuclock. */
 	regmap_update_bits(regmap, 0x45000, BIT(0), BIT(0));
-pr_info("---------------GCC 1!!!-------------\n");
 
 	ret = qcom_cc_really_probe(pdev, &gcc_msm8936_desc, regmap);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to register GCC clocks\n");
 		return ret;
 	}
-pr_info("---------------GCC 2!!!-------------\n");
 
 	clk_set_rate(apss_ahb_clk_src.clkr.hw.clk, 19200000);
 	clk_prepare_enable(apss_ahb_clk_src.clkr.hw.clk);
-pr_info("---------------GCC 3!!!-------------\n");
 
 	base = ioremap_nocache(GCC_REG_BASE, 0x80000);
 	val = readl_relaxed((void __iomem*)(base + 0x59024));
@@ -3028,7 +3023,6 @@ pr_info("---------------GCC 3!!!-------------\n");
 	val |= (0 << 8);
 	val |= (0 << 4);
 	writel_relaxed(val, (void __iomem*)(base + 0x59024));
-pr_info("---------------GCC 4!!!-------------\n");
 
 	clk_pll_configure_sr_hpm_lp(&gpll3, regmap,
 					&gpll3_config, true);
@@ -3036,11 +3030,9 @@ pr_info("---------------GCC 4!!!-------------\n");
 					&gpll4_config, true);
 
 	clk_set_rate(gpll3.clkr.hw.clk, 1100000000);
-pr_info("---------------GCC 5!!!-------------\n");
 
 	/* Enable AUX2 clock for APSS */
 	regmap_update_bits(regmap, 0x60000, BIT(2), BIT(2));
-pr_info("---------------GCC 6!!!-------------\n");
 
 	dev_info(&pdev->dev, "Registered GCC clocks\n");
 
