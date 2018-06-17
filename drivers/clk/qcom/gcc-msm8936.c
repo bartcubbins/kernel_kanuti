@@ -343,7 +343,7 @@ static struct clk_pll gpll1 = {
 
 static struct clk_regmap gpll1_out_main = {
 	.enable_reg = 0x45000,
-	.enable_mask = BIT(4),
+	.enable_mask = BIT(1),
 	.hw.init = &(struct clk_init_data){
 		.name = "gpll1_out_main",
 		.parent_names = (const char *[]){ "gpll1" },
@@ -370,13 +370,19 @@ static struct clk_pll gpll2 = {
 
 static struct clk_regmap gpll2_out_main = {
 	.enable_reg = 0x45000,
-	.enable_mask = BIT(4),
+	.enable_mask = BIT(2),
 	.hw.init = &(struct clk_init_data){
 		.name = "gpll2_out_main",
 		.parent_names = (const char *[]){ "gpll2" },
 		.num_parents = 1,
 		.ops = &clk_pll_vote_ops,
 	},
+};
+
+#define F_GPLL(f, l, m, n) { (f), (l), (m), (n), 0 }
+
+static struct pll_freq_tbl ftbl_gcc_gpll3[] = {
+	F_GPLL(1100000000, 57, 7, 24),
 };
 
 static struct clk_pll gpll3 = {
@@ -387,6 +393,7 @@ static struct clk_pll gpll3 = {
 	.mode_reg	= 0x22000,
 	.status_reg	= 0x2201c,
 	.status_bit	= 17,
+	.freq_tbl	= ftbl_gcc_gpll3,
 	.clkr.hw.init = &(struct clk_init_data) {
 		.name = "gpll3",
 		.parent_names = (const char *[]) { "xo" },
@@ -424,7 +431,7 @@ static struct clk_pll gpll4 = {
 
 static struct clk_regmap gpll4_out_main = {
 	.enable_reg = 0x45000,
-	.enable_mask = BIT(4),
+	.enable_mask = BIT(5),
 	.hw.init = &(struct clk_init_data){
 		.name = "gpll4_out_main",
 		.parent_names = (const char *[]){ "gpll4" },
@@ -452,11 +459,12 @@ static struct clk_pll gpll6 = {
 
 static struct clk_regmap gpll6_out_main = {
 	.enable_reg = 0x45000,
-	.enable_mask = BIT(4),
+	.enable_mask = BIT(7),
 	.hw.init = &(struct clk_init_data){
 		.name = "gpll6_out_main",
 		.parent_names = (const char *[]){ "gpll6" },
 		.num_parents = 1,
+		.flags = CLK_ENABLE_HAND_OFF,
 		.ops = &clk_pll_vote_ops,
 	},
 };
@@ -3009,9 +3017,9 @@ pr_info("---------------GCC 3!!!-------------\n");
 pr_info("---------------GCC 4!!!-------------\n");
 
 	clk_pll_configure_sr_hpm_lp(&gpll3, regmap,
-							&gpll3_config, true);
+					&gpll3_config, true);
 	clk_pll_configure_sr_hpm_lp(&gpll4, regmap,
-							&gpll4_config, true);
+					&gpll4_config, true);
 
 	clk_set_rate(gpll3.clkr.hw.clk, 1100000000);
 pr_info("---------------GCC 5!!!-------------\n");
