@@ -96,7 +96,7 @@
 #define GCC_SMMU_CFG_CLK		57
 #define GCC_VENUS_TBU_CLK		58
 #define GCC_VFE_TBU_CLK			59
-#define GCC_TBU_CPP_CLK			60
+#define GCC_CPP_TBU_CLK			60
 #define GCC_MDP_RT_TBU_CLK		61
 
 /* Branches */
