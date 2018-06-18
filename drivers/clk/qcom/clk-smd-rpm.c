@@ -772,11 +772,11 @@ DEFINE_CLK_SMD_RPM_XO_BUFFER_PINCTRL(msm8936, bb_clk2_pin, bb_clk2_a_pin, 2);
 DEFINE_CLK_SMD_RPM_XO_BUFFER_PINCTRL(msm8936, rf_clk2_pin, rf_clk2_a_pin, 5);
 
 /* Voter clocks */
-static DEFINE_CLK_VOTER(sysmmnoc_msmbus_clk, sysmmnoc_clk.c, LONG_MAX);
-static DEFINE_CLK_VOTER(sysmmnoc_msmbus_a_clk, sysmmnoc_a_clk.c, LONG_MAX);
-static DEFINE_CLK_VOTER(pcnoc_keepalive_a_clk, pcnoc_a_clk, LONG_MAX);
-static DEFINE_CLK_VOTER(pcnoc_msmbus_clk, pcnoc_clk, LONG_MAX);
-static DEFINE_CLK_VOTER(pcnoc_msmbus_a_clk, pcnoc_a_clk, LONG_MAX);
+//static DEFINE_CLK_VOTER(sysmmnoc_msmbus_clk, sysmmnoc_clk, LONG_MAX);
+//static DEFINE_CLK_VOTER(sysmmnoc_msmbus_a_clk, sysmmnoc_a_clk, LONG_MAX);
+//static DEFINE_CLK_VOTER(pcnoc_keepalive_a_clk, pcnoc_a_clk, LONG_MAX);
+//static DEFINE_CLK_VOTER(pcnoc_msmbus_clk, pcnoc_clk, LONG_MAX);
+//static DEFINE_CLK_VOTER(pcnoc_msmbus_a_clk, pcnoc_a_clk, LONG_MAX);
 static DEFINE_CLK_VOTER(bimc_usb_clk, bimc_clk, LONG_MAX);
 static DEFINE_CLK_VOTER(pcnoc_usb_clk, pcnoc_clk, LONG_MAX);
 static DEFINE_CLK_VOTER(snoc_usb_clk, snoc_clk, LONG_MAX);
@@ -811,17 +811,17 @@ static struct clk_hw *msm8936_clks[] = {
 	/* Voter clocks */
 	[MMSSNOC_AXI_CLK]	= &msm8936_mmssnoc_axi_clk.hw,
 	[MMSSNOC_AXI_A_CLK]	= &msm8936_mmssnoc_axi_a_clk.hw,
-	[BIMC_MSMBUS_CLK]	= &bimc_msmbus_clk.hw,
-	[BIMC_MSMBUS_A_CLK]	= &bimc_msmbus_a_clk.hw,
-	[CNOC_MSMBUS_CLK]	= &sysmmnoc_msmbus_clk.hw,
-	[CNOC_MSMBUS_A_CLK]	= &sysmmnoc_msmbus_a_clk.hw,
-	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
-	[PNOC_MSMBUS_CLK]	= &pcnoc_msmbus_clk.hw,
-	[PNOC_MSMBUS_A_CLK]	= &pcnoc_msmbus_a_clk.hw,
-	[SNOC_MSMBUS_CLK]	= &snoc_msmbus_clk.hw,
-	[SNOC_MSMBUS_A_CLK]	= &snoc_msmbus_a_clk.hw,
-	[CXO_LPM_CLK]		= &cxo_lpm_clk.hw,
-	[CXO_OTG_CLK]		= &cxo_otg_clk.hw,
+//	[BIMC_MSMBUS_CLK]	= &bimc_msmbus_clk.hw,
+//	[BIMC_MSMBUS_A_CLK]	= &bimc_msmbus_a_clk.hw,
+//	[CNOC_MSMBUS_CLK]	= &sysmmnoc_msmbus_clk.hw,
+//	[CNOC_MSMBUS_A_CLK]	= &sysmmnoc_msmbus_a_clk.hw,
+//	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
+//	[PNOC_MSMBUS_CLK]	= &pcnoc_msmbus_clk.hw,
+//	[PNOC_MSMBUS_A_CLK]	= &pcnoc_msmbus_a_clk.hw,
+//	[SNOC_MSMBUS_CLK]	= &snoc_msmbus_clk.hw,
+//	[SNOC_MSMBUS_A_CLK]	= &snoc_msmbus_a_clk.hw,
+//	[CXO_LPM_CLK]		= &cxo_lpm_clk.hw,
+//	[CXO_OTG_CLK]		= &cxo_otg_clk.hw,
 	[BIMC_USB_CLK]		= &bimc_usb_clk.hw,
 	[PNOC_USB_CLK]		= &pcnoc_usb_clk.hw,
 	[SNOC_USB_CLK]		= &snoc_usb_clk.hw,
@@ -943,8 +943,8 @@ static int rpm_smd_clk_probe(struct platform_device *pdev)
 		clk_prepare_enable(msm8936_cxo_a.hw.clk);
 
 		/* Hold an active set vote for the pcnoc_keepalive_a_clk */
-		clk_set_rate(pcnoc_keepalive_a_clk.hw.clk, 19200000);
-		clk_prepare_enable(pcnoc_keepalive_a_clk.hw.clk);
+//		clk_set_rate(pcnoc_keepalive_a_clk.hw.clk, 19200000);
+//		clk_prepare_enable(pcnoc_keepalive_a_clk.hw.clk);
 	} else if (is_8996) {
 		/*
 		 * Keep an active vote on CXO in case no other driver

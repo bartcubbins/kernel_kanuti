@@ -145,7 +145,7 @@
 			qcom,bus-type = <1>;
 			clock-names = "bus_clk", "bus_a_clk";
 			clocks = <&clock_rpmcc  PNOC_MSMBUS_CLK>,
-			      <&clock_rpmcc  PNOC_MSMBUS_CLK>;
+			      <&clock_rpmcc  PNOC_MSMBUS_A_CLK>;
 
 			coresight-id = <54>;
 			coresight-name = "coresight-pnoc";
