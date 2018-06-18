@@ -124,7 +124,7 @@
 #include "msm8939-ion.dtsi"
 #include "msm-gdsc-8916.dtsi"
 #include "msm8939-iommu.dtsi"
-//#include "msm8939-bus.dtsi"
+#include "msm8939-bus.dtsi"
 #include "msm8939-mdss.dtsi"
 #include "msm8939-vidc.dtsi"
 #include "msm8939-iommu-domains.dtsi"
@@ -1365,7 +1365,7 @@
 
 		clocks = <&clock_rpmcc RPM_XO_CLK_SRC>,
 			 <&clock_gcc GCC_MSS_CFG_AHB_CLK>,
-		//	 <&clock_gcc GCC_MSS_Q6_BIMC_AXI_CLK>, !!!!!!!!!!!!!!!!!!!!!!
+			 <&clock_gcc GCC_MSS_Q6_BIMC_AXI_CLK>,
 			 <&clock_gcc GCC_BOOT_ROM_AHB_CLK>;
 		clock-names = "xo", "iface_clk", "bus_clk", "mem_clk";
 		qcom,proxy-clock-names = "xo";

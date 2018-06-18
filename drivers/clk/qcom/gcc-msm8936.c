@@ -2350,6 +2350,20 @@ static struct clk_branch gcc_mss_cfg_ahb_clk = {
 	},
 };
 
+static struct clk_branch gcc_mss_q6_bimc_axi_clk = {
+	.halt_reg = 0x49004,
+	.halt_check = BRANCH_HALT,
+	.clkr = {
+		.enable_reg = 0x49004,
+		.enable_mask = BIT(0),
+		.hw.init = &(struct clk_init_data) {
+			.name ="gcc_mss_q6_bimc_axi_clk",
+			.flags = CLK_ENABLE_HAND_OFF,
+			.ops = &clk_branch2_ops,
+		},
+	},
+};
+
 static struct clk_branch gcc_oxili_ahb_clk = {
 	.halt_reg = 0x59028,
 	.clkr = {
@@ -2885,6 +2899,7 @@ static struct clk_regmap *gcc_msm8936_clocks[] = {
 	[GCC_MDSS_MDP_CLK]		= &gcc_mdss_mdp_clk.clkr,
 	[GCC_MDSS_VSYNC_CLK]		= &gcc_mdss_vsync_clk.clkr,
 	[GCC_MSS_CFG_AHB_CLK]		= &gcc_mss_cfg_ahb_clk.clkr,
+	[GCC_MSS_Q6_BIMC_AXI_CLK]	= &gcc_mss_q6_bimc_axi_clk.clkr,
 	[GCC_OXILI_AHB_CLK]		= &gcc_oxili_ahb_clk.clkr,
 	[GCC_OXILI_TIMER_CLK]		= &gcc_oxili_timer_clk.clkr,
 	[GCC_OXILI_GFX3D_CLK]		= &gcc_oxili_gfx3d_clk.clkr,
