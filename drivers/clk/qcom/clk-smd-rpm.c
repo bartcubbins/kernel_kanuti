@@ -523,6 +523,27 @@ static const struct rpm_smd_clk_desc rpm_clk_msm8916 = {
 	.num_clks = ARRAY_SIZE(msm8916_clks),
 };
 
+/* msm8936 */
+DEFINE_CLK_SMD_RPM_BRANCH(msm8936, cxo, cxo_a, QCOM_SMD_RPM_MISC_CLK, 0, 19200000);
+DEFINE_CLK_SMD_RPM(msm8936, bimc_clk, bimc_a_clk, QCOM_SMD_RPM_MEM_CLK, 0);
+DEFINE_CLK_SMD_RPM_QDSS(msm8936, qdss_clk, qdss_a_clk, QCOM_SMD_RPM_MISC_CLK, 1);
+
+/* Voter clocks */
+static DEFINE_CLK_VOTER(pcnoc_keepalive_a_clk, pcnoc_a_clk, LONG_MAX);
+
+static struct clk_hw *msm8936_clks[] = {
+	[RPM_XO_A_CLK_SRC]	= &msm8936_cxo_a.hw,
+	[RPM_BIMC_CLK] 		= &msm8936_bimc_clk.hw,
+	[RPM_QDSS_CLK]		= &msm8936_qdss_clk.hw,
+	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
+};
+
+static const struct rpm_smd_clk_desc rpm_clk_msm8936 = {
+	.clks = msm8936_clks,
+	.num_rpm_clks = 1, // !!!!
+	.num_clks = ARRAY_SIZE(msm8936_clks),
+};
+
 /* msm8996 */
 DEFINE_CLK_SMD_RPM(msm8996, pnoc_clk, pnoc_a_clk, QCOM_SMD_RPM_BUS_CLK, 0);
 DEFINE_CLK_SMD_RPM(msm8996, snoc_clk, snoc_a_clk, QCOM_SMD_RPM_BUS_CLK, 1);
@@ -759,6 +780,7 @@ static const struct rpm_smd_clk_desc rpm_clk_sdm660 = {
 
 static const struct of_device_id rpm_smd_clk_match_table[] = {
 	{ .compatible = "qcom,rpmcc-msm8916", .data = &rpm_clk_msm8916},
+        { .compatible = "qcom,rpmcc-msm8936", .data = &rpm_clk_msm8936},
 	{ .compatible = "qcom,rpmcc-msm8996", .data = &rpm_clk_msm8996},
 	{ .compatible = "qcom,rpmcc-sdm660", .data = &rpm_clk_sdm660},
 	{ }
@@ -771,16 +793,22 @@ static int rpm_smd_clk_probe(struct platform_device *pdev)
 	struct clk *clk;
 	struct rpm_cc *rcc;
 	struct clk_onecell_data *data;
-	int ret, is_8996 = 0, is_660 = 0;
+	int ret, is_8936 = 0, is_8996 = 0, is_660 = 0;
 	size_t num_clks, i;
 	struct clk_hw **hw_clks;
 	const struct rpm_smd_clk_desc *desc;
 
+	is_8936 = of_device_is_compatible(pdev->dev.of_node,
+						"qcom,rpmcc-msm8936");
 	is_8996 = of_device_is_compatible(pdev->dev.of_node,
 						"qcom,rpmcc-msm8996");
 	is_660 = of_device_is_compatible(pdev->dev.of_node,
 						"qcom,rpmcc-sdm660");
-	if (is_8996) {
+	if (is_8936) {
+		ret = clk_vote_bimc(&msm8936_bimc_clk.hw, INT_MAX);
+		if (ret < 0)
+			return ret;
+	} else if (is_8996) {
 		ret = clk_vote_bimc(&msm8996_bimc_clk.hw, INT_MAX);
 		if (ret < 0)
 			return ret;
@@ -853,7 +881,13 @@ static int rpm_smd_clk_probe(struct platform_device *pdev)
 	if (ret)
 		goto err;
 
-	if (is_8996) {
+	if (is_8936) {
+		clk_prepare_enable(msm8936_cxo_a.hw.clk);
+
+		/* Hold an active set vote for the pcnoc_keepalive_a_clk */
+		clk_set_rate(pcnoc_keepalive_a_clk.hw.clk, 19200000);
+		clk_prepare_enable(pcnoc_keepalive_a_clk.hw.clk);
+	} else if (is_8996) {
 		/*
 		 * Keep an active vote on CXO in case no other driver
 		 * votes for it.
