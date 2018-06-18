@@ -91,7 +91,7 @@
 		clocks = <&clock_gcc GCC_MDSS_AHB_CLK>,
 			 <&clock_gcc GCC_MDSS_AXI_CLK>,
 			 <&clock_gcc MDP_CLK_SRC>,
-			 <&clock_gcc_mdss GCC_MDSS_MDP_VOTE_CLK>,
+			 //<&clock_gcc_mdss GCC_MDSS_MDP_VOTE_CLK>,
 			 <&clock_gcc GCC_MDSS_VSYNC_CLK>;
 		clock-names = "iface_clk", "bus_clk", "core_clk_src",
 				"core_clk", "vsync_clk";
@@ -171,7 +171,7 @@
 			0x1a98780 0x1a98780 0x30
 			0x193e000 0x193e000 0x30>;
 
-		clocks = <&clock_gcc_mdss GCC_MDSS_MDP_VOTE_CLK>,
+		clocks = //<&clock_gcc_mdss GCC_MDSS_MDP_VOTE_CLK>,
 			 <&clock_gcc GCC_MDSS_AHB_CLK>,
 			 <&clock_gcc GCC_MDSS_AXI_CLK>;
 		clock-names = "mdp_core_clk", "iface_clk", "bus_clk";
