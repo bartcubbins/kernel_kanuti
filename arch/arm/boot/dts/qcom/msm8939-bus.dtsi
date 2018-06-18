@@ -93,8 +93,8 @@
 			qcom,qos-off = <0x1000>;
 			qcom,bus-type = <1>;
 			clock-names = "bus_clk", "bus_a_clk";
-			clocks = <&clock_rpm  clk_snoc_msmbus_clk>,
-			      <&clock_rpm  clk_snoc_msmbus_a_clk>;
+			clocks = <&clock_rpmcc SNOC_MSMBUS_CLK>,
+			      <&clock_rpmcc SNOC_MSMBUS_A_CLK>;
 
 			coresight-id = <50>;
 			coresight-name = "coresight-snoc";
@@ -113,8 +113,8 @@
 			qcom,qos-off = <0x1000>;
 			qcom,bus-type = <1>;
 			clock-names = "bus_clk", "bus_a_clk";
-			clocks = <&clock_rpm  clk_sysmmnoc_msmbus_clk>,
-			      <&clock_rpm  clk_sysmmnoc_msmbus_a_clk>;
+			clocks = <&clock_rpmcc  SNOC_MSMBUS_CLK>,
+			      <&clock_rpmcc  SNOC_MSMBUS_A_CLK>;
 		};
 
 		fab_bimc: fab-bimc {
@@ -124,8 +124,8 @@
 			qcom,base-name = "bimc-base";
 			qcom,bus-type = <2>;
 			clock-names = "bus_clk", "bus_a_clk";
-			clocks = <&clock_rpm  clk_bimc_msmbus_clk>,
-			      <&clock_rpm  clk_bimc_msmbus_a_clk>;
+			clocks = <&clock_rpmcc  BIMC_MSMBUS_CLK>,
+			      <&clock_rpmcc  BIMC_MSMBUS_A_CLK>;
 
 			coresight-id = <55>;
 			coresight-name = "coresight-bimc";
@@ -144,8 +144,8 @@
 			qcom,qos-delta = <0x1000>;
 			qcom,bus-type = <1>;
 			clock-names = "bus_clk", "bus_a_clk";
-			clocks = <&clock_rpm  clk_pcnoc_msmbus_clk>,
-			      <&clock_rpm  clk_pcnoc_msmbus_a_clk>;
+			clocks = <&clock_rpmcc  PNOC_MSMBUS_CLK>,
+			      <&clock_rpmcc  PNOC_MSMBUS_CLK>;
 
 			coresight-id = <54>;
 			coresight-name = "coresight-pnoc";

@@ -77,15 +77,15 @@
 		qcom,clk-map = <0x000003DE>;
 
 
-		clocks = //<&clock_gcc GCC_GFX3D_OXILI_CLK>,
-			 //<&clock_gcc GCC_GFX3D_OXILI_AHB_CLK>,
-			 //<&clock_gcc GCC_GFX3D_OXILI_GMEM_CLK>,
-			 <&clock_gcc GCC_GFX3D_BIMC_CLK>,
+		clocks = <&clock_gcc GCC_OXILI_GFX3D_CLK>,
+			 <&clock_gcc GCC_OXILI_AHB_CLK>,
+			 <&clock_gcc GCC_OXILI_GMEM_CLK>,
+			 <&clock_gcc GCC_BIMC_GFX_CLK>,
 			 <&clock_gcc GCC_BIMC_GPU_CLK>,
-			 <&clock_gcc GCC_GFX3D_GTCU_AHB_CLK>,
-			 <&clock_gcc GCC_GFX3D_TCU_CLK>,
-			 <&clock_gcc GCC_GFX3D_TBU_CLK>,
-			 <&clock_gcc GCC_GFX3D_OXILI_TIMER_CLK>;
+			 <&clock_gcc GCC_GTCU_AHB_CLK>,
+			 <&clock_gcc GCC_GFX_TCU_CLK>,
+			 <&clock_gcc GCC_GFX_TBU_CLK>,
+			 <&clock_gcc GCC_OXILI_TIMER_CLK>;
 
 		clock-names = "core_clk", "iface_clk", "mem_clk",
 		              "mem_iface_clk", "alt_mem_iface_clk",
@@ -172,8 +172,8 @@
 		*/
 		qcom,protect = <0x48000 0x1000>;
 		clocks = <&clock_gcc GCC_SMMU_CFG_CLK>,
-			<&clock_gcc GCC_GFX3D_TCU_CLK>,
-			<&clock_gcc GCC_GFX3D_GTCU_AHB_CLK>,
+			<&clock_gcc GCC_GFX_TCU_CLK>,
+			<&clock_gcc GCC_GTCU_AHB_CLK>,
 			<&clock_gcc GCC_GFX_TBU_CLK>;
 		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
 				"gtbu_clk";
