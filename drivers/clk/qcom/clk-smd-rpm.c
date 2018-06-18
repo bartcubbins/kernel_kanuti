@@ -811,8 +811,8 @@ static struct clk_hw *msm8936_clks[] = {
 	/* Voter clocks */
 	[MMSSNOC_AXI_CLK]	= &msm8936_mmssnoc_axi_clk.hw,
 	[MMSSNOC_AXI_A_CLK]	= &msm8936_mmssnoc_axi_a_clk.hw,
-//	[BIMC_MSMBUS_CLK]	= &bimc_msmbus_clk.hw,
-//	[BIMC_MSMBUS_A_CLK]	= &bimc_msmbus_a_clk.hw,
+//	[BIMC_MSMBUS_CLK]	= &bimc_msmbus_clk.hw, // BL BUG!!!
+//	[BIMC_MSMBUS_A_CLK]	= &bimc_msmbus_a_clk.hw, // BL BUG!!!
 //	[CNOC_MSMBUS_CLK]	= &sysmmnoc_msmbus_clk.hw,
 //	[CNOC_MSMBUS_A_CLK]	= &sysmmnoc_msmbus_a_clk.hw,
 //	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
