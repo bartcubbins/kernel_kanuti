@@ -923,11 +923,11 @@
 				<87 512 6000  6000>;
 		clocks = <&clock_gcc GCC_USB_HS_AHB_CLK>,
 			 <&clock_gcc GCC_USB_HS_SYSTEM_CLK>,
-			 <&clock_gcc GCC_USB2A_PHY_SLEEP_CLK>;//,
-		//	 <&clock_rpm clk_bimc_usb_a_clk>,
-		//	 <&clock_rpm clk_snoc_usb_a_clk>,
-		//	 <&clock_rpm clk_pcnoc_usb_a_clk>,
-		//	 <&clock_rpm clk_xo_otg_clk>;
+			 <&clock_gcc GCC_USB2A_PHY_SLEEP_CLK>,
+			 <&clock_rpmcc BIMC_USB_CLK>,
+			 <&clock_rpmcc SNOC_USB_CLK>,
+			 <&clock_rpmcc PNOC_USB_CLK>,
+			 <&clock_rpmcc CXO_OTG_CLK>;
 		clock-names = "iface_clk", "core_clk", "sleep_clk",
 				"bimc_clk", "snoc_clk", "pcnoc_clk",
 				"xo";
@@ -1614,7 +1614,7 @@
 		vdd_pronto_pll-supply = <&pm8916_l7>;
 		proxy-reg-names = "vdd_pronto_pll";
 		vdd_pronto_pll-uV-uA = <1800000 18000>;
-		clocks = //<&clock_rpmcc CXO_PIL_PRONTO_CLK>,
+		clocks = <&clock_rpmcc CXO_PIL_PRONTO_CLK>,
 			 <&clock_gcc GCC_CRYPTO_CLK>,
 			 <&clock_gcc GCC_CRYPTO_AHB_CLK>,
 			 <&clock_gcc GCC_CRYPTO_AXI_CLK>,

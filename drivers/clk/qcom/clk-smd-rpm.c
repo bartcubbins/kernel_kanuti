@@ -523,27 +523,6 @@ static const struct rpm_smd_clk_desc rpm_clk_msm8916 = {
 	.num_clks = ARRAY_SIZE(msm8916_clks),
 };
 
-/* msm8936 */
-DEFINE_CLK_SMD_RPM_BRANCH(msm8936, cxo, cxo_a, QCOM_SMD_RPM_MISC_CLK, 0, 19200000);
-DEFINE_CLK_SMD_RPM(msm8936, bimc_clk, bimc_a_clk, QCOM_SMD_RPM_MEM_CLK, 0);
-DEFINE_CLK_SMD_RPM_QDSS(msm8936, qdss_clk, qdss_a_clk, QCOM_SMD_RPM_MISC_CLK, 1);
-
-/* Voter clocks */
-static DEFINE_CLK_VOTER(pcnoc_keepalive_a_clk, pcnoc_a_clk, LONG_MAX);
-
-static struct clk_hw *msm8936_clks[] = {
-	[RPM_XO_A_CLK_SRC]	= &msm8936_cxo_a.hw,
-	[RPM_BIMC_CLK] 		= &msm8936_bimc_clk.hw,
-	[RPM_QDSS_CLK]		= &msm8936_qdss_clk.hw,
-	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
-};
-
-static const struct rpm_smd_clk_desc rpm_clk_msm8936 = {
-	.clks = msm8936_clks,
-	.num_rpm_clks = 1, // !!!!
-	.num_clks = ARRAY_SIZE(msm8936_clks),
-};
-
 /* msm8996 */
 DEFINE_CLK_SMD_RPM(msm8996, pnoc_clk, pnoc_a_clk, QCOM_SMD_RPM_BUS_CLK, 0);
 DEFINE_CLK_SMD_RPM(msm8996, snoc_clk, snoc_a_clk, QCOM_SMD_RPM_BUS_CLK, 1);
@@ -776,6 +755,85 @@ static const struct rpm_smd_clk_desc rpm_clk_sdm660 = {
 	.clks = sdm660_clks,
 	.num_rpm_clks = MMSSNOC_AXI_A_CLK,
 	.num_clks = ARRAY_SIZE(sdm660_clks),
+};
+
+/* msm8936 */
+DEFINE_CLK_SMD_RPM_BRANCH(msm8936, cxo, cxo_a, QCOM_SMD_RPM_MISC_CLK, 0, 19200000);
+DEFINE_CLK_SMD_RPM(msm8936, pcnoc_clk, pcnoc_a_clk, QCOM_SMD_RPM_BUS_CLK, 0);
+DEFINE_CLK_SMD_RPM(msm8936, snoc_clk, snoc_a_clk, QCOM_SMD_RPM_BUS_CLK, 1);
+DEFINE_CLK_SMD_RPM(msm8936, bimc_clk, bimc_a_clk, QCOM_SMD_RPM_MEM_CLK, 0);
+DEFINE_CLK_SMD_RPM(msm8936, mmssnoc_axi_clk, mmssnoc_axi_a_clk, QCOM_SMD_RPM_BUS_CLK, 2);
+DEFINE_CLK_SMD_RPM_QDSS(msm8936, qdss_clk, qdss_a_clk, QCOM_SMD_RPM_MISC_CLK, 1);
+DEFINE_CLK_SMD_RPM_XO_BUFFER(msm8936, bb_clk1, bb_clk1_a, 1);
+DEFINE_CLK_SMD_RPM_XO_BUFFER(msm8936, bb_clk2, bb_clk2_a, 2);
+DEFINE_CLK_SMD_RPM_XO_BUFFER(msm8936, rf_clk2, rf_clk2_a, 5);
+DEFINE_CLK_SMD_RPM_XO_BUFFER_PINCTRL(msm8936, bb_clk1_pin, bb_clk1_a_pin, 1);
+DEFINE_CLK_SMD_RPM_XO_BUFFER_PINCTRL(msm8936, bb_clk2_pin, bb_clk2_a_pin, 2);
+DEFINE_CLK_SMD_RPM_XO_BUFFER_PINCTRL(msm8936, rf_clk2_pin, rf_clk2_a_pin, 5);
+
+/* Voter clocks */
+static DEFINE_CLK_VOTER(sysmmnoc_msmbus_clk, sysmmnoc_clk.c, LONG_MAX);
+static DEFINE_CLK_VOTER(sysmmnoc_msmbus_a_clk, sysmmnoc_a_clk.c, LONG_MAX);
+static DEFINE_CLK_VOTER(pcnoc_keepalive_a_clk, pcnoc_a_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(pcnoc_msmbus_clk, pcnoc_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(pcnoc_msmbus_a_clk, pcnoc_a_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(bimc_usb_clk, bimc_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(pcnoc_usb_clk, pcnoc_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(snoc_usb_clk, snoc_clk, LONG_MAX);
+static DEFINE_CLK_BRANCH_VOTER(cxo_pil_mss_clk, cxo);
+static DEFINE_CLK_BRANCH_VOTER(cxo_pil_pronto_clk, cxo);
+static DEFINE_CLK_BRANCH_VOTER(cxo_wlan_clk, cxo);
+
+static struct clk_hw *msm8936_clks[] = {
+	[RPM_XO_CLK_SRC]	= &msm8936_cxo.hw,
+	[RPM_XO_A_CLK_SRC]	= &msm8936_cxo_a.hw,
+	[RPM_PCNOC_CLK]		= &msm8936_pcnoc_clk.hw,
+	[RPM_PCNOC_A_CLK]	= &msm8936_pcnoc_a_clk.hw,
+	[RPM_SNOC_CLK]		= &msm8936_snoc_clk.hw,
+	[RPM_SNOC_A_CLK]	= &msm8936_snoc_a_clk.hw,
+	[RPM_BIMC_CLK] 		= &msm8936_bimc_clk.hw,
+	[RPM_BIMC_A_CLK]	= &msm8936_bimc_a_clk.hw,
+	[RPM_QDSS_CLK]		= &msm8936_qdss_clk.hw,
+	[RPM_QDSS_A_CLK]	= &msm8936_qdss_a_clk.hw,
+	[RPM_BB_CLK1]		= &msm8936_bb_clk1.hw,
+	[RPM_BB_CLK1_A]		= &msm8936_bb_clk1_a.hw,
+	[RPM_BB_CLK1_PIN]	= &msm8936_bb_clk1_pin.hw,
+	[RPM_BB_CLK1_A_PIN]	= &msm8936_bb_clk1_a_pin.hw,
+	[RPM_BB_CLK2]		= &msm8936_bb_clk2.hw,
+	[RPM_BB_CLK2_A]		= &msm8936_bb_clk2_a.hw,
+	[RPM_BB_CLK2_PIN]	= &msm8936_bb_clk2_pin.hw,
+	[RPM_BB_CLK2_A_PIN]	= &msm8936_bb_clk2_a_pin.hw,
+	[RPM_RF_CLK2]		= &msm8936_rf_clk2.hw,
+	[RPM_RF_CLK2_A]		= &msm8936_rf_clk2_a.hw,
+	[RPM_RF_CLK2_PIN]	= &msm8936_rf_clk2_pin.hw,
+	[RPM_RF_CLK2_A_PIN]	= &msm8936_rf_clk2_a_pin.hw,
+
+	/* Voter clocks */
+	[MMSSNOC_AXI_CLK]	= &msm8936_mmssnoc_axi_clk.hw,
+	[MMSSNOC_AXI_A_CLK]	= &msm8936_mmssnoc_axi_a_clk.hw,
+	[BIMC_MSMBUS_CLK]	= &bimc_msmbus_clk.hw,
+	[BIMC_MSMBUS_A_CLK]	= &bimc_msmbus_a_clk.hw,
+	[CNOC_MSMBUS_CLK]	= &sysmmnoc_msmbus_clk.hw,
+	[CNOC_MSMBUS_A_CLK]	= &sysmmnoc_msmbus_a_clk.hw,
+	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
+	[PNOC_MSMBUS_CLK]	= &pcnoc_msmbus_clk.hw,
+	[PNOC_MSMBUS_A_CLK]	= &pcnoc_msmbus_a_clk.hw,
+	[SNOC_MSMBUS_CLK]	= &snoc_msmbus_clk.hw,
+	[SNOC_MSMBUS_A_CLK]	= &snoc_msmbus_a_clk.hw,
+	[CXO_LPM_CLK]		= &cxo_lpm_clk.hw,
+	[CXO_OTG_CLK]		= &cxo_otg_clk.hw,
+	[BIMC_USB_A_CLK]	= &bimc_usb_clk.hw,
+	[PNOC_USB_A_CLK]	= &pnoc_usb_clk.hw,
+	[SNOC_USB_A_CLK]	= &snoc_usb_clk.hw,
+	[CXO_PIL_MSS_CLK]	= &cxo_pil_mss_clk.hw,
+	[CXO_PIL_PRONTO_CLK]	= &cxo_pil_pronto_clk.hw,
+	[CXO_WLAN_CLK]		= &cxo_wlan_clk.hw,
+};
+
+static const struct rpm_smd_clk_desc rpm_clk_msm8936 = {
+	.clks = msm8936_clks,
+	.num_rpm_clks = MMSSNOC_AXI_A_CLK,
+	.num_clks = ARRAY_SIZE(msm8936_clks),
 };
 
 static const struct of_device_id rpm_smd_clk_match_table[] = {
