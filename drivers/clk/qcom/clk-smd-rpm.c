@@ -775,8 +775,8 @@ DEFINE_CLK_SMD_RPM_XO_BUFFER_PINCTRL(msm8936, rf_clk2_pin, rf_clk2_a_pin, 5);
 //static DEFINE_CLK_VOTER(sysmmnoc_msmbus_clk, sysmmnoc_clk, LONG_MAX);
 //static DEFINE_CLK_VOTER(sysmmnoc_msmbus_a_clk, sysmmnoc_a_clk, LONG_MAX);
 //static DEFINE_CLK_VOTER(pcnoc_keepalive_a_clk, pcnoc_a_clk, LONG_MAX);
-//static DEFINE_CLK_VOTER(pcnoc_msmbus_clk, pcnoc_clk, LONG_MAX);
-//static DEFINE_CLK_VOTER(pcnoc_msmbus_a_clk, pcnoc_a_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(pcnoc_msmbus_clk, pcnoc_clk, LONG_MAX);
+static DEFINE_CLK_VOTER(pcnoc_msmbus_a_clk, pcnoc_a_clk, LONG_MAX);
 static DEFINE_CLK_VOTER(bimc_usb_clk, bimc_clk, LONG_MAX);
 static DEFINE_CLK_VOTER(pcnoc_usb_clk, pcnoc_clk, LONG_MAX);
 static DEFINE_CLK_VOTER(snoc_usb_clk, snoc_clk, LONG_MAX);
@@ -816,12 +816,12 @@ static struct clk_hw *msm8936_clks[] = {
 //	[CNOC_MSMBUS_CLK]	= &sysmmnoc_msmbus_clk.hw,
 //	[CNOC_MSMBUS_A_CLK]	= &sysmmnoc_msmbus_a_clk.hw,
 //	[PNOC_KEEPALIVE_A_CLK]	= &pcnoc_keepalive_a_clk.hw,
-//	[PNOC_MSMBUS_CLK]	= &pcnoc_msmbus_clk.hw,
-//	[PNOC_MSMBUS_A_CLK]	= &pcnoc_msmbus_a_clk.hw,
-//	[SNOC_MSMBUS_CLK]	= &snoc_msmbus_clk.hw,
-//	[SNOC_MSMBUS_A_CLK]	= &snoc_msmbus_a_clk.hw,
-//	[CXO_LPM_CLK]		= &cxo_lpm_clk.hw,
-//	[CXO_OTG_CLK]		= &cxo_otg_clk.hw,
+	[PNOC_MSMBUS_CLK]	= &pcnoc_msmbus_clk.hw,
+	[PNOC_MSMBUS_A_CLK]	= &pcnoc_msmbus_a_clk.hw,
+	[SNOC_MSMBUS_CLK]	= &snoc_msmbus_clk.hw,
+	[SNOC_MSMBUS_A_CLK]	= &snoc_msmbus_a_clk.hw,
+	[CXO_LPM_CLK]		= &cxo_lpm_clk.hw,
+	[CXO_OTG_CLK]		= &cxo_otg_clk.hw,
 	[BIMC_USB_CLK]		= &bimc_usb_clk.hw,
 	[PNOC_USB_CLK]		= &pcnoc_usb_clk.hw,
 	[SNOC_USB_CLK]		= &snoc_usb_clk.hw,
