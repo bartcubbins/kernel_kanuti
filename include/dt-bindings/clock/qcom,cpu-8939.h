@@ -14,11 +14,8 @@
 #ifndef _DT_BINDINGS_CLK_MSM_CPU_8939_H
 #define _DT_BINDINGS_CLK_MSM_CPU_8939_H
 
-#define P_A53_LC_CLK		0
-#define P_A53_BC_CLK		1
-#define P_A53_CCI_CLK		2
-#define P_A53SSPLL_C0		3
-#define P_A53SSPLL_C1		4
-#define P_A53SSPLL_CCI		5
+#define P_A53_C0			0
+#define P_A53_C1			1
+#define P_A53_CCI			2
 
 #endif
