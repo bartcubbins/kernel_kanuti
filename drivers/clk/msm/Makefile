@@ -31,6 +31,11 @@ obj-$(CONFIG_ARCH_MDM9650)      += clock-gcc-mdm9650.o
 obj-$(CONFIG_ARCH_MSM8909)	+= clock-rpm-8909.o
 obj-$(CONFIG_ARCH_MSM8909)	+= clock-gcc-8909.o
 
+# MSM8939
+obj-$(CONFIG_ARCH_MSM8916)	+= clock-cpu-8939.o
+obj-$(CONFIG_ARCH_MSM8916)	+= clock-gcc-8936.o
+obj-$(CONFIG_ARCH_MSM8916)	+= clock-rpm-8936.o
+
 # ACPU clock
 obj-$(CONFIG_ARCH_MSM8909)	+= clock-a7.o
 obj-$(CONFIG_ARCH_MDM9607)	+= clock-a7.o
