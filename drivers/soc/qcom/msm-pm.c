@@ -387,7 +387,9 @@ static bool msm_pm_power_collapse(bool from_idle)
  * External Idle/Suspend Functions
  *****************************************************************************/
 
+#ifdef CONFIG_ARM
 static void arch_idle(void) {}
+#endif
 
 static bool (*execute[MSM_PM_SLEEP_MODE_NR])(bool idle) = {
 	[MSM_PM_SLEEP_MODE_WAIT_FOR_INTERRUPT] = msm_pm_swfi,
