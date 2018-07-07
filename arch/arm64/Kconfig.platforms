@@ -152,6 +152,7 @@ config ARCH_MSM8916
         depends on ARCH_QCOM
         select CPU_FREQ_QCOM
         select COMMON_CLK_MSM
+	select MSM_PM_LEGACY if PM
         help
           This enables support for the MSM8916 chipset. If you do not
           wish to build a kernel that runs on this chipset, say 'N' here.
