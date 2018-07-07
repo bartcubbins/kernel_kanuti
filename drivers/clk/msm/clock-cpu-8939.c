@@ -802,12 +802,16 @@ static int clock_a53_probe(struct platform_device *pdev)
 	int mux_num;
 	bool single_cluster;
 	bool is_sdm429 = false;
+	bool is_msm8939 = false;
 
 	single_cluster = of_property_read_bool(pdev->dev.of_node,
 						"qcom,num-cluster");
 
 	is_sdm429 = of_device_is_compatible(pdev->dev.of_node,
 						"qcom,cpu-clock-sdm429");
+
+	is_msm8939 = of_device_is_compatible(pdev->dev.of_node,
+						"qcom,cpu-clock-8939");
 
 	get_speed_bin(pdev, &speed_bin, &version);
 
@@ -883,9 +887,21 @@ static int clock_a53_probe(struct platform_device *pdev)
 		clk_set_rate(&cci_clk.c, rate);
 	}
 
-	for (mux_id = 0; mux_id < mux_num; mux_id++) {
-		/* Force a PLL reconfiguration */
-		config_pll(mux_id);
+	/*
+	 * The PLL reconfiguration is different for the MSM8939 SoC.
+	 * We have already successfully reconfigured MUX_CCI above so we
+	 * don't need to do this again on the MSM8939 SoC.
+	 */
+	if (is_msm8939) {
+		for (mux_id = 0; mux_id < A53SS_MUX_CCI; mux_id++) {
+	 	 	 /* Force a PLL reconfiguration */
+	 	 	 config_pll(mux_id);
+	 	 }
+	} else {
+		for (mux_id = 0; mux_id < mux_num; mux_id++) {
+			/* Force a PLL reconfiguration */
+			config_pll(mux_id);
+		}
 	}
 
 	/*
