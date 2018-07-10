@@ -19,7 +19,7 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/regulator/rpm-smd-regulator.h>
-#include <lpm-workarounds.h>
+#include "lpm-workarounds.h"
 
 static struct regulator *lpm_cx_reg;
 static struct work_struct dummy_vote_work;
