@@ -28,7 +28,7 @@
 #include <soc/qcom/cpu_pwr_ctl.h>
 #include <soc/qcom/scm-boot.h>
 #include <soc/qcom/socinfo.h>
-#include <soc/qcom/pm.h>
+#include <soc/qcom/pm-legacy.h>
 #include <soc/qcom/spm.h>
 #include <soc/qcom/jtag.h>
 
