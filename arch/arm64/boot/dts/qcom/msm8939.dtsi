@@ -11,6 +11,7 @@
  */
 
 #include "skeleton64.dtsi"
+#include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/clock/msm-clocks-8936.h>
 #include <dt-bindings/clock/msm-cpu-clocks-8939.h>
 #include "msm8939-common.dtsi"
@@ -26,6 +27,7 @@
 	compatible = "qcom,msm8939";
 	qcom,msm-id = <239 0>;
 	qcom,msm-name = "MSM8939";
+	interrupt-parent = <&wakegic>;
 
 	chosen {
 		bootargs = "boot_cpus=0,4,5,6,7 sched_enable_hmp=1";
