@@ -10,8 +10,6 @@
  * GNU General Public License for more details.
  */
 
-#include <dt-bindings/interrupt-controller/arm-gic.h>
-
 / {
 	interrupt-parent = <&intc>;
 	aliases {
@@ -140,9 +138,29 @@
 	intc: interrupt-controller@b000000 {
 		compatible = "qcom,msm-qgic2";
 		interrupt-controller;
+		interrupt-parent = <&intc>;
 		#interrupt-cells = <3>;
 		reg = <0x0b000000 0x1000>,
-		<0x0b002000 0x1000>;
+		      <0x0b002000 0x1000>;
+	};
+
+	wakegic: wake-gic {
+		compatible = "qcom,mpm-gic-msm8939", "qcom,mpm-gic";
+		reg = <0x601d0 0x1000>, /* MSM_RPM_MPM_BASE 4K */
+		      <0xb011008 0x4>;
+		reg-names = "vmpm", "ipc";
+		qcom,num-mpm-irqs = <96>;
+		interrupts = <GIC_SPI 171 IRQ_TYPE_EDGE_RISING>;
+		interrupt-controller;
+		interrupt-parent = <&intc>;
+		#interrupt-cells = <3>;
+	};
+
+	wakegpio: wake-gpio {
+		compatible = "qcom,mpm-gpio-msm8939", "qcom,mpm-gpio";
+		interrupt-controller;
+		interrupt-parent = <&intc>;
+		#interrupt-cells = <2>;
 	};
 
 	restart@4ab000 {
