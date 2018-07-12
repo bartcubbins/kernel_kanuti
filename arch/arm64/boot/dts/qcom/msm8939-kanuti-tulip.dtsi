@@ -412,6 +412,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&usbid_default>;
 	vbus_otg-supply = <&smb1360_otg_supply>;
+
+	extcon = <&smb1360_otg_supply>;
 };
 
 &mdss_dsi0 {
