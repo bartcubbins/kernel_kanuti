@@ -546,8 +546,11 @@ static int cyttsp5_setup_input_device(struct device *dev)
 	set_bit( EV_SYN, md->input->evbit );
 	set_bit( EV_KEY, md->input->evbit );
 	set_bit( EV_ABS, md->input->evbit );
-	set_bit( INPUT_PROP_NO_DUMMY_RELEASE, md->input->propbit);
-	
+	/* FIXME
+	 * verify if this is really required
+	 * set_bit( INPUT_PROP_NO_DUMMY_RELEASE, md->input->propbit);
+	 */
+
 #ifdef INPUT_PROP_DIRECT
 	__set_bit(INPUT_PROP_DIRECT, md->input->propbit);
 #endif
@@ -558,7 +561,7 @@ static int cyttsp5_setup_input_device(struct device *dev)
 	input_set_abs_params( md->input, ABS_MT_PRESSURE, 0, 255, 0, 0);
 
 	input_mt_init_slots( md->input, 15, 0 );
-	
+
 	md->or_min = -127;
 	md->or_max = 127;
 
