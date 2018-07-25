@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
+
 / {
 	reserved-memory {
 		ramoops {
@@ -426,27 +428,33 @@
 };
 
 &pm8916_mpps {
-	mpp@a300 { /* MPP4: NC */
-		status = "disabled";
+	/* WLED_PWM_MPP_4 */
+	wled_pwm_mpp { /* MPP4: NC */
+		wled_pwm_mpp_default: wled_pwm_mpp_default {
+			status = "disabled";
+		};
 	};
 };
 
 &pm8916_gpios {
-	gpio@c100 { /* GPIO 2: NC */
-		status = "disabled";
+	/* NFC_CLK_REQ */
+	nfc_clk { /* GPIO 2: NC */
+		nfc_clk_default: nfc_clk_default {
+			status = "disabled";
+		};
 	};
 
-	gpio@c200 { /* GPIO 3: Camera */
-		qcom,mode = <1>;		/* Digital output */
-		qcom,output-type = <0>;		/* CMOS logic */
-		qcom,invert = <0>;		/* Output low by default */
-		qcom,vin-sel = <3>;		/* VIN 3 = 1.8v */
-		qcom,out-strength = <2>;	/* Medium */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	wcn_ldo_en { /* GPIO 3: Camera */
+		wcn_ldo_en_default: wcn_ldo_en_default {
+			function = "digital";				/* Digital output */
+			output-low;
+			drive-push-pull;
+			power-source = <PM8916_GPIO_L5>;		/* 1.8v */
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_MED>;	/* Medium */
+			status = "okay";
+		};
 	};
 };
-
 
 /* Pinctrl */
 &msm_gpio {
