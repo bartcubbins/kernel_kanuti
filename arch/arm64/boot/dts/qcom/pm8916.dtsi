@@ -18,8 +18,8 @@
 	pm8916_0: pm8916@0 {
 		compatible = "qcom,pm8916", "qcom,spmi-pmic";
 		reg = <0x0 SPMI_USID>;
-		#address-cells = <1>;
-		#size-cells = <1>;
+		#address-cells = <2>;
+		#size-cells = <0>;
 
 		pm8916_revid: qcom,revid@100 {
 			compatible = "qcom,qpnp-revid";
@@ -296,8 +296,8 @@
 	pm8916_1: pm8916@1 {
 		compatible = "qcom,pm8916", "qcom,spmi-pmic";
 		reg = <0x1 SPMI_USID>;
-		#address-cells = <1>;
-		#size-cells = <1>;
+		#address-cells = <2>;
+		#size-cells = <0>;
 
 		pm8916_pwm: pwm@bc00 {
 			compatible = "qcom,qpnp-pwm";

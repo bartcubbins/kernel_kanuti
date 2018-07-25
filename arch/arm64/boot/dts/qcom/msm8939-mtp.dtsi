@@ -10,6 +10,7 @@
  * GNU General Public License for more details.
  */
 
+#include <dt-bindings/pinctrl/qcom,pmic-mpp.h>
 #include "msm8939-pinctrl.dtsi"
 //#include "msm8939-camera-sensor-mtp.dtsi"
 
@@ -56,27 +57,9 @@
 	pinctrl-0 = <&uart_console_sleep>;
 };
 
-&pm8916_gpios {
-	gpio@c100 { /* GPIO 2 */
-		/* NFC_CLK_REQ */
-		qcom,mode = <0>; /* QPNP_PIN_MODE_DIG_IN */
-		qcom,pull = <5>; /* QPNP_PIN_PULL_NO */
-		qcom,vin-sel = <2>; /* QPNP_PIN_VIN2 */
-		qcom,src-sel = <2>; /* QPNP_PIN_SEL_FUNC_1 */
-		qcom,master-en = <1>;
-	};
-};
 &spmi_bus {
-	qcom,pm8916@1 {
-		qcom,vibrator@c000 {
-			status = "okay";
-			qcom,vib-timeout-ms = <15000>;
-			qcom,vib-vtg-level-mV = <3100>;
-		};
-	};
-
-	qcom,pm8916@0 {
-		qcom,leds@a100 {
+	pm8916@0 {
+		pm8916_leds: qcom,leds@a100 {
 			status = "okay";
 			qcom,led_mpp_2 {
 				label = "mpp";
@@ -90,6 +73,14 @@
 				qcom,source-sel = <1>;
 				qcom,mode-ctrl = <0x60>;
 			};
+		};
+	};
+
+	pm8916@1 {
+		pm8916_vib: qcom,vibrator@c000 {
+			qcom,vib-timeout-ms = <15000>;
+			qcom,vib-vtg-level-mV = <3100>;
+			status = "okay";
 		};
 	};
 };
@@ -196,54 +187,75 @@
 };
 
 &pm8916_mpps {
-	mpp@a000 { /* MPP 1 */
-		/* VDD_PX */
-		status = "disabled";
+	/* VDD_PX_BIAS_MPP_1 */
+	vdd_px_bias_mpp {
+		vdd_px_bias_mpp_default: vdd_px_bias_mpp_default {
+			pins = "mpp1";
+			status = "disabled";
+		};
 	};
 
-	mpp@a100 { /* MPP 2 */
-		/* HR LED */
-		status = "disabled";
+	/* PMIC_MPP_2 */
+	pmic_mpp {
+		pmic_mpp_default: pmic_mpp_default {
+			pins = "mpp2";
+			status = "disabled";
+		};
 	};
 
-	mpp@a200 { /* MPP 3 */
-		/* VREF DAC */
-		status = "disabled";
+	/* VREF_DAC_MPP_3 */
+	vref_dac_mpp {
+		vref_dac_mpp_default: vref_dac_mpp_default {
+			pins = "mpp3";
+			status = "disabled";
+		};
 	};
 
-	mpp@a300 { /* MPP 4 */
-		/* Backlight PWM */
-		qcom,mode = <1>;		/* Digital output */
-		qcom,invert = <0>;		/* Disable invert */
-		qcom,src-sel = <4>;		/* DTEST1 */
-		qcom,vin-sel = <0>;		/* VPH_PWR */
-		qcom,master-en = <1>;		/* Enable MPP */
+	/* WLED_PWM_MPP_4 */
+	wled_pwm_mpp {
+		wled_pwm_mpp_default: wled_pwm_mpp_default {
+			pins = "mpp4";
+			function = "digital";
+			output-enable;
+			power-source = <PM8916_MPP_VPH>;
+			status = "okay";
+		};
 	};
+
 };
 
+/* pm8916 gpio pinctrl configuration */
 &pm8916_gpios {
-	gpio@c000 { /* GPIO 1 */
-		/* Battery UICC Alarm */
-		status = "disabled";
+	/* Battery UICC Alarm */
+	uim_batt_alarm { /* GPIO 1 */
+		uim_batt_alarm_default: uim_batt_alarm_default {
+			status = "disabled";
+		};
 	};
 
-	gpio@c100 { /* GPIO 2 */
-		/* NFC_CLK_REQ */
-		qcom,mode = <0>; /* QPNP_PIN_MODE_DIG_IN */
-		qcom,pull = <5>; /* QPNP_PIN_PULL_NO */
-		qcom,vin-sel = <2>; /* QPNP_PIN_VIN2 */
-		qcom,src-sel = <2>; /* QPNP_PIN_SEL_FUNC_1 */
-		qcom,master-en = <1>;
+	/* NFC_CLK_REQ */
+	nfc_clk { /* GPIO 2 */
+		nfc_clk_default: nfc_clk_default {
+			pins = "gpio2";
+			function = "normal";
+			input-enable;
+		};
 	};
 
-	gpio@c200 { /* GPIO 3 */
-		/* External regulator control for WTR */
-		status = "disabled";
+	/* External regulator control for WTR */
+	wcn_ldo_en { /* GPIO 3 */
+		wcn_ldo_en_default: wcn_ldo_en_default {
+			pins = "gpio3";
+			status = "disabled";
+		};
 	};
 
-	gpio@c300 { /* GPIO 4 */
-		/* External regulator control for APC */
-		status = "disabled";
+	/* External regulator control for APC */
+	wcd_eldo_en { /* GPIO 4 */
+		wcd_eldo_en_default: wcd_eldo_en_default {
+			pins = "gpio4";
+			status = "disabled";
+		};
 	};
 };
 
