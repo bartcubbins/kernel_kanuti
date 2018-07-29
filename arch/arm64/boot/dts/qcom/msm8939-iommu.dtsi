@@ -33,11 +33,13 @@
 			compatible = "qcom,msm-smmu-v2-ctx";
 			reg = <0x1f09000 0x1000>;
 			interrupts = <0 241 0>;
+			qcom,ctx-num = <0>;
 			qcom,iommu-ctx-sids = <0x0>;
 			qcom,iommu-sid-mask = <0x401>;
 			label = "gfx3d_user";
 		};
 
+#if 0 /* Private KGSL context (deprecated) */
 		qcom,iommu-ctx@1f0a000 {
 			compatible = "qcom,msm-smmu-v2-ctx";
 			reg = <0x1f0a000 0x1000>;
@@ -46,6 +48,7 @@
 			qcom,iommu-sid-mask = <0x400>;
 			label = "gfx3d_priv";
 		};
+#endif
 	};
 
 	apps_iommu: qcom,iommu@1e00000 {
