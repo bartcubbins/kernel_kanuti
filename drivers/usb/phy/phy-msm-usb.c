@@ -2493,6 +2493,10 @@ static void msm_chg_block_off(struct msm_otg *motg)
 #define MSM_CHG_PRIMARY_DET_TIME	(50 * HZ/1000) /* TVDPSRC_ON */
 #define MSM_CHG_SECONDARY_DET_TIME	(50 * HZ/1000) /* TVDMSRC_ON */
 
+#ifdef CONFIG_ARCH_SONY_KANUTI
+static int external_chg_type = 0;
+#endif
+
 static void msm_chg_detect_work(struct work_struct *w)
 {
 	struct msm_otg *motg = container_of(w, struct msm_otg, chg_work.work);
@@ -2650,7 +2654,17 @@ static void msm_chg_detect_work(struct work_struct *w)
 
 	msm_otg_dbg_log_event(phy, "CHG WORK: QUEUE", motg->chg_type, delay);
 	queue_delayed_work(motg->otg_wq, &motg->chg_work, delay);
+#ifdef CONFIG_ARCH_SONY_KANUTI
+	external_chg_type = motg->chg_type;
+#endif
 }
+
+#ifdef CONFIG_ARCH_SONY_KANUTI
+int get_chg_type(void)
+{
+	return external_chg_type;
+}
+#endif
 
 /*
  * We support OTG, Peripheral only and Host only configurations. In case
