@@ -131,6 +131,11 @@ static enum handoff cpu_clk_8939_handoff(struct clk *c)
 static long cpu_clk_8939_round_rate(struct clk *c, unsigned long rate)
 {
 	int level;
+	struct device_node *ofnode = of_find_compatible_node(NULL, NULL,
+							"qcom,cpu-clock-8939");
+
+	if (ofnode)
+		return clk_round_rate(c->parent, rate);
 
 	for (level = 0; level < c->num_fmax; level++)
 		if (rate <= c->fmax[level])
@@ -661,7 +666,7 @@ static void populate_opp_table(struct platform_device *pdev,
 	}
 
 	/* One time print during bootup */
-	pr_info("clock-cpu-8939: OPP tables populated (cpu %d and %d)",
+	pr_info("clock-cpu-8939: OPP tables populated (cpu %d and %d)\n",
 		a53_c0_cpu, a53_c1_cpu);
 
 	print_opp_table(a53_c0_cpu, a53_c1_cpu, single_cluster);
