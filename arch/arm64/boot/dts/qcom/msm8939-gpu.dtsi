@@ -97,14 +97,6 @@
 		/* GDSC oxili regulators */
 		vdd-supply = <&gdsc_oxili_gx>;
 
-		/* Trace bus */
-		coresight-id = <67>;
-		coresight-name = "coresight-gfx";
-		coresight-nr-inports = <0>;
-		coresight-outports = <0>;
-		coresight-child-list = <&funnel_in0>;
-		coresight-child-ports = <4>;
-
 		/* CPU latency parameter */
 		qcom,pm-qos-active-latency = <401>;
 		qcom,pm-qos-wakeup-latency = <401>;
