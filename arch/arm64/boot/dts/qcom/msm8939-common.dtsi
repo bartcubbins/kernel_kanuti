@@ -38,25 +38,25 @@
 		#size-cells = <2>;
 		ranges;
 
-		external_image_mem: external_image__region@85b00000 {
+		external_image_mem: external_image__region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x85b00000 0x0 0xD00000>;
 		};
 
-		modem_adsp_mem: modem_adsp_region@86800000 {
+		modem_adsp_mem: modem_adsp_region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x86800000 0x0 0x05500000>;
 		};
 
-		peripheral_mem: peripheral_region@8bd00000 {
+		peripheral_mem: peripheral_region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x8bd00000 0x0 0x0600000>;
 		};
 
-		venus_mem: venus_region@80000000 {
+		venus_mem: venus_region@0 {
 			compatible = "shared-dma-pool";
 			reusable;
 			alloc-ranges = <0x0 0x80000000 0x0 0x10000000>;
@@ -570,91 +570,6 @@
 		qcom,client-id = <0 1 2 3 5 6 7 8 9>;
 		qcom,valid-status-check;
 	};
-
-	qcom,sensor-information {
-		compatible = "qcom,sensor-information";
-
-		sensor_information0: qcom,sensor-information-0 {
-			qcom,sensor-type = "tsens";
-			qcom,sensor-name = "tsens_tz_sensor0";
-		};
-
-		sensor_information1: qcom,sensor-information-1 {
-			qcom,sensor-type =  "tsens";
-			qcom,sensor-name = "tsens_tz_sensor1";
-		};
-
-		sensor_information2: qcom,sensor-information-2 {
-			qcom,sensor-type =  "tsens";
-			qcom,sensor-name = "tsens_tz_sensor2";
-		};
-
-		sensor_information3: qcom,sensor-information-3 {
-			qcom,sensor-type =  "tsens";
-			qcom,sensor-name = "tsens_tz_sensor3";
-		};
-
-		sensor_information5: qcom,sensor-information-5 {
-			qcom,sensor-type = "tsens";
-			qcom,sensor-name = "tsens_tz_sensor5";
-		};
-
-		sensor_information6: qcom,sensor-information-6 {
-			qcom,sensor-type = "tsens";
-			qcom,sensor-name = "tsens_tz_sensor6";
-		};
-
-		sensor_information7: qcom,sensor-information-7 {
-			qcom,sensor-type = "tsens";
-			qcom,sensor-name = "tsens_tz_sensor7";
-		};
-
-		sensor_information8: qcom,sensor-information-8 {
-			qcom,sensor-type = "tsens";
-			qcom,sensor-name = "tsens_tz_sensor8";
-		};
-
-		sensor_information9: qcom,sensor-information-9 {
-			qcom,sensor-type = "tsens";
-			qcom,sensor-name = "tsens_tz_sensor9";
-		};
-	};
-
-	mitigation_profile0: qcom,limit_info-0 {
-		qcom,temperature-sensor = <&sensor_information5>;
-		qcom,boot-frequency-mitigate;
-		qcom,hotplug-mitigation-enable;
-		qcom,emergency-frequency-mitigate;
-	};
-
-	mitigation_profile1: qcom,limit_info-1 {
-		qcom,temperature-sensor = <&sensor_information6>;
-		qcom,boot-frequency-mitigate;
-		qcom,hotplug-mitigation-enable;
-		qcom,emergency-frequency-mitigate;
-	};
-
-	mitigation_profile2: qcom,limit_info-2 {
-		qcom,temperature-sensor = <&sensor_information7>;
-		qcom,boot-frequency-mitigate;
-		qcom,hotplug-mitigation-enable;
-		qcom,emergency-frequency-mitigate;
-	};
-
-	mitigation_profile3: qcom,limit_info-3 {
-		qcom,temperature-sensor = <&sensor_information8>;
-		qcom,boot-frequency-mitigate;
-		qcom,hotplug-mitigation-enable;
-		qcom,emergency-frequency-mitigate;
-	};
-
-	mitigation_profile4: qcom,limit_info-4 {
-		qcom,temperature-sensor = <&sensor_information9>;
-		qcom,boot-frequency-mitigate;
-		qcom,hotplug-mitigation-enable;
-		qcom,emergency-frequency-mitigate;
-	};
-
 
 	qcom,msm-thermal {
 		compatible = "qcom,msm-thermal";
