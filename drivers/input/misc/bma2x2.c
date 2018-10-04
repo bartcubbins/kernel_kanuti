@@ -15,7 +15,7 @@
  * This file contains all function implementations for the BMA2X2 in linux
 */
 
-#define BMA2X2_ENABLE_INT2
+//#define BMA2X2_ENABLE_INT2
 
 #if !defined(BMA2X2_ENABLE_INT1) && !defined(BMA2X2_ENABLE_INT2)
 #if defined(CONFIG_BMA_ENABLE_NEWDATA_INT) || defined(CONFIG_SIG_MOTION)
