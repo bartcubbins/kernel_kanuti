@@ -354,13 +354,6 @@
 		};
 	};
 
-	keyreset {
-		compatible = "keycombo";
-		down,num = <2>;
-		down,code = <115 116>;
-		down,codeV = <114 116>;
-	};
-
 	sound {
 		qcom,msm-mclk-freq = <9600000>;
 		qcom,msm-mbhc-hphl-swh = <1>;
