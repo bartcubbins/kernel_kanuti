@@ -69,7 +69,7 @@ dtb-$(CONFIG_ARCH_MSM8909) += msm8909-sim.dtb \
 	msm8208-qhd-cdp.dtb \
 	msm8208-qhd-rcm.dtb
 
-ifndef CONFIG_MACH_SONY_TULIP
+ifneq ($(CONFIG_ARCH_SONY_KANUTI), y)
 dtb-$(CONFIG_ARCH_MSM8916) += msm8916-sim.dtb \
 	msm8916-rumi.dtb \
 	msm8916-cdp.dtb \
