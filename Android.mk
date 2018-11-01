@@ -16,6 +16,7 @@
 # Android makefile to build kernel as a part of Android Build
 
 ifeq ($(BUILD_KERNEL),true)
+ifeq ($(PRODUCT_PLATFORM_SOD),true)
 ifeq ($(filter-out kanuti,$(PRODUCT_PLATFORM)),)
 
 KERNEL_SRC := $(call my-dir)
@@ -226,4 +227,5 @@ $(PRODUCT_OUT)/kernel: $(KERNEL_BIN)
 	cp $(KERNEL_BIN) $(PRODUCT_OUT)/kernel
 
 endif # Sony AOSP devices
+endif # PRODUCT_PLATFORM_SOD
 endif # BUILD_KERNEL
