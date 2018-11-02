@@ -263,18 +263,14 @@
 		mems_accel@10 {
 			compatible = "bosch,bma2x2";
 			reg = <0x10>;
-
-			pinctrl-names = "bma_default","bma_sleep";
-			pinctrl-0 = <&bma2x2_default>;
-			pinctrl-1 = <&bma2x2_sleep>;
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&bma2x2_int1_default>;
+			pinctrl-1 = <&bma2x2_int1_sleep>;
 			interrupt-parent = <&msm_gpio>;
 			interrupts = <69 0x00>;
-
-			bosch,int_pin = <&msm_gpio 69 0x00>;
-			bosch,layout=<0x8>;
 			vdd-supply = <&pm8916_l17>;
 			vio-supply = <&pm8916_l6>;
-			bosch,vdd-current-level = <1 210>;
+			bosch,place = <8>;
 		};
 
 		mems_mag@12 {
@@ -283,20 +279,6 @@
 
 			vdd-supply = <&pm8916_l17>;
 			vio-supply = <&pm8916_l6>;
-			bosch,vdd-current-level = <1 255>;
-		};
-
-		mems_gyro@68 {
-			compatible = "bosch,bmg160";
-			reg = <0x68>;
-
-			pinctrl-names = "bmg_default","bmg_sleep";
-			pinctrl-0 = <&bmg160_default>;
-			pinctrl-1 = <&bmg160_sleep>;
-			interrupt-parent = <&msm_gpio>;
-			interrupts = <115 0x00>;
-
-			vdd-supply = <&pm8916_l17>;
 			bosch,vdd-current-level = <1 255>;
 		};
 
@@ -352,13 +334,6 @@
 			gpios = <&msm_gpio 11 0x1>;
 			debounce-interval = <100>;
 		};
-	};
-
-	keyreset {
-		compatible = "keycombo";
-		down,num = <2>;
-		down,code = <115 116>;
-		down,codeV = <114 116>;
 	};
 
 	sound {
@@ -458,33 +433,17 @@
 
 /* Pinctrl */
 &tlmm_pinmux {
-	bma2x2_int_pin {
+	bma2x2_int1_pin {
 		qcom,pins = <&gp 69>;
 		qcom,pin-func = <0>;
 		qcom,num-grp-pins = <1>;
-		label = "bma2x2-irq";
+		label = "bma2x2_int1_pin";
 
-		bma2x2_default: bma2x2_default {
+		bma2x2_int1_default: int1_default {
 			drive-strength = <2>;
 			bias-disable; /* NO pull */
 		};
-		bma2x2_sleep: bma2x2_sleep {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
-		};
-	};
-
-	bmg160_int_pin {
-		qcom,pins = <&gp 115>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "bmg160-irq";
-
-		bmg160_default: bmg160_default {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
-		};
-		bmg160_sleep: bmg160_sleep {
+		bma2x2_int1_sleep: int1_sleep {
 			drive-strength = <2>;
 			bias-disable; /* NO pull */
 		};
