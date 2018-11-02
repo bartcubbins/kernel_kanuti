@@ -15,7 +15,7 @@
  * This file contains all function implementations for the BMA2X2 in linux
 */
 
-#define BMA2X2_ENABLE_INT2
+//#define BMA2X2_ENABLE_INT2
 
 #if !defined(BMA2X2_ENABLE_INT1) && !defined(BMA2X2_ENABLE_INT2)
 #if defined(CONFIG_BMA_ENABLE_NEWDATA_INT) || defined(CONFIG_SIG_MOTION)
@@ -23,9 +23,6 @@
 #endif
 #endif
 
-#ifdef CONFIG_SIG_MOTION
-#undef CONFIG_HAS_EARLYSUSPEND
-#endif
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/i2c.h>
@@ -40,10 +37,6 @@
 #include <linux/regulator/consumer.h>
 #include <linux/of_gpio.h>
 #include <linux/sensors.h>
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-#include <linux/earlysuspend.h>
-#endif
 
 #ifdef __KERNEL__
 #include <linux/kernel.h>
@@ -67,7 +60,9 @@
 #define ISR_INFO(dev, fmt, arg...)
 #endif
 
+#ifndef CONFIG_ARCH_SONY_KANUTI
 #define BMA2X2_SENSOR_IDENTIFICATION_ENABLE
+#endif
 
 #define SENSOR_NAME                 "bma2x2-accel"
 #define ABSMIN                      -512
@@ -95,6 +90,7 @@
 /* wait 10ms for self test  done */
 #define SELF_TEST_DELAY()           usleep_range(10000, 15000)
 
+#ifdef USE_BMA_INTERRUPT
 #define LOW_G_INTERRUPT             REL_Z
 #define HIGH_G_INTERRUPT            REL_HWHEEL
 #define SLOP_INTERRUPT              REL_DIAL
@@ -103,6 +99,17 @@
 #define ORIENT_INTERRUPT            ABS_PRESSURE
 #define FLAT_INTERRUPT              ABS_DISTANCE
 #define SLOW_NO_MOTION_INTERRUPT    REL_Y
+#else
+/* AndroidM didn't use the dev-interrupt,bypass above defines */
+#define LOW_G_INTERRUPT             REL_Z
+#define HIGH_G_INTERRUPT            REL_Z
+#define SLOP_INTERRUPT              REL_Z
+#define DOUBLE_TAP_INTERRUPT        REL_Z
+#define SINGLE_TAP_INTERRUPT        REL_Z
+#define ORIENT_INTERRUPT            REL_Z
+#define FLAT_INTERRUPT              REL_Z
+#define SLOW_NO_MOTION_INTERRUPT    REL_Z
+#endif
 
 #define HIGH_G_INTERRUPT_X_HAPPENED                 1
 #define HIGH_G_INTERRUPT_Y_HAPPENED                 2
@@ -1300,8 +1307,8 @@
 
 /*! Bosch sensor unknown place*/
 #define BOSCH_SENSOR_PLACE_UNKNOWN (-1)
-/*! Bosch sensor remapping table size P0~P7*/
-#define MAX_AXIS_REMAP_TAB_SZ 8
+/*! Bosch sensor remapping table size P0~P8*/
+#define MAX_AXIS_REMAP_TAB_SZ 9
 #define BOSCH_SENSOR_PLANE	0
 #define BOSCH_SENSOR_UP	1
 #define BOSCH_SENSOR_DOWN	2
@@ -1560,9 +1567,6 @@ struct bma2x2_data {
 	unsigned char range;
 	unsigned int int_flag;
 	int sensitivity;
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	struct early_suspend early_suspend;
-#endif
 	int IRQ;
 	struct bma2x2_platform_data *pdata;
 	struct bma2x2_suspend_state suspend_state;
@@ -1595,11 +1599,6 @@ struct bma2x2_delay2bw {
 	unsigned int delay_ms;
 	unsigned int bw_config;
 };
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-static void bma2x2_early_suspend(struct early_suspend *h);
-static void bma2x2_late_resume(struct early_suspend *h);
-#endif
 
 static int bma2x2_open_init(struct i2c_client *client,
 			struct bma2x2_data *data);
@@ -1674,6 +1673,7 @@ bst_axis_remap_tab_dft[MAX_AXIS_REMAP_TAB_SZ] = {
 	{  1,    0,    2,    -1,     -1,     -1 }, /* P5 */
 	{  0,    1,    2,     1,     -1,     -1 }, /* P6 */
 	{  1,    0,    2,     1,      1,     -1 }, /* P7 */
+	{  2,    1,    0,     1,      1,     -1 }, /* P8 */
 };
 
 static const int bosch_sensor_range_map[MAX_RANGE_MAP] = {
@@ -8036,7 +8036,7 @@ static int bma2x2_parse_dt(struct device *dev,
 		dev_err(dev, "Unable to read sensor place paramater\n");
 		return rc;
 	}
-	if (temp_val > 7 || temp_val < 0) {
+	if (temp_val > (MAX_AXIS_REMAP_TAB_SZ - 1) || temp_val < 0) {
 		dev_err(dev, "Invalid place parameter, use default value 0\n");
 		pdata->place = 0;
 	} else {
@@ -8549,13 +8549,6 @@ static int bma2x2_probe(struct i2c_client *client,
 		goto bst_free_exit;
 	}
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
-	data->early_suspend.suspend = bma2x2_early_suspend;
-	data->early_suspend.resume = bma2x2_late_resume;
-	register_early_suspend(&data->early_suspend);
-#endif
-
 	data->ref_count = 0;
 	data->fifo_datasel = 0;
 	data->fifo_count = 0;
@@ -8667,38 +8660,6 @@ exit:
 	return err;
 }
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-static void bma2x2_early_suspend(struct early_suspend *h)
-{
-	struct bma2x2_data *data =
-		container_of(h, struct bma2x2_data, early_suspend);
-
-	mutex_lock(&data->enable_mutex);
-	if (atomic_read(&data->enable) == 1) {
-		bma2x2_set_mode(data->bma2x2_client, BMA2X2_MODE_SUSPEND);
-		if (!data->pdata->int_en)
-			cancel_delayed_work_sync(&data->work);
-	}
-	mutex_unlock(&data->enable_mutex);
-}
-
-static void bma2x2_late_resume(struct early_suspend *h)
-{
-	struct bma2x2_data *data =
-		container_of(h, struct bma2x2_data, early_suspend);
-
-	mutex_lock(&data->enable_mutex);
-	if (atomic_read(&data->enable) == 1) {
-		bma2x2_set_mode(data->bma2x2_client, BMA2X2_MODE_NORMAL);
-		if (!data->pdata->int_en)
-			queue_delayed_work(data->data_wq,
-				&data->work,
-				msecs_to_jiffies(atomic_read(&data->delay)));
-	}
-	mutex_unlock(&data->enable_mutex);
-}
-#endif
-
 static int bma2x2_remove(struct i2c_client *client)
 {
 	struct bma2x2_data *data = i2c_get_clientdata(client);
@@ -8706,9 +8667,6 @@ static int bma2x2_remove(struct i2c_client *client)
 	sensors_classdev_unregister(&data->cdev);
 	if (data->pdata && data->pdata->use_smd)
 		bma2x2_register_smd(data, false);
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	unregister_early_suspend(&data->early_suspend);
-#endif
 
 	if (data->bst_acc) {
 		bst_unregister_device(data->bst_acc);
@@ -8762,9 +8720,9 @@ static int bma2x2_store_state(struct i2c_client *client,
 	return err;
 }
 
-#ifdef CONFIG_PM
-static int bma2x2_suspend(struct i2c_client *client, pm_message_t mesg)
+static int bma2x2_suspend(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
 	data->suspend_state.powerEn = bma2x2_is_power_enabled(data);
@@ -8772,8 +8730,9 @@ static int bma2x2_suspend(struct i2c_client *client, pm_message_t mesg)
 	return 0;
 }
 
-static int bma2x2_resume(struct i2c_client *client)
+static int bma2x2_resume(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
 	if (data->suspend_state.powerEn)
@@ -8782,12 +8741,10 @@ static int bma2x2_resume(struct i2c_client *client)
 	return 0;
 }
 
-#else
-
-#define bma2x2_suspend      NULL
-#define bma2x2_resume       NULL
-
-#endif /* CONFIG_PM */
+static const struct dev_pm_ops bma2x2_pm_ops = {
+	.resume		= bma2x2_resume,
+	.suspend	= bma2x2_suspend,
+};
 
 static const struct i2c_device_id bma2x2_id[] = {
 	{ SENSOR_NAME, 0 },
@@ -8806,29 +8763,16 @@ static struct i2c_driver bma2x2_driver = {
 		.owner  = THIS_MODULE,
 		.name   = SENSOR_NAME,
 		.of_match_table = bma2x2_of_match,
+		.pm     = &bma2x2_pm_ops,
 	},
-	.suspend    = bma2x2_suspend,
-	.resume     = bma2x2_resume,
 	.id_table   = bma2x2_id,
 	.probe      = bma2x2_probe,
 	.remove     = bma2x2_remove,
 	.shutdown   = bma2x2_shutdown,
 };
 
-static int __init BMA2X2_init(void)
-{
-	return i2c_add_driver(&bma2x2_driver);
-}
-
-static void __exit BMA2X2_exit(void)
-{
-	i2c_del_driver(&bma2x2_driver);
-}
+module_i2c_driver(bma2x2_driver);
 
 MODULE_AUTHOR("contact@bosch-sensortec.com");
 MODULE_DESCRIPTION("BMA2X2 ACCELEROMETER SENSOR DRIVER");
 MODULE_LICENSE("GPL v2");
-
-module_init(BMA2X2_init);
-module_exit(BMA2X2_exit);
-
