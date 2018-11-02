@@ -8586,13 +8586,13 @@ static int bma2x2_probe(struct i2c_client *client,
 		err = -EINVAL;
 		goto remove_bst_acc_sysfs_exit;
 	}
-
+#ifdef CONFIG_SIG_MOTION
 	if (pdata->use_smd) {
 		err = bma2x2_register_smd(data, true);
 		if (err)
 			dev_err(&client->dev, "Register SMD device failed!\n");
 	}
-
+#endif
 	dev_notice(&client->dev, "BMA2x2 driver probe successfully");
 
 	bma2x2_pinctrl_state(data, false);
@@ -8665,9 +8665,10 @@ static int bma2x2_remove(struct i2c_client *client)
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
 	sensors_classdev_unregister(&data->cdev);
+#ifdef CONFIG_SIG_MOTION
 	if (data->pdata && data->pdata->use_smd)
 		bma2x2_register_smd(data, false);
-
+#endif
 	if (data->bst_acc) {
 		bst_unregister_device(data->bst_acc);
 		bst_free_device(data->bst_acc);
