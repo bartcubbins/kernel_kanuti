@@ -286,20 +286,6 @@
 			bosch,vdd-current-level = <1 255>;
 		};
 
-		mems_gyro@68 {
-			compatible = "bosch,bmg160";
-			reg = <0x68>;
-
-			pinctrl-names = "bmg_default","bmg_sleep";
-			pinctrl-0 = <&bmg160_default>;
-			pinctrl-1 = <&bmg160_sleep>;
-			interrupt-parent = <&msm_gpio>;
-			interrupts = <115 0x00>;
-
-			vdd-supply = <&pm8916_l17>;
-			bosch,vdd-current-level = <1 255>;
-		};
-
 		mems_pls@60 {
 			compatible = "capella,cm36286";
 			reg = <0x60>;
@@ -462,22 +448,6 @@
 			bias-disable; /* NO pull */
 		};
 		bma2x2_sleep: bma2x2_sleep {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
-		};
-	};
-
-	bmg160_int_pin {
-		qcom,pins = <&gp 115>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "bmg160-irq";
-
-		bmg160_default: bmg160_default {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
-		};
-		bmg160_sleep: bmg160_sleep {
 			drive-strength = <2>;
 			bias-disable; /* NO pull */
 		};
