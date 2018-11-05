@@ -882,11 +882,14 @@ int read_platform_resources_from_dt(
 		goto err_load_clock_table;
 	}
 
-	rc = msm_vidc_load_clock_voltage_table(res);
-	if (rc) {
-		dprintk(VIDC_ERR,
-			"Failed to load clock voltage table: %d\n", rc);
-		goto err_load_clock_voltage_table;
+	if (of_machine_is_compatible("qcom,msm8956") ||
+            of_machine_is_compatible("qcom,msm8976")) {
+		rc = msm_vidc_load_clock_voltage_table(res);
+		if (rc) {
+			dprintk(VIDC_ERR,
+				"Failed to load clock voltage table: %d\n", rc);
+			goto err_load_clock_voltage_table;
+		}
 	}
 
 	rc = of_property_read_u32(pdev->dev.of_node, "qcom,dcvs-min-load",
