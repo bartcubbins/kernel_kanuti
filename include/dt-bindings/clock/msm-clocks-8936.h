@@ -158,6 +158,8 @@
 #define clk_gcc_gp1_clk				0x057f7b69
 #define clk_gcc_gp2_clk				0x9bf83ffd
 #define clk_gcc_gp3_clk				0xec6539ee
+#define clk_dsi_pll0_byte_clk_src               0x44539836
+#define clk_dsi_pll0_pixel_clk_src              0x5767c287
 #define clk_gcc_mdss_ahb_clk			0xbfb92ed3
 #define clk_gcc_mdss_axi_clk			0x668f51de
 #define clk_gcc_mdss_byte0_clk			0x35da7862
