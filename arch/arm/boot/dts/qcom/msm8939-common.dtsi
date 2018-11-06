@@ -689,6 +689,8 @@
 	};
 
 	clock_gcc: qcom,gcc@1800000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
 		compatible = "qcom,gcc-8936";
 		reg = <0x1800000 0x80000>,
 			<0xb116000 0x00040>,
@@ -705,6 +707,15 @@
                          <&clock_rpm clk_xo_a_clk_src>;
 		clock-names = "xo", "xo_a";
 		#clock-cells = <1>;
+		ranges;
+		qcom,spm@0 {
+			compatible = "qcom,gcc-spm-8936";
+			reg = <0x0b111200 0x100>,
+			      <0x0b011200 0x100>,
+			      <0x0b1d4000 0x100>;
+			reg-names = "spm_c0_base", "spm_c1_base",
+					"spm_cci_base";
+		};
 	};
 
 	clock_gcc_mdss: qcom,gcc-mdss@1a98300 {
