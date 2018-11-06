@@ -31,8 +31,8 @@
 		i2c4 = &i2c_4;
 		i2c5 = &i2c_5;
 		i2c6 = &i2c_6;
-		spi0 = &spi_0;
-		spi5 = &spi_5;
+		//spi0 = &spi_0;
+		//spi5 = &spi_5;
 	};
 
 	memory {
@@ -1023,6 +1023,7 @@
 		qcom,master-id = <86>;
 	};
 
+#if 0
 	spi_0: spi@78b7000 { /* BLSP1 QUP3 */
 		compatible = "qcom,spi-qup-v2";
 		#address-cells = <1>;
@@ -1047,6 +1048,7 @@
 		qcom,bam-producer-pipe-index = <9>;
 		qcom,master-id = <86>;
 		};
+#endif
 
 	i2c_4: i2c@78b8000 { /* BLSP1 QUP4 */
 		compatible = "qcom,i2c-msm-v2";
@@ -1098,6 +1100,7 @@
 		qcom,master-id = <86>;
 	};
 
+#if 0
 	spi_5: spi@78b9000 {  /* BLSP1 QUP5 */
 		compatible = "qcom,spi-qup-v2";
 		#address-cells = <1>;
@@ -1124,6 +1127,7 @@
 		qcom,rt-priority;
 		status = "disabled";
 	};
+#endif
 
 	spmi_bus: qcom,spmi@200f000 {
 		compatible = "qcom,spmi-pmic-arb";

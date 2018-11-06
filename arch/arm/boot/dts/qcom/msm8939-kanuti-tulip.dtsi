@@ -11,11 +11,6 @@
  */
 
 / {
-        aliases {
-		/delete-property/ spi0;
-		/delete-property/ spi5;
-        };
-
 	firmware: firmware {
 		android {
 			compatible = "android,firmware";
@@ -343,14 +338,6 @@
 	};
 };
 
-&spi_0 {
-	status = "disabled";
-};
-
-&spi_5 {
-	status = "disabled";
-};
-
 &i2c_4 {
 	smb1360_otg_supply: smb1360-chg-fg@14 {
 		compatible = "qcom,smb1360-chg-fg";
@@ -431,89 +418,141 @@
 
 
 /* Pinctrl */
-&tlmm_pinmux {
+&msm_gpio {
 	bma2x2_int_pin {
-		qcom,pins = <&gp 69>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "bma2x2-irq";
-
 		bma2x2_default: bma2x2_default {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
+			mux {
+				pins = "gpio69";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio69";
+				drive-strength = <2>;
+				bias-disable; /* NO pull */
+			};
 		};
+
 		bma2x2_sleep: bma2x2_sleep {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
+			mux {
+				pins = "gpio69";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio69";
+				drive-strength = <2>;
+				bias-disable; /* NO pull */
+			};
 		};
 	};
 
 	bmg160_int_pin {
-		qcom,pins = <&gp 115>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "bmg160-irq";
-
 		bmg160_default: bmg160_default {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
+			mux {
+				pins = "gpio115";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio115";
+				drive-strength = <2>;
+				bias-disable; /* NO pull */
+			};
 		};
+
 		bmg160_sleep: bmg160_sleep {
-			drive-strength = <2>;
-			bias-disable; /* NO pull */
+			mux {
+				pins = "gpio115";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio115";
+				drive-strength = <2>;
+				bias-disable; /* NO pull */
+			};
 		};
 	};
 
-	cm36286_int_active {
-		qcom,pins = <&gp 113>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "cm36286_irq_active";
-
+	cm36286_int_pin {
 		cm_int_active: cm_int_active {
-			drive-strength = <16>;
-			bias-pull-up;
-		};
-	};
+			mux {
+				pins = "gpio113";
+				function = "gpio";
+			};
 
-	cm36286_int_suspend {
-		qcom,pins = <&gp 113>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "cm36286_irq_suspend";
+			config {
+				pins = "gpio113";
+				drive-strength = <16>;
+				bias-pull-up;
+			};
+		};
 
 		cm_int_suspend: cm_int_suspend {
-			drive-strength = <16>;
-			bias-disable;
+			mux {
+				pins = "gpio113";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio113";
+				drive-strength = <16>;
+				bias-disable;
+			};
 		};
 	};
 
 	tlmm_lp5562 { /* LED IC lp5562 */
-		qcom,pins = <&gp 32>;
-		qcom,pin-func = <0>;
-		qcom,num-grp-pins = <1>;
-		label = "tlmm_lp5562";
-
 		lp5562_active: lp5562_active {
-			drive-strength = <2>;
-			bias-pull-up;
+			mux {
+				pins = "gpio32";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio32";
+				drive-strength = <2>;
+				bias-pull-up;
+			};
 		};
+
 		lp5562_suspend: lp5562_suspend {
-			drive-strength = <2>;
-			bias-pull-up;
+			mux {
+				pins = "gpio32";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio32";
+				drive-strength = <2>;
+				bias-pull-up;
+			};
 		};
 	};
 
-	cam_sensor_rear {
-		qcom,pins =  <&gp 28>, <&gp 33>, <&gp 34>, <&gp 36>;
-		qcom,num-grp-pins = <4>;
+
+	cam_sensor_rear_default {
+		mux {
+			pins = "gpio28", "gpio33", "gpio34", "gpio36";
+		};
+
+		config {
+			pins = "gpio28", "gpio33", "gpio34", "gpio36";
+		};
 	};
 
 	cam_sensor_rear_sleep {
-		qcom,pins =  <&gp 36>;
-		qcom,num-grp-pins = <1>;
+		mux {
+			pins = "gpio28", "gpio33", "gpio34", "gpio36";
+		};
+
+		config {
+			pins = "gpio28", "gpio33", "gpio34", "gpio36";
+		};
 	};
 
+#if 0
 	cam_sensor_rear_sleep_np {
 		/* RESET, STANDBY */
 		qcom,pins =  <&gp 28>, <&gp 33>, <&gp 34>;
@@ -526,20 +565,46 @@
 			bias-disable; /* No PULL */
 		};
 	};
+#endif
 
-	cam_sensor_front {
-		qcom,pins = <&gp 121>;
-		qcom,num-grp-pins = <1>;
+	cam_sensor_front_default {
+		mux {
+			pins = "gpio121";
+		};
+
+		config {
+			pins = "gpio121";
+		};
 	};
 
 	cam_sensor_front_sleep {
-		qcom,pins = <&gp 121>;
-		qcom,num-grp-pins = <1>;
+		mux {
+			pins = "gpio121";
+		};
+
+		config {
+			pins = "gpio121";
+		};
 	};
 
-	cam_sensor_flash {
-		qcom,pins = <&gp 98>, <&gp 97> ;
-		qcom,num-grp-pins = <2>;
+	cam_sensor_flash_default {
+		mux {
+			pins = "gpio98", "gpio97";
+		};
+
+		config {
+			pins = "gpio98", "gpio97";
+		};
+	};
+
+	camera_sensor_flash_sleep {
+		mux {
+			pins = "gpio98", "gpio97";
+		};
+
+		config {
+			pins = "gpio98", "gpio97";
+		};
 	};
 };
 
