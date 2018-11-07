@@ -181,7 +181,7 @@ unsigned int adreno_get_rptr(struct adreno_ringbuffer *rb)
 	struct adreno_device *adreno_dev = ADRENO_RB_DEVICE(rb);
 	unsigned int rptr = 0;
 
-	if (adreno_is_a3xx(adreno_dev))
+	if (adreno_is_a3xx(adreno_dev) || adreno_is_a4xx(adreno_dev))
 		adreno_readreg(adreno_dev, ADRENO_REG_CP_RB_RPTR,
 				&rptr);
 	else {
