@@ -76,6 +76,8 @@
 
 		/* Bus Scale Settings */
 		qcom,gpubw-dev = <&gpubw>;
+		qcom,bus-control;
+		qcom,bus-width = <16>;
 		qcom,msm-bus,name = "grp3d";
 		qcom,msm-bus,num-cases = <5>;
 		qcom,msm-bus,num-paths = <1>;
@@ -87,10 +89,8 @@
 		        <26 512 0 6368000>;
 
 		/* GDSC oxili regulators */
+		regulator-names = "vdd";
 		vdd-supply = <&gdsc_oxili_gx>;
-
-		/* IOMMU Data */
-		iommu = <&gfx_iommu>;
 
 		/* Trace bus */
 		coresight-id = <67>;
@@ -142,6 +142,27 @@
 			};
 		};
 
+	};
+
+	kgsl_msm_iommu: qcom,kgsl-iommu {
+		compatible = "qcom,kgsl-smmu-v2";
+		reg = <0x1f00000 0x10000>;
+		qcom,protect = <0x48000 0x1000>;
+
+		clocks = <&clock_gcc clk_gcc_oxili_ahb_clk>,
+			 <&clock_gcc clk_gcc_bimc_gfx_clk>;
+
+		clock-names = "gpu_ahb_clk", "gcc_bimc_gfx_clk";
+
+		qcom,secure_align_mask = <0xfff>;
+		qcom,retention;
+
+		gfx3d_user: gfx3d_user {
+			compatible = "qcom,smmu-kgsl-cb";
+			label = "gfx3d_user";
+			iommus = <&gfx_iommu 0>;
+			qcom,gpu-offset = <0x48000>;
+		};
 	};
 };
 
