@@ -515,13 +515,34 @@
 		reg-names = "tsens_physical", "tsens_eeprom_physical";
 		interrupts = <0 184 0>;
 		interrupt-names = "tsens-upper-lower";
-		qcom,sensors = <9>;
+		qcom,sensors = <5>;
 		qcom,slope = <2911 2789 2906 2763 2922 2867 2833 2838 2840>;
 		qcom,sensor-id = <0 1 2 3 5 6 7 8 9>;
 	};
 
 	qcom,sensor-information {
 		compatible = "qcom,sensor-information";
+
+		sensor_information0: qcom,sensor-information-0 {
+			qcom,sensor-type = "tsens";
+			qcom,sensor-name = "tsens_tz_sensor0";
+		};
+
+		sensor_information1: qcom,sensor-information-1 {
+			qcom,sensor-type =  "tsens";
+			qcom,sensor-name = "tsens_tz_sensor1";
+		};
+
+		sensor_information2: qcom,sensor-information-2 {
+			qcom,sensor-type =  "tsens";
+			qcom,sensor-name = "tsens_tz_sensor2";
+			qcom,alias-name = "pop_mem";
+		};
+
+		sensor_information3: qcom,sensor-information-3 {
+			qcom,sensor-type =  "tsens";
+			qcom,sensor-name = "tsens_tz_sensor3";
+		};
 
 		sensor_information5: qcom,sensor-information-5 {
 			qcom,sensor-type = "tsens";
