@@ -329,7 +329,7 @@ void msm_iommu_remote_p0_spin_unlock(unsigned int need_lock);
 #define msm_iommu_remote_spin_unlock(need_lock)
 #endif
 
-#ifdef CONFIG_MSM_IOMMU
+#ifdef CONFIG_MSM_IOMMU_V1
 /*
  * Look up an IOMMU context device by its context name. NULL if none found.
  * Useful for testing and drivers that do not yet fully have IOMMU stuff in

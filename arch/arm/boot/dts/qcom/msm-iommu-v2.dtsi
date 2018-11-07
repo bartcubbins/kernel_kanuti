@@ -15,6 +15,7 @@
 		compatible = "qcom,msm-smmu-v2", "qcom,msm-mmu-500";
 		#address-cells = <1>;
 		#size-cells = <1>;
+		#iommu-cells = <1>;
 		ranges;
 		reg = <0x1f00000 0x10000>;
 		reg-names = "iommu_base";
@@ -33,14 +34,6 @@
 			interrupts = <0 241 0>;
 			qcom,iommu-ctx-sids = <0>;
 			label = "gfx3d_user";
-		};
-
-		qcom,iommu-ctx@1f0a000 {
-			compatible = "qcom,msm-smmu-v2-ctx";
-			reg = <0x1f0a000 0x1000>;
-			interrupts = <0 242 0>;
-			qcom,iommu-ctx-sids = <1>;
-			label = "gfx3d_priv";
 		};
 	};
 
