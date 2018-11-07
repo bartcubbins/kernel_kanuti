@@ -96,7 +96,6 @@
 #include "msm8939-iommu.dtsi"
 #include "msm8939-bus.dtsi"
 #include "msm8939-mdss.dtsi"
-#include "msm8939-iommu-domains.dtsi"
 #include "msm8939-camera.dtsi"
 #include "msm8939-mdss-pll.dtsi"
 
@@ -1688,25 +1687,7 @@
 			<0x9181000 0x1000>;
 		qcom,max-hw-load = <489600>; /* 1080p @ 30 + 1080p @ 30 */
 		qcom,enable-idle-indicator;
-		qcom,vidc-iommu-domains {
-			qcom,domain-ns {
-				qcom,vidc-domain-phandle = <&venus_domain_ns>;
-				qcom,vidc-partition-buffer-types = <0x7ff>,
-					<0x800>;
-			};
-			qcom,domain-sec-bs {
-				qcom,vidc-domain-phandle = <&venus_domain_sec_bitstream>;
-				qcom,vidc-partition-buffer-types = <0x241>;
-			};
-			qcom,domain-sec-px {
-				qcom,vidc-domain-phandle = <&venus_domain_sec_pixel>;
-				qcom,vidc-partition-buffer-types = <0x106>;
-			};
-			qcom,domain-sec-np {
-				qcom,vidc-domain-phandle = <&venus_domain_sec_non_pixel>;
-				qcom,vidc-partition-buffer-types = <0x480>;
-			};
-		};
+	
 		qcom,msm-bus-clients {
 			qcom,msm-bus-client@0 {
 				qcom,msm-bus,name = "venc-ddr";
