@@ -1210,6 +1210,14 @@
 		qcom,cpu-affinity-mask-r = <0xf0>;
 		qcom,modified-dynamic-qos;
 
+		qcom,pm-qos-irq-type = "affine_irq";
+		qcom,pm-qos-irq-latency = <2 200>;
+
+ 		qcom,pm-qos-cpu-groups = <0x0f 0xf0>;
+		qcom,pm-qos-cmdq-latency-us = <2 200>, <2 200>;
+
+ 		qcom,pm-qos-legacy-latency-us = <2 200>, <2 200>;
+
 		qcom,msm-bus,name = "sdhc1";
 		qcom,msm-bus,num-cases = <8>;
 		qcom,msm-bus,num-paths = <1>;
@@ -1231,6 +1239,8 @@
 		qcom,clk-rates = <400000 25000000 50000000 100000000 177770000>;
 		qcom,bus-speed-mode = "HS200_1p8v", "DDR_1p8v";
 
+		qcom,devfreq,freq-table = <50000000 177770000>;
+
 		status = "disabled";
 	};
 
@@ -1243,6 +1253,13 @@
 		interrupt-names = "hc_irq", "pwr_irq";
 
 		qcom,bus-width = <4>;
+
+		qcom,pm-qos-irq-type = "affine_irq";
+		qcom,pm-qos-irq-latency = <2 200>;
+
+ 		qcom,pm-qos-cpu-groups = <0x0f 0xf0>;
+		qcom,pm-qos-legacy-latency-us = <2 200>, <2 200>;
+
 		qcom,cpu-dma-latency-us = <401>;
 		qcom,msm-bus,name = "sdhc2";
 		qcom,msm-bus,num-cases = <8>;
