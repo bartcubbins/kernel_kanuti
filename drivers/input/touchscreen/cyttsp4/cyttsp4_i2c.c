@@ -366,7 +366,25 @@ static struct i2c_driver cyttsp4_i2c_driver = {
 	.id_table = cyttsp4_i2c_id,
 };
 
-module_i2c_driver(cyttsp4_i2c_driver);
+static int __init cyttsp4_i2c_init(void)
+{
+	int rc;
+
+	rc = i2c_add_driver(&cyttsp4_i2c_driver);
+	if (rc)
+		pr_err("%s: Failed rc = %d",  __func__, rc);
+
+	return rc;
+}
+late_initcall(cyttsp4_i2c_init);
+
+static void __exit cyttsp4_i2c_exit(void)
+{
+	i2c_del_driver(&cyttsp4_i2c_driver);
+
+	return;
+}
+module_exit(cyttsp4_i2c_exit);
 
 MODULE_ALIAS(CYTTSP4_I2C_NAME);
 MODULE_LICENSE("GPL");

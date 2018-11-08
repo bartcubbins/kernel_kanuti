@@ -283,7 +283,25 @@ static struct i2c_driver cyttsp5_i2c_driver = {
 	.id_table = cyttsp5_i2c_id,
 };
 
-module_i2c_driver(cyttsp5_i2c_driver);
+static int __init cyttsp5_i2c_init(void)
+{
+	int rc;
+
+	rc = i2c_add_driver(&cyttsp5_i2c_driver);
+	if (rc)
+		pr_err("%s: Failed rc = %d",  __func__, rc);
+
+	return rc;
+}
+late_initcall(cyttsp5_i2c_init);
+
+static void __exit cyttsp5_i2c_exit(void)
+{
+	i2c_del_driver(&cyttsp5_i2c_driver);
+
+	return;
+}
+module_exit(cyttsp5_i2c_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Cypress TrueTouch(R) Standard Product I2C driver");
