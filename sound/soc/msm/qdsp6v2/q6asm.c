@@ -36,6 +36,7 @@
 
 #include <sound/apr_audio-v2.h>
 #include <sound/q6asm-v2.h>
+#include <sound/q6core.h>
 #include <sound/q6audio-v2.h>
 #include <sound/audio_cal_utils.h>
 #include <sound/adsp_err.h>
@@ -2548,11 +2549,37 @@ int q6asm_open_write_compressed(struct audio_client *ac, uint32_t format,
 
 	switch (format) {
 	case FORMAT_AC3:
-		open.fmt_id = ASM_MEDIA_FMT_AC3;
-		break;
+		switch (q6core_get_avs_version()) {
+		case Q6_SUBSYS_AVS2_6:
+			open.fmt_id = ASM_MEDIA_FMT_AC3_DEC;
+			break;
+		case Q6_SUBSYS_AVS2_7:
+		case Q6_SUBSYS_AVS2_8:
+			open.fmt_id = ASM_MEDIA_FMT_AC3;
+			break;
+		case Q6_SUBSYS_INVALID:
+		default:
+			pr_err("%s: Invalid format[%d]\n",
+					 __func__, format);
+			rc = -EINVAL;
+			goto fail_cmd;
+		}
 	case FORMAT_EAC3:
-		open.fmt_id = ASM_MEDIA_FMT_EAC3;
-		break;
+		switch (q6core_get_avs_version()) {
+		case Q6_SUBSYS_AVS2_6:
+			open.fmt_id = ASM_MEDIA_FMT_EAC3_DEC;
+			break;
+		case Q6_SUBSYS_AVS2_7:
+		case Q6_SUBSYS_AVS2_8:
+			open.fmt_id = ASM_MEDIA_FMT_EAC3;
+			break;
+		case Q6_SUBSYS_INVALID:
+		default:
+			pr_err("%s: Invalid format[%d]\n",
+					 __func__, format);
+			rc = -EINVAL;
+			goto fail_cmd;
+		}
 	case FORMAT_DTS:
 		open.fmt_id = ASM_MEDIA_FMT_DTS;
 		break;
@@ -2691,10 +2718,38 @@ static int __q6asm_open_write(struct audio_client *ac, uint32_t format,
 		open.dec_fmt_id = ASM_MEDIA_FMT_MP3;
 		break;
 	case FORMAT_AC3:
-		open.dec_fmt_id = ASM_MEDIA_FMT_AC3;
+		switch (q6core_get_avs_version()) {
+		case Q6_SUBSYS_AVS2_6:
+			open.dec_fmt_id = ASM_MEDIA_FMT_AC3_DEC;
+			break;
+		case Q6_SUBSYS_AVS2_7:
+		case Q6_SUBSYS_AVS2_8:
+			open.dec_fmt_id = ASM_MEDIA_FMT_AC3;
+			break;
+		case Q6_SUBSYS_INVALID:
+		default:
+			pr_err("%s: Invalid format[%d]\n",
+					 __func__, format);
+			rc = -EINVAL;
+			goto fail_cmd;
+		}
 		break;
 	case FORMAT_EAC3:
-		open.dec_fmt_id = ASM_MEDIA_FMT_EAC3;
+		switch (q6core_get_avs_version()) {
+		case Q6_SUBSYS_AVS2_6:
+			open.dec_fmt_id = ASM_MEDIA_FMT_EAC3_DEC;
+			break;
+		case Q6_SUBSYS_AVS2_7:
+		case Q6_SUBSYS_AVS2_8:
+			open.dec_fmt_id = ASM_MEDIA_FMT_EAC3;
+			break;
+		case Q6_SUBSYS_INVALID:
+		default:
+			pr_err("%s: Invalid format[%d]\n",
+					 __func__, format);
+			rc = -EINVAL;
+			goto fail_cmd;
+		}
 		break;
 	case FORMAT_MP2:
 		open.dec_fmt_id = ASM_MEDIA_FMT_MP2;
