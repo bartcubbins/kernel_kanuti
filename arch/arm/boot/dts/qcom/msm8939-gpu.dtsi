@@ -11,12 +11,23 @@
  */
 
 &soc {
+	msm_bus: qcom,kgsl-busmon {
+		label = "kgsl-busmon";
+		compatible = "qcom,kgsl-busmon";
+	};
 
 	/* To use BIMC based bus governor */
 	gpubw: qcom,gpubw {
 		compatible = "qcom,devbw";
 		governor = "bw_hwmon";
 		qcom,src-dst-ports = <26 512>;
+
+		/*
+		 * active-only flag is used while registering the bus
+		 * governor.It helps release the bus vote when the CPU
+		 * subsystem is inactiv3
+		 */
+		qcom,active-only;
 		qcom,bw-tbl =
 			< 146 >,	/* 9.6 MHz */
 			< 1977 >,	/* 129.6 MHz */
@@ -51,13 +62,20 @@
 
 		qcom,initial-pwrlevel = <2>;
 
-		qcom,idle-timeout = <8>; //<HZ/12>
+		qcom,idle-timeout = <80>; //msecs
+
+		/*
+		 * Timeout to enter deeper power saving state
+		 * from NAP.
+		 */
+		qcom,deep-nap-timeout = <20>; //msecs
 		qcom,strtstp-sleepwake;
 
 		/* Clocks = KGSL_CLK_CORE | KGSL_CLK_IFACE | KGSL_CLK_MEM |
 		KGSL_CLK_MEM_IFACE | KGSL_CLK_ALT_MEM_IFACE |
 		KGSL_CLK_RBBMTIMER */
 		qcom,clk-map = <0x000003DE>;
+
 
 		clocks = <&clock_gcc clk_gcc_oxili_gfx3d_clk>,
 		         <&clock_gcc clk_gcc_oxili_ahb_clk>,
@@ -74,8 +92,24 @@
 		              "gtcu_iface_clk", "gtcu_clk", "gtbu_clk",
 		              "rbbmtimer_clk";
 
+/*
+		clocks = <&clock_gcc clk_gcc_oxili_gfx3d_clk>,
+		         <&clock_gcc clk_gcc_oxili_ahb_clk>,
+		         <&clock_gcc clk_gcc_oxili_gmem_clk>,
+		         <&clock_gcc clk_gcc_bimc_gfx_clk>,
+		         <&clock_gcc clk_gcc_bimc_gpu_clk>,
+			 <&clock_gcc clk_gcc_oxili_timer_clk>;
+
+		clock-names = "core_clk", "iface_clk", "mem_clk",
+		              "mem_iface_clk", "alt_mem_iface_clk",
+		              "rbbmtimer_clk";
+*/
 		/* Bus Scale Settings */
 		qcom,gpubw-dev = <&gpubw>;
+
+		qcom,bus-control;
+		qcom,bus-width = <16>;
+
 		qcom,msm-bus,name = "grp3d";
 		qcom,msm-bus,num-cases = <5>;
 		qcom,msm-bus,num-paths = <1>;
@@ -86,6 +120,7 @@
 		        <26 512 0 5984000>,
 		        <26 512 0 6368000>;
 
+		regulator-names = "vdd";
 		/* GDSC oxili regulators */
 		vdd-supply = <&gdsc_oxili_gx>;
 
@@ -141,7 +176,29 @@
 				qcom,bus-freq = <0>;
 			};
 		};
+	};
 
+	kgsl_msm_iommu: qcom,kgsl-iommu@1f00000 {
+		compatible = "qcom,kgsl-smmu-v2";
+		reg = <0x1f00000 0x10000>;
+		/*
+		* The gpu can only program a single context bank
+		* at this fixed offset.
+		*/
+		qcom,protect = <0x48000 0x1000>;
+		clocks = <&clock_gcc clk_gcc_smmu_cfg_clk>,
+			<&clock_gcc clk_gcc_gfx_tcu_clk>,
+			<&clock_gcc clk_gcc_gtcu_ahb_clk>,
+			<&clock_gcc clk_gcc_gfx_tbu_clk>;
+		clock-names = "scfg_clk", "gtcu_clk", "gtcu_iface_clk",
+				"gtbu_clk";
+/*		qcom,secure_align_mask = <0xfff>;
+		qcom,retention;
+*/
+		gfx3d_user: gfx3d_user {
+			compatible = "qcom,smmu-kgsl-cb";
+			label = "gfx3d_user";
+			qcom,gpu-offset = <0x48000>;
+		};
 	};
 };
-
