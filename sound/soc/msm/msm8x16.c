@@ -2711,6 +2711,8 @@ static int msm8x16_asoc_machine_probe(struct platform_device *pdev)
 		mbhc_cfg.hs_ext_micbias = false;
 	}
 
+	pdata->afe_clk_ver = AFE_CLK_VERSION_V1;
+
 	/* initialize the mclk */
 	pdata->digital_cdc_clk.i2s_cfg_minor_version =
 					AFE_API_VERSION_I2S_CONFIG;
