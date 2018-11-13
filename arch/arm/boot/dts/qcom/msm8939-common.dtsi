@@ -1196,6 +1196,7 @@
 		interrupt-names = "hc_irq", "pwr_irq";
 
 		qcom,bus-width = <8>;
+		qcom,large-address-bus;
 
 		qcom,qos-planes = <3>;
 		qcom,cpu-dma-latency-us = <2 401 701>;
@@ -1238,6 +1239,8 @@
 		interrupt-names = "hc_irq", "pwr_irq";
 
 		qcom,bus-width = <4>;
+		qcom,large-address-bus;
+
 		qcom,cpu-dma-latency-us = <401>;
 		qcom,msm-bus,name = "sdhc2";
 		qcom,msm-bus,num-cases = <8>;
