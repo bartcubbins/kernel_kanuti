@@ -343,6 +343,7 @@ static int msm_pcm_playback_prepare(struct snd_pcm_substream *substream)
 		break;
 	}
 	switch (q6core_get_avs_version()) {
+	case (Q6_SUBSYS_AVS2_6):
 	case (Q6_SUBSYS_AVS2_7):
 		ret = q6asm_open_write_v3(prtd->audio_client,
 					  FORMAT_LINEAR_PCM, bits_per_sample);
@@ -379,6 +380,7 @@ static int msm_pcm_playback_prepare(struct snd_pcm_substream *substream)
 	}
 
 	switch (q6core_get_avs_version()) {
+	case (Q6_SUBSYS_AVS2_6):
 	case (Q6_SUBSYS_AVS2_7):
 		ret = q6asm_media_format_block_multi_ch_pcm_v3(
 				prtd->audio_client, runtime->rate,
@@ -458,6 +460,7 @@ static int msm_pcm_capture_prepare(struct snd_pcm_substream *substream)
 				prtd->audio_client->perf_mode);
 
 		switch (q6core_get_avs_version()) {
+		case (Q6_SUBSYS_AVS2_6):
 		case (Q6_SUBSYS_AVS2_7):
 			ret = q6asm_open_read_v3(prtd->audio_client,
 					FORMAT_LINEAR_PCM,
@@ -542,6 +545,7 @@ static int msm_pcm_capture_prepare(struct snd_pcm_substream *substream)
 			bits_per_sample, sample_word_size);
 
 	switch (q6core_get_avs_version()) {
+	case (Q6_SUBSYS_AVS2_6):
 	case (Q6_SUBSYS_AVS2_7):
 		ret = q6asm_enc_cfg_blk_pcm_format_support_v3(
 				prtd->audio_client,

@@ -843,6 +843,7 @@ static int msm_compr_send_media_format_block(struct snd_compr_stream *cstream,
 		}
 
 		switch (q6core_get_avs_version()) {
+		case (Q6_SUBSYS_AVS2_6):
 		case (Q6_SUBSYS_AVS2_7):
 			ret = q6asm_media_format_block_pcm_format_support_v3(
 							prtd->audio_client,
@@ -1145,6 +1146,7 @@ static int msm_compr_configure_dsp_for_playback
 				__func__, ac->stream_id, bits_per_sample);
 
 		switch (q6core_get_avs_version()) {
+		case (Q6_SUBSYS_AVS2_6):
 		case (Q6_SUBSYS_AVS2_7):
 			ret = q6asm_stream_open_write_v3(ac,
 				prtd->codec, bits_per_sample,
@@ -2396,6 +2398,7 @@ static int msm_compr_trigger(struct snd_compr_stream *cstream, int cmd)
 				__func__, stream_id, bits_per_sample);
 
 		switch (q6core_get_avs_version()) {
+		case (Q6_SUBSYS_AVS2_6):
 		case (Q6_SUBSYS_AVS2_7):
 			rc = q6asm_stream_open_write_v3(ac,
 				prtd->codec, bits_per_sample,

@@ -1960,6 +1960,9 @@ static struct snd_soc_dai_link msm8x16_dai[] = {
 		.codec_name     = "tombak_codec",
 		.codec_dai_name = "msm8x16_wcd_i2s_rx1",
 		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.async_ops = ASYNC_DPCM_SND_SOC_PREPARE |
+			ASYNC_DPCM_SND_SOC_HW_PARAMS,
 		.be_id = MSM_BACKEND_DAI_PRI_MI2S_RX,
 		.init = &msm_audrx_init,
 		.be_hw_params_fixup = msm_pri_rx_be_hw_params_fixup,
